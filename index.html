@@ -2,922 +2,1264 @@
 
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IRON FRONT — 2D War Game</title>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Oswald:wght@700&display=swap" rel="stylesheet">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MathSolve – Smart Math Calculator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.2/math.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,600;0,900;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d0f14;
+    --surface: #13161d;
+    --surface2: #1a1e28;
+    --border: #252b38;
+    --accent: #6ee7b7;
+    --accent2: #38bdf8;
+    --warn: #fb923c;
+    --text: #e8eaf0;
+    --muted: #6b7385;
+    --glow: rgba(110, 231, 183, 0.15);
+  }
+
+- { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-background: #0a0c08;
+background: var(–bg);
+color: var(–text);
+font-family: ‘DM Sans’, sans-serif;
+min-height: 100vh;
 display: flex;
 flex-direction: column;
+overflow-x: hidden;
+}
+
+/* Background grid */
+body::before {
+content: ‘’;
+position: fixed;
+inset: 0;
+background-image:
+linear-gradient(rgba(110,231,183,0.03) 1px, transparent 1px),
+linear-gradient(90deg, rgba(110,231,183,0.03) 1px, transparent 1px);
+background-size: 40px 40px;
+pointer-events: none;
+z-index: 0;
+}
+
+header {
+position: relative;
+z-index: 2;
+padding: 28px 40px 20px;
+display: flex;
 align-items: center;
+gap: 12px;
+border-bottom: 1px solid var(–border);
+}
+
+.logo-mark {
+width: 36px; height: 36px;
+background: linear-gradient(135deg, var(–accent), var(–accent2));
+border-radius: 10px;
+display: flex; align-items: center; justify-content: center;
+font-family: ‘Fraunces’, serif;
+font-weight: 900;
+font-size: 18px;
+color: #0d0f14;
+}
+
+.logo-text {
+font-family: ‘Fraunces’, serif;
+font-size: 22px;
+font-weight: 600;
+letter-spacing: -0.5px;
+}
+
+.logo-text span { color: var(–accent); }
+
+.tagline {
+margin-left: auto;
+font-size: 13px;
+color: var(–muted);
+font-style: italic;
+font-family: ‘Fraunces’, serif;
+}
+
+main {
+position: relative;
+z-index: 1;
+max-width: 820px;
+width: 100%;
+margin: 0 auto;
+padding: 48px 24px 80px;
+display: flex;
+flex-direction: column;
+gap: 24px;
+}
+
+.hero-text {
+text-align: center;
+margin-bottom: 8px;
+}
+
+.hero-text h1 {
+font-family: ‘Fraunces’, serif;
+font-size: clamp(32px, 5vw, 52px);
+font-weight: 900;
+line-height: 1.1;
+letter-spacing: -1px;
+}
+
+.hero-text h1 em {
+font-style: italic;
+color: var(–accent);
+}
+
+.hero-text p {
+margin-top: 10px;
+color: var(–muted);
+font-size: 16px;
+font-weight: 300;
+}
+
+/* Mode tabs */
+.mode-tabs {
+display: flex;
+flex-wrap: wrap;
+gap: 8px;
 justify-content: center;
-min-height: 100vh;
-font-family: ‘Share Tech Mono’, monospace;
-overflow: hidden;
+}
+
+.mode-tab {
+padding: 8px 18px;
+border-radius: 100px;
+border: 1px solid var(–border);
+background: var(–surface);
+color: var(–muted);
+font-family: ‘DM Sans’, sans-serif;
+font-size: 13px;
+cursor: pointer;
+transition: all 0.2s;
+}
+
+.mode-tab:hover { border-color: var(–accent); color: var(–text); }
+
+.mode-tab.active {
+background: var(–accent);
+color: #0d0f14;
+border-color: var(–accent);
+font-weight: 500;
+}
+
+/* Input card */
+.input-card {
+background: var(–surface);
+border: 1px solid var(–border);
+border-radius: 16px;
+padding: 20px;
+display: flex;
+flex-direction: column;
+gap: 14px;
+transition: border-color 0.3s;
+}
+
+.input-card:focus-within {
+border-color: var(–accent);
+box-shadow: 0 0 0 3px var(–glow);
+}
+
+.input-label {
+font-size: 11px;
+letter-spacing: 1.5px;
+text-transform: uppercase;
+color: var(–muted);
+font-weight: 500;
+}
+
+textarea {
+width: 100%;
+background: var(–surface2);
+border: 1px solid var(–border);
+border-radius: 10px;
+color: var(–text);
+font-family: ‘DM Mono’, monospace;
+font-size: 18px;
+padding: 14px 16px;
+resize: none;
+outline: none;
+transition: border-color 0.2s;
+line-height: 1.6;
+}
+
+textarea:focus { border-color: var(–accent); }
+textarea::placeholder { color: var(–muted); font-style: italic; }
+
+.input-row {
+display: flex;
+gap: 10px;
+align-items: center;
+flex-wrap: wrap;
+}
+
+.op-select {
+flex: 1;
+min-width: 160px;
+background: var(–surface2);
+border: 1px solid var(–border);
+border-radius: 10px;
+color: var(–text);
+font-family: ‘DM Sans’, sans-serif;
+font-size: 14px;
+padding: 11px 14px;
+outline: none;
+cursor: pointer;
+transition: border-color 0.2s;
+}
+
+.op-select:focus { border-color: var(–accent); }
+.op-select option { background: var(–surface2); }
+
+.solve-btn {
+padding: 12px 32px;
+background: linear-gradient(135deg, var(–accent), #34d399);
+border: none;
+border-radius: 10px;
+color: #0d0f14;
+font-family: ‘DM Sans’, sans-serif;
+font-weight: 600;
+font-size: 15px;
+cursor: pointer;
+transition: all 0.2s;
+white-space: nowrap;
+}
+
+.solve-btn:hover {
+transform: translateY(-1px);
+box-shadow: 0 6px 24px rgba(110,231,183,0.3);
+}
+
+.solve-btn:active { transform: translateY(0); }
+
+/* Quick keys */
+.quick-keys {
+display: flex;
+flex-wrap: wrap;
+gap: 6px;
+}
+
+.qkey {
+padding: 5px 12px;
+background: var(–surface2);
+border: 1px solid var(–border);
+border-radius: 6px;
+color: var(–accent2);
+font-family: ‘DM Mono’, monospace;
+font-size: 13px;
+cursor: pointer;
+transition: all 0.15s;
 user-select: none;
 }
 
-#game-wrapper {
-position: relative;
+.qkey:hover {
+background: var(–border);
+color: var(–accent);
+}
+
+/* Result card */
+.result-card {
+background: var(–surface);
+border: 1px solid var(–border);
+border-radius: 16px;
+overflow: hidden;
+animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+from { opacity: 0; transform: translateY(12px); }
+to { opacity: 1; transform: translateY(0); }
+}
+
+.result-header {
+padding: 14px 20px;
+background: var(–surface2);
+border-bottom: 1px solid var(–border);
+display: flex;
+align-items: center;
+justify-content: space-between;
+}
+
+.result-label {
+font-size: 11px;
+letter-spacing: 1.5px;
+text-transform: uppercase;
+color: var(–muted);
+font-weight: 500;
+}
+
+.result-badge {
+padding: 3px 10px;
+border-radius: 100px;
+font-size: 11px;
+font-weight: 500;
+}
+
+.result-badge.success {
+background: rgba(110,231,183,0.15);
+color: var(–accent);
+border: 1px solid rgba(110,231,183,0.3);
+}
+
+.result-badge.error {
+background: rgba(251,146,60,0.15);
+color: var(–warn);
+border: 1px solid rgba(251,146,60,0.3);
+}
+
+.result-body {
+padding: 24px 20px;
+}
+
+.result-answer {
+font-family: ‘DM Mono’, monospace;
+font-size: clamp(20px, 3vw, 28px);
+color: var(–accent);
+line-height: 1.4;
+word-break: break-word;
+}
+
+.result-steps {
+margin-top: 20px;
 display: flex;
 flex-direction: column;
-align-items: center;
 gap: 10px;
 }
 
-#title-bar {
-color: #c8b560;
-font-family: ‘Oswald’, sans-serif;
-font-size: 28px;
-letter-spacing: 10px;
-text-transform: uppercase;
-text-shadow: 0 0 20px rgba(200,181,96,0.5);
-}
-
-#canvas {
-border: 2px solid #3a4a2a;
-box-shadow: 0 0 40px rgba(80,120,40,0.2), 0 0 80px rgba(0,0,0,0.8);
-display: block;
-image-rendering: pixelated;
-}
-
-#hud {
-width: 800px;
+.step {
 display: flex;
-justify-content: space-between;
-align-items: center;
-padding: 6px 10px;
-background: rgba(10,12,8,0.8);
-border: 1px solid #2a3a1a;
+gap: 14px;
+align-items: flex-start;
+padding: 12px 14px;
+background: var(–surface2);
+border-radius: 10px;
+border-left: 3px solid var(–accent2);
+animation: fadeIn 0.3s ease both;
 }
 
-.hud-block { display: flex; flex-direction: column; gap: 3px; }
-.hud-label { color: #6a8a4a; font-size: 10px; letter-spacing: 3px; }
-.hud-value { color: #c8d8a0; font-size: 14px; letter-spacing: 2px; }
-
-#health-bar-wrap {
-width: 160px;
-height: 12px;
-background: #1a1a10;
-border: 1px solid #3a4a2a;
-position: relative;
+@keyframes fadeIn {
+from { opacity: 0; transform: translateX(-8px); }
+to { opacity: 1; transform: translateX(0); }
 }
-#health-bar {
-height: 100%;
-background: linear-gradient(90deg, #4a8a20, #a0d040);
-transition: width 0.15s;
-width: 100%;
-}
-#health-bar.danger { background: linear-gradient(90deg, #8a2020, #d04040); }
 
-#controls-hint {
-color: #3a5a2a;
-font-size: 10px;
-letter-spacing: 2px;
+.step-num {
+min-width: 22px; height: 22px;
+background: var(–accent2);
+border-radius: 50%;
+display: flex; align-items: center; justify-content: center;
+font-size: 11px;
+font-weight: 700;
+color: #0d0f14;
+}
+
+.step-text {
+font-size: 14px;
+color: var(–text);
+line-height: 1.6;
+}
+
+.step-text code {
+font-family: ‘DM Mono’, monospace;
+color: var(–accent);
+font-size: 13px;
+background: rgba(110,231,183,0.08);
+padding: 1px 6px;
+border-radius: 4px;
+}
+
+.error-msg {
+font-family: ‘DM Mono’, monospace;
+color: var(–warn);
+font-size: 15px;
+}
+
+/* Examples section */
+.examples-section { margin-top: 8px; }
+
+.examples-title {
+font-size: 11px;
+letter-spacing: 1.5px;
+text-transform: uppercase;
+color: var(–muted);
+font-weight: 500;
+margin-bottom: 12px;
+}
+
+.examples-grid {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+gap: 10px;
+}
+
+.example-card {
+background: var(–surface);
+border: 1px solid var(–border);
+border-radius: 12px;
+padding: 14px 16px;
+cursor: pointer;
+transition: all 0.2s;
+}
+
+.example-card:hover {
+border-color: var(–accent2);
+background: var(–surface2);
+transform: translateY(-2px);
+}
+
+.ex-label {
+font-size: 11px;
+color: var(–accent2);
+text-transform: uppercase;
+letter-spacing: 1px;
+margin-bottom: 5px;
+font-weight: 500;
+}
+
+.ex-eq {
+font-family: ‘DM Mono’, monospace;
+font-size: 15px;
+color: var(–text);
+}
+
+.ex-desc {
+font-size: 12px;
+color: var(–muted);
 margin-top: 4px;
 }
 
-/* Overlay screens */
-#overlay {
-position: absolute;
-top: 0; left: 0;
-width: 800px;
-height: 450px;
-background: rgba(0,0,0,0.88);
+/* History */
+.history-section { margin-top: 8px; }
+.history-title {
+font-size: 11px;
+letter-spacing: 1.5px;
+text-transform: uppercase;
+color: var(–muted);
+font-weight: 500;
+margin-bottom: 12px;
+display: flex;
+align-items: center;
+justify-content: space-between;
+}
+
+.clear-hist {
+background: none; border: none; color: var(–muted);
+cursor: pointer; font-size: 12px; text-decoration: underline;
+font-family: ‘DM Sans’, sans-serif;
+}
+.clear-hist:hover { color: var(–warn); }
+
+.history-list {
 display: flex;
 flex-direction: column;
+gap: 8px;
+}
+
+.hist-item {
+display: flex;
 align-items: center;
-justify-content: center;
-gap: 20px;
-z-index: 10;
-}
-
-#overlay.hidden { display: none; }
-
-.overlay-title {
-font-family: ‘Oswald’, sans-serif;
-font-size: 52px;
-letter-spacing: 12px;
-color: #c8b560;
-text-shadow: 0 0 30px rgba(200,181,96,0.6);
-}
-
-.overlay-sub {
-color: #8aa870;
-font-size: 13px;
-letter-spacing: 4px;
-text-align: center;
-line-height: 2;
-}
-
-.overlay-score {
-color: #c8d8a0;
-font-size: 18px;
-letter-spacing: 4px;
-}
-
-.start-btn {
-margin-top: 10px;
-padding: 14px 48px;
-background: transparent;
-border: 2px solid #c8b560;
-color: #c8b560;
-font-family: ‘Oswald’, sans-serif;
-font-size: 18px;
-letter-spacing: 8px;
+gap: 12px;
+padding: 10px 14px;
+background: var(–surface);
+border: 1px solid var(–border);
+border-radius: 10px;
 cursor: pointer;
-transition: all 0.2s;
-text-transform: uppercase;
-}
-.start-btn:hover {
-background: rgba(200,181,96,0.15);
-box-shadow: 0 0 20px rgba(200,181,96,0.3);
+transition: border-color 0.2s;
+font-family: ‘DM Mono’, monospace;
+font-size: 13px;
 }
 
-#wave-announce {
-position: absolute;
-top: 50%;
-left: 50%;
-transform: translate(-50%, -50%);
-color: #c8b560;
-font-family: ‘Oswald’, sans-serif;
-font-size: 36px;
-letter-spacing: 8px;
-text-shadow: 0 0 20px rgba(200,181,96,0.7);
-pointer-events: none;
-opacity: 0;
-transition: opacity 0.4s;
-z-index: 5;
-white-space: nowrap;
-}
-#wave-announce.show { opacity: 1; }
+.hist-item:hover { border-color: var(–accent); }
+.hist-eq { color: var(–muted); }
+.hist-arrow { color: var(–border); }
+.hist-ans { color: var(–accent); }
 </style>
 
 </head>
 <body>
 
-<div id="game-wrapper">
-  <div id="title-bar">⚔ IRON FRONT ⚔</div>
+<header>
+  <div class="logo-mark">∑</div>
+  <div class="logo-text">Math<span>Solve</span></div>
+  <div class="tagline">any equation, any operation</div>
+</header>
 
-  <div style="position:relative;">
-    <canvas id="canvas" width="800" height="450"></canvas>
+<main>
+  <div class="hero-text">
+    <h1>Solve <em>anything</em>.<br>Step by step.</h1>
+    <p>Arithmetic, algebra, calculus, matrices, statistics — all in one place.</p>
+  </div>
+
+  <!-- Mode Tabs -->
+
+  <div class="mode-tabs" id="modeTabs">
+    <button class="mode-tab active" data-mode="basic">Basic Math</button>
+    <button class="mode-tab" data-mode="algebra">Algebra</button>
+    <button class="mode-tab" data-mode="calculus">Calculus</button>
+    <button class="mode-tab" data-mode="trig">Trigonometry</button>
+    <button class="mode-tab" data-mode="matrix">Matrices</button>
+    <button class="mode-tab" data-mode="stats">Statistics</button>
+    <button class="mode-tab" data-mode="convert">Unit Convert</button>
+  </div>
+
+  <!-- Input -->
+
+  <div class="input-card">
+    <div class="input-label">Enter your expression or equation</div>
+    <textarea id="inputExpr" rows="2" placeholder="e.g.  2x^2 + 5x - 3 = 0"></textarea>
 
 ```
-<!-- Overlay -->
-<div id="overlay">
-  <div class="overlay-title">IRON FRONT</div>
-  <div class="overlay-sub">
-    DEFEND THE LINE. SURVIVE THE ASSAULT.<br>
-    WASD / ARROWS — MOVE &amp; JUMP &nbsp;|&nbsp; SPACE — SHOOT<br>
-    SHIFT — GRENADE &nbsp;|&nbsp; S / DOWN — CROUCH
-  </div>
-  <button class="start-btn" id="start-btn">DEPLOY</button>
-</div>
+<div class="quick-keys" id="quickKeys"></div>
 
-<!-- Wave announce -->
-<div id="wave-announce" id="wave-ann"></div>
+<div class="input-row">
+  <select class="op-select" id="opSelect"></select>
+  <button class="solve-btn" onclick="solve()">Solve →</button>
+</div>
 ```
 
   </div>
 
-  <div id="hud">
-    <div class="hud-block">
-      <div class="hud-label">HP</div>
-      <div id="health-bar-wrap"><div id="health-bar"></div></div>
-    </div>
-    <div class="hud-block" style="align-items:center;">
-      <div class="hud-label">WAVE</div>
-      <div class="hud-value" id="hud-wave">1</div>
-    </div>
-    <div class="hud-block" style="align-items:center;">
-      <div class="hud-label">SCORE</div>
-      <div class="hud-value" id="hud-score">00000</div>
-    </div>
-    <div class="hud-block" style="align-items:center;">
-      <div class="hud-label">GRENADES</div>
-      <div class="hud-value" id="hud-gren">3</div>
-    </div>
-    <div class="hud-block" style="align-items:center;">
-      <div class="hud-label">KILLS</div>
-      <div class="hud-value" id="hud-kills">0</div>
-    </div>
+  <!-- Result -->
+
+  <div id="resultCard" style="display:none"></div>
+
+  <!-- Examples -->
+
+  <div class="examples-section">
+    <div class="examples-title">Try an example</div>
+    <div class="examples-grid" id="examplesGrid"></div>
   </div>
 
-  <div id="controls-hint">WASD/ARROWS: MOVE | SPACE: SHOOT | SHIFT: GRENADE | S/↓: CROUCH</div>
-</div>
+  <!-- History -->
+
+  <div class="history-section" id="historySection" style="display:none">
+    <div class="history-title">
+      <span>Recent Calculations</span>
+      <button class="clear-hist" onclick="clearHistory()">Clear all</button>
+    </div>
+    <div class="history-list" id="historyList"></div>
+  </div>
+</main>
 
 <script>
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-const W = 800, H = 450;
-
-// ── CONSTANTS ──────────────────────────────────────────
-const GROUND_Y = 380;
-const GRAVITY = 0.55;
-const JUMP_V = -13;
-const PLAYER_SPEED = 3.2;
-const BULLET_SPEED = 10;
-const ENEMY_BULLET_SPEED = 5;
-
-// ── COLORS ─────────────────────────────────────────────
-const C = {
-  sky:    ['#0d1408','#121e08','#1a2a0e'],
-  ground: '#2a3018',
-  dirt:   '#1e2410',
-  cover:  '#3a4828',
-  coverDark: '#2a3618',
-  player: '#4a7830',
-  playerDark: '#2e4e1e',
-  enemy:  '#7a3020',
-  enemyDark: '#4e1e10',
-  bullet: '#ffee70',
-  eBullet:'#ff6040',
-  muzzle: '#ffe090',
-  blood:  '#8a2010',
-  expl:   ['#ffcc20','#ff8820','#ff4420','#cc2010'],
-  ui:     '#c8b560',
-  green:  '#4a8a20',
-  moon:   '#d0c880',
+// ─── Mode Configuration ────────────────────────────────────────────────────
+const MODES = {
+  basic: {
+    ops: [
+      { value: 'evaluate', label: 'Evaluate' },
+      { value: 'simplify', label: 'Simplify' },
+      { value: 'factor_num', label: 'Factor (number)' },
+      { value: 'fraction', label: 'Fraction → Decimal' },
+      { value: 'percentage', label: 'Percentage' },
+    ],
+    keys: ['(', ')', '^', '√', 'π', 'e', '%', '!'],
+    examples: [
+      { label: 'Arithmetic', eq: '(3 + 5) * 12 / 4 - 2^3', desc: 'Order of operations' },
+      { label: 'Roots', eq: 'sqrt(144) + cbrt(27)', desc: 'Square & cube roots' },
+      { label: 'Factorial', eq: '7!', desc: 'Factorial' },
+    ]
+  },
+  algebra: {
+    ops: [
+      { value: 'solve_linear', label: 'Solve for x (linear)' },
+      { value: 'solve_quadratic', label: 'Solve quadratic' },
+      { value: 'simplify', label: 'Simplify expression' },
+      { value: 'expand', label: 'Expand expression' },
+      { value: 'evaluate', label: 'Evaluate' },
+    ],
+    keys: ['x', 'y', '^2', '^3', '√x', '±', '(', ')'],
+    examples: [
+      { label: 'Linear', eq: '3x + 7 = 22', desc: 'Solve for x' },
+      { label: 'Quadratic', eq: 'x^2 - 5x + 6 = 0', desc: 'Find roots' },
+      { label: 'Simplify', eq: '(x+2)^2 - (x-1)^2', desc: 'Simplify' },
+    ]
+  },
+  calculus: {
+    ops: [
+      { value: 'derivative', label: 'Derivative d/dx' },
+      { value: 'integral', label: 'Indefinite Integral ∫' },
+      { value: 'def_integral', label: 'Definite Integral ∫ab' },
+      { value: 'evaluate', label: 'Evaluate at point' },
+    ],
+    keys: ['x', 'd/dx', '∫', 'sin', 'cos', 'ln', 'e^x', '^'],
+    examples: [
+      { label: 'Derivative', eq: 'x^3 + 3x^2 - 2x + 5', desc: 'Find d/dx' },
+      { label: 'Integral', eq: 'x^2 + 2x', desc: 'Indefinite integral' },
+      { label: 'Def. Integral', eq: 'x^2  [0, 3]', desc: 'Evaluate from 0 to 3' },
+    ]
+  },
+  trig: {
+    ops: [
+      { value: 'trig_eval', label: 'Evaluate (degrees)' },
+      { value: 'trig_eval_rad', label: 'Evaluate (radians)' },
+      { value: 'trig_identity', label: 'Verify identity' },
+      { value: 'inverse_trig', label: 'Inverse trig (degrees)' },
+    ],
+    keys: ['sin', 'cos', 'tan', 'arcsin', 'arccos', 'arctan', 'π', '^2'],
+    examples: [
+      { label: 'Sin/Cos', eq: 'sin(30)', desc: 'In degrees' },
+      { label: 'Pythagorean', eq: 'sin(x)^2 + cos(x)^2', desc: 'Identity check' },
+      { label: 'Inverse', eq: 'arcsin(0.5)', desc: 'In degrees' },
+    ]
+  },
+  matrix: {
+    ops: [
+      { value: 'mat_det', label: 'Determinant' },
+      { value: 'mat_inv', label: 'Inverse' },
+      { value: 'mat_transpose', label: 'Transpose' },
+      { value: 'mat_multiply', label: 'Multiply matrices' },
+      { value: 'mat_add', label: 'Add matrices' },
+    ],
+    keys: ['[[', ']]', ',', ';', 'A·B', 'det', 'inv', 'T'],
+    examples: [
+      { label: '2×2 Det', eq: '[[1, 2], [3, 4]]', desc: 'Determinant' },
+      { label: 'Inverse', eq: '[[2, 1], [5, 3]]', desc: 'Find inverse' },
+      { label: 'Multiply', eq: '[[1,2],[3,4]] * [[5,6],[7,8]]', desc: 'Matrix multiply' },
+    ]
+  },
+  stats: {
+    ops: [
+      { value: 'mean', label: 'Mean (average)' },
+      { value: 'median', label: 'Median' },
+      { value: 'std', label: 'Standard Deviation' },
+      { value: 'variance', label: 'Variance' },
+      { value: 'stats_all', label: 'Full Summary' },
+    ],
+    keys: [',', '[', ']', 'mean', 'std', 'min', 'max', 'Σ'],
+    examples: [
+      { label: 'Dataset', eq: '4, 8, 15, 16, 23, 42', desc: 'Enter comma-separated values' },
+      { label: 'Large set', eq: '2, 4, 4, 4, 5, 5, 7, 9', desc: 'Classic variance example' },
+      { label: 'Grades', eq: '88, 92, 79, 95, 84, 91', desc: 'Find average grade' },
+    ]
+  },
+  convert: {
+    ops: [
+      { value: 'convert_unit', label: 'Convert units' },
+      { value: 'evaluate', label: 'Evaluate expression' },
+    ],
+    keys: ['km', 'mi', 'kg', 'lb', '°C', '°F', 'in', 'cm'],
+    examples: [
+      { label: 'Length', eq: '5 km to mi', desc: 'Kilometers to miles' },
+      { label: 'Weight', eq: '70 kg to lb', desc: 'Kilograms to pounds' },
+      { label: 'Temp', eq: '100 degC to degF', desc: 'Celsius to Fahrenheit' },
+    ]
+  }
 };
 
-// ── GAME STATE ─────────────────────────────────────────
-let state = 'menu'; // menu | playing | gameover | winclear
-let score = 0;
-let kills = 0;
-let wave = 1;
-let waveTimer = 0;
-let waveAnnounce = false;
-let waveAnnTimer = 0;
+let currentMode = 'basic';
+let history = [];
 
-// ── INPUT ──────────────────────────────────────────────
-const keys = {};
-document.addEventListener('keydown', e => {
-  keys[e.code] = true;
-  if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'ArrowDown') e.preventDefault();
-  if (state === 'playing') {
-    if (e.code === 'Space') shootPlayer();
-    if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') throwGrenade();
-  }
-});
-document.addEventListener('keyup', e => { keys[e.code] = false; });
-
-// ── PARTICLES ──────────────────────────────────────────
-let particles = [];
-function spawnParticles(x, y, color, count=8, speed=3, life=30) {
-  for (let i = 0; i < count; i++) {
-    const a = Math.random() * Math.PI * 2;
-    const s = Math.random() * speed + 1;
-    particles.push({ x, y, vx: Math.cos(a)*s, vy: Math.sin(a)*s - 1, life, maxLife: life, color });
-  }
-}
-function spawnExplosion(x, y, big=false) {
-  const n = big ? 30 : 16;
-  const sp = big ? 6 : 4;
-  C.expl.forEach(c => spawnParticles(x, y, c, n/4, sp, big?45:30));
-  spawnParticles(x, y, '#ffffff', 4, sp*1.5, 15);
-}
-
-// ── BULLETS ────────────────────────────────────────────
-let bullets = [];
-let eBullets = [];
-let grenades = [];
-let grenadeCount = 3;
-
-function shootPlayer() {
-  const p = player;
-  const bx = p.facing === 1 ? p.x + p.w : p.x;
-  bullets.push({ x: bx, y: p.y + (p.crouching ? 14 : 10), vx: BULLET_SPEED * p.facing, life: 80 });
-  spawnParticles(bx, p.y + 10, C.muzzle, 4, 4, 12);
-}
-
-function shootEnemy(e) {
-  const dir = e.x > player.x ? -1 : 1;
-  eBullets.push({ x: e.x + (dir === 1 ? e.w : 0), y: e.y + 12, vx: ENEMY_BULLET_SPEED * dir, life: 120 });
-  spawnParticles(e.x + e.w/2, e.y + 12, C.muzzle, 3, 3, 10);
-  e.shootCooldown = e.shootRate;
-}
-
-function throwGrenade() {
-  if (grenadeCount <= 0) return;
-  grenadeCount--;
-  updateHUD();
-  const dir = player.facing;
-  grenades.push({
-    x: player.x + player.w/2, y: player.y,
-    vx: dir * 7, vy: -10,
-    life: 120, exploded: false
+// ─── Init ──────────────────────────────────────────────────────────────────
+function init() {
+  document.querySelectorAll('.mode-tab').forEach(btn => {
+    btn.addEventListener('click', () => setMode(btn.dataset.mode));
   });
+  document.getElementById('inputExpr').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); solve(); }
+  });
+  setMode('basic');
 }
 
-// ── COVER OBJECTS ──────────────────────────────────────
-const covers = [
-  { x: 120, y: GROUND_Y - 30, w: 60, h: 30 },
-  { x: 280, y: GROUND_Y - 30, w: 50, h: 30 },
-  { x: 460, y: GROUND_Y - 45, w: 70, h: 45 },
-  { x: 620, y: GROUND_Y - 30, w: 55, h: 30 },
-];
+function setMode(mode) {
+  currentMode = mode;
+  document.querySelectorAll('.mode-tab').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  const cfg = MODES[mode];
 
-// ── PLAYER ─────────────────────────────────────────────
-let player = {};
-function resetPlayer() {
-  player = {
-    x: 60, y: GROUND_Y - 42, w: 22, h: 42,
-    vx: 0, vy: 0,
-    onGround: false,
-    facing: 1,
-    crouching: false,
-    hp: 100, maxHp: 100,
-    shootCooldown: 0,
-    invincible: 0,
-    animFrame: 0, animTimer: 0
+  // Quick keys
+  const qk = document.getElementById('quickKeys');
+  qk.innerHTML = cfg.keys.map(k =>
+    `<button class="qkey" onclick="insertKey('${k}')">${k}</button>`
+  ).join('');
+
+  // Op select
+  const sel = document.getElementById('opSelect');
+  sel.innerHTML = cfg.ops.map(o =>
+    `<option value="${o.value}">${o.label}</option>`
+  ).join('');
+
+  // Examples
+  const eg = document.getElementById('examplesGrid');
+  eg.innerHTML = cfg.examples.map(ex =>
+    `<div class="example-card" onclick="loadExample('${ex.eq.replace(/'/g,"\\'")}', '${ex.label}')">
+      <div class="ex-label">${ex.label}</div>
+      <div class="ex-eq">${ex.eq}</div>
+      <div class="ex-desc">${ex.desc}</div>
+    </div>`
+  ).join('');
+
+  document.getElementById('resultCard').style.display = 'none';
+}
+
+function insertKey(k) {
+  const ta = document.getElementById('inputExpr');
+  const start = ta.selectionStart, end = ta.selectionEnd;
+  const insert = k === '√' ? 'sqrt(' : k === 'e^x' ? 'exp(' : k === 'd/dx' ? '' : k;
+  ta.value = ta.value.slice(0, start) + insert + ta.value.slice(end);
+  ta.focus();
+  ta.setSelectionRange(start + insert.length, start + insert.length);
+}
+
+function loadExample(eq, label) {
+  document.getElementById('inputExpr').value = eq;
+  // pick best op for the example
+  solve();
+}
+
+// ─── SOLVER ───────────────────────────────────────────────────────────────
+function solve() {
+  const raw = document.getElementById('inputExpr').value.trim();
+  const op = document.getElementById('opSelect').value;
+  if (!raw) return;
+
+  let result;
+  try {
+    result = compute(raw, op);
+  } catch(e) {
+    result = { ok: false, error: e.message };
+  }
+
+  showResult(raw, op, result);
+  if (result.ok) addHistory(raw, result.answer);
+}
+
+function compute(raw, op) {
+  const m = math;
+
+  if (op === 'evaluate') {
+    const val = m.evaluate(raw);
+    return { ok: true, answer: formatVal(val), steps: [
+      { text: `Parse expression: <code>${raw}</code>` },
+      { text: `Evaluate: <code>${formatVal(val)}</code>` }
+    ]};
+  }
+
+  if (op === 'simplify') {
+    const simplified = m.simplify(raw);
+    return { ok: true, answer: simplified.toString(), steps: [
+      { text: `Original: <code>${raw}</code>` },
+      { text: `Simplified: <code>${simplified}</code>` }
+    ]};
+  }
+
+  if (op === 'expand') {
+    const exp = m.simplify(raw, [{ l: 'n1*(n2+n3)', r: 'n1*n2+n1*n3' }]);
+    return { ok: true, answer: exp.toString(), steps: [
+      { text: `Expand: <code>${raw}</code>` },
+      { text: `Result: <code>${exp}</code>` }
+    ]};
+  }
+
+  if (op === 'factor_num') {
+    const n = parseInt(m.evaluate(raw));
+    const factors = primeFactors(n);
+    return { ok: true, answer: factors.length ? factors.join(' × ') : `${n} is prime`, steps: [
+      { text: `Number: <code>${n}</code>` },
+      { text: `Prime factors: <code>${factors.join(' × ')}</code>` }
+    ]};
+  }
+
+  if (op === 'fraction') {
+    const val = m.evaluate(raw);
+    return { ok: true, answer: `${val}`, steps: [
+      { text: `Expression: <code>${raw}</code>` },
+      { text: `Decimal: <code>${val}</code>` }
+    ]};
+  }
+
+  if (op === 'percentage') {
+    const expr = raw.replace(/%/g, '/100');
+    const val = m.evaluate(expr) * 100;
+    return { ok: true, answer: `${m.evaluate(expr)} = ${val}%`, steps: [
+      { text: `Convert: <code>${raw}</code>` },
+      { text: `Value: <code>${m.evaluate(expr)}</code> = <code>${val}%</code>` }
+    ]};
+  }
+
+  if (op === 'solve_linear') {
+    return solveLinear(raw);
+  }
+
+  if (op === 'solve_quadratic') {
+    return solveQuadratic(raw);
+  }
+
+  if (op === 'derivative') {
+    const node = m.parse(raw);
+    const d = m.derivative(node, 'x');
+    const simplified = m.simplify(d);
+    return { ok: true, answer: `d/dx [${raw}] = ${simplified}`, steps: [
+      { text: `Function: <code>f(x) = ${raw}</code>` },
+      { text: `Apply differentiation rules` },
+      { text: `f'(x) = <code>${simplified}</code>` }
+    ]};
+  }
+
+  if (op === 'integral') {
+    return approxIntegral(raw);
+  }
+
+  if (op === 'def_integral') {
+    return definiteIntegral(raw);
+  }
+
+  if (op === 'trig_eval') {
+    const expr = raw
+      .replace(/sin\(/g, 'sin(')
+      .replace(/cos\(/g, 'cos(')
+      .replace(/tan\(/g, 'tan(');
+    // convert degrees to radians
+    const degExpr = expr.replace(/sin\(([^)]+)\)/g, (_, a) => `sin(${a} * pi / 180)`)
+                        .replace(/cos\(([^)]+)\)/g, (_, a) => `cos(${a} * pi / 180)`)
+                        .replace(/tan\(([^)]+)\)/g, (_, a) => `tan(${a} * pi / 180)`);
+    const val = m.evaluate(degExpr);
+    return { ok: true, answer: formatNum(val), steps: [
+      { text: `Expression (degrees): <code>${raw}</code>` },
+      { text: `Convert to radians and evaluate` },
+      { text: `Result: <code>${formatNum(val)}</code>` }
+    ]};
+  }
+
+  if (op === 'trig_eval_rad') {
+    const val = m.evaluate(raw.replace(/pi/g, 'pi'));
+    return { ok: true, answer: formatNum(val), steps: [
+      { text: `Expression (radians): <code>${raw}</code>` },
+      { text: `Result: <code>${formatNum(val)}</code>` }
+    ]};
+  }
+
+  if (op === 'trig_identity') {
+    const simplified = m.simplify(raw);
+    return { ok: true, answer: simplified.toString(), steps: [
+      { text: `Identity: <code>${raw}</code>` },
+      { text: `Simplified: <code>${simplified}</code>` }
+    ]};
+  }
+
+  if (op === 'inverse_trig') {
+    const val = m.evaluate(raw.replace(/arcsin/g,'asin').replace(/arccos/g,'acos').replace(/arctan/g,'atan'));
+    const deg = val * 180 / Math.PI;
+    return { ok: true, answer: `${formatNum(deg)}°`, steps: [
+      { text: `Inverse trig: <code>${raw}</code>` },
+      { text: `Radians: <code>${formatNum(val)}</code>` },
+      { text: `Degrees: <code>${formatNum(deg)}°</code>` }
+    ]};
+  }
+
+  if (op === 'mat_det') {
+    const mat = m.evaluate(raw);
+    const det = m.det(mat);
+    return { ok: true, answer: `det = ${formatNum(det)}`, steps: [
+      { text: `Matrix: <code>${raw}</code>` },
+      { text: `Determinant: <code>${formatNum(det)}</code>` }
+    ]};
+  }
+
+  if (op === 'mat_inv') {
+    const mat = m.evaluate(raw);
+    const inv = m.inv(mat);
+    return { ok: true, answer: matrixToStr(inv), steps: [
+      { text: `Matrix A: <code>${raw}</code>` },
+      { text: `Compute A⁻¹ using row reduction` },
+      { text: `A⁻¹ = <code>${matrixToStr(inv)}</code>` }
+    ]};
+  }
+
+  if (op === 'mat_transpose') {
+    const mat = m.evaluate(raw);
+    const t = m.transpose(mat);
+    return { ok: true, answer: matrixToStr(t), steps: [
+      { text: `Matrix: <code>${raw}</code>` },
+      { text: `Transpose (swap rows/cols): <code>${matrixToStr(t)}</code>` }
+    ]};
+  }
+
+  if (op === 'mat_multiply') {
+    const val = m.evaluate(raw);
+    return { ok: true, answer: matrixToStr(val), steps: [
+      { text: `Multiply: <code>${raw}</code>` },
+      { text: `Result: <code>${matrixToStr(val)}</code>` }
+    ]};
+  }
+
+  if (op === 'mat_add') {
+    const val = m.evaluate(raw);
+    return { ok: true, answer: matrixToStr(val), steps: [
+      { text: `Add: <code>${raw}</code>` },
+      { text: `Result: <code>${matrixToStr(val)}</code>` }
+    ]};
+  }
+
+  if (['mean','median','std','variance','stats_all'].includes(op)) {
+    return doStats(raw, op);
+  }
+
+  if (op === 'convert_unit') {
+    const val = m.evaluate(raw);
+    return { ok: true, answer: val.toString(), steps: [
+      { text: `Convert: <code>${raw}</code>` },
+      { text: `Result: <code>${val}</code>` }
+    ]};
+  }
+
+  // fallback
+  const val = m.evaluate(raw);
+  return { ok: true, answer: formatVal(val), steps: [{ text: `Result: <code>${formatVal(val)}</code>` }]};
+}
+
+// ─── Helpers ───────────────────────────────────────────────────────────────
+function formatNum(n) {
+  if (typeof n !== 'number') return String(n);
+  return Number.isInteger(n) ? n.toString() : parseFloat(n.toFixed(8)).toString();
+}
+
+function formatVal(v) {
+  if (typeof v === 'number') return formatNum(v);
+  if (v && v.isMatrix) return matrixToStr(v);
+  return String(v);
+}
+
+function matrixToStr(m) {
+  const arr = m.toArray ? m.toArray() : m;
+  return '[' + arr.map(row => Array.isArray(row) ? '[' + row.map(x=>formatNum(x)).join(', ') + ']' : formatNum(row)).join(', ') + ']';
+}
+
+function primeFactors(n) {
+  const factors = [];
+  for (let d = 2; d * d <= n; d++) {
+    while (n % d === 0) { factors.push(d); n /= d; }
+  }
+  if (n > 1) factors.push(n);
+  return factors;
+}
+
+function solveLinear(raw) {
+  // ax + b = c  →  extract a, b, c
+  if (!raw.includes('=')) throw new Error("Enter equation with '=' sign, e.g. 3x + 2 = 8");
+  const [lhs, rhs] = raw.split('=').map(s => s.trim());
+  try {
+    const scope = {};
+    // Use algebra: move everything to lhs, solve for x
+    const expr = math.parse(`(${lhs}) - (${rhs})`);
+    const simplified = math.simplify(expr);
+    // Try numerical solve
+    let x = numericalSolve(lhs, rhs, 'x');
+    return { ok: true, answer: `x = ${formatNum(x)}`, steps: [
+      { text: `Start: <code>${raw}</code>` },
+      { text: `Rearrange: <code>${lhs} - (${rhs}) = 0</code>` },
+      { text: `Solve for x: <code>x = ${formatNum(x)}</code>` }
+    ]};
+  } catch(e) {
+    throw new Error("Couldn't solve. Make sure it's a linear equation in x.");
+  }
+}
+
+function numericalSolve(lhs, rhs, variable, guess=0) {
+  // Simple Newton's method
+  const f = (val) => {
+    const scope = { [variable]: val };
+    return math.evaluate(lhs, scope) - math.evaluate(rhs, scope);
   };
-}
-
-// ── ENEMIES ────────────────────────────────────────────
-let enemies = [];
-
-function spawnEnemy(x, hp, speed, shootRate) {
-  enemies.push({
-    x, y: GROUND_Y - 38, w: 20, h: 38,
-    vx: 0, vy: 0,
-    onGround: false,
-    facing: -1,
-    hp, maxHp: hp,
-    speed, shootRate,
-    shootCooldown: Math.random() * shootRate,
-    state: 'approach', // approach | cover | shoot
-    coverTimer: 0,
-    alertTimer: 0,
-    animFrame: 0, animTimer: 0,
-    crouching: false,
-    dead: false,
-    deathTimer: 0
-  });
-}
-
-function spawnWave(w) {
-  enemies = [];
-  const count = 2 + w * 2;
-  const hp = 30 + w * 10;
-  const spd = 1 + w * 0.2;
-  const shootRate = Math.max(40 - w * 3, 18);
-  for (let i = 0; i < count; i++) {
-    const x = 700 + i * 90;
-    spawnEnemy(x, hp, spd, shootRate);
+  let x = guess;
+  for (let i = 0; i < 100; i++) {
+    const fx = f(x);
+    const dfx = (f(x+1e-7) - fx) / 1e-7;
+    if (Math.abs(dfx) < 1e-12) break;
+    x = x - fx/dfx;
+    if (Math.abs(fx) < 1e-10) break;
   }
+  return x;
 }
 
-// ── PHYSICS HELPERS ────────────────────────────────────
-function applyGravity(obj) {
-  obj.vy += GRAVITY;
-  obj.y += obj.vy;
-  obj.x += obj.vx;
-
-  // Ground
-  if (obj.y + obj.h >= GROUND_Y) {
-    obj.y = GROUND_Y - obj.h;
-    obj.vy = 0;
-    obj.onGround = true;
-  } else {
-    obj.onGround = false;
+function solveQuadratic(raw) {
+  let expr = raw;
+  if (raw.includes('=')) {
+    const [lhs, rhs] = raw.split('=');
+    expr = `(${lhs}) - (${rhs})`;
   }
-
-  // Cover collision
-  covers.forEach(c => {
-    if (obj.x + obj.w > c.x && obj.x < c.x + c.w &&
-        obj.y + obj.h > c.y && obj.y + obj.h < c.y + c.h + 15 && obj.vy >= 0) {
-      obj.y = c.y - obj.h;
-      obj.vy = 0;
-      obj.onGround = true;
+  // extract coefficients a, b, c from ax^2+bx+c
+  try {
+    const node = math.simplify(expr);
+    const str = node.toString();
+    // Try evaluating at x=1,2,3 to detect if quadratic
+    const f = (x) => math.evaluate(expr, { x });
+    // Get coefficients numerically
+    // f(x) = ax^2 + bx + c
+    // f(0)=c, f(1)=a+b+c, f(-1)=a-b+c
+    const c = f(0), s1 = f(1), sm1 = f(-1);
+    const a = (s1 + sm1 - 2*c) / 2;
+    const b = s1 - a - c;
+    const disc = b*b - 4*a*c;
+    if (Math.abs(a) < 1e-10) return solveLinear(raw);
+    const steps = [
+      { text: `Equation: <code>ax² + bx + c = 0</code>` },
+      { text: `Coefficients: <code>a = ${formatNum(a)}, b = ${formatNum(b)}, c = ${formatNum(c)}</code>` },
+      { text: `Discriminant: <code>b² - 4ac = ${formatNum(disc)}</code>` },
+    ];
+    if (disc < 0) {
+      const re = -b/(2*a), im = Math.sqrt(-disc)/(2*a);
+      return { ok: true, answer: `x = ${formatNum(re)} ± ${formatNum(im)}i (complex roots)`, steps: [
+        ...steps,
+        { text: `Disc < 0 → complex roots` },
+        { text: `x = <code>${formatNum(re)} + ${formatNum(im)}i</code> or <code>${formatNum(re)} - ${formatNum(im)}i</code>` }
+      ]};
+    } else if (Math.abs(disc) < 1e-10) {
+      const x = -b/(2*a);
+      return { ok: true, answer: `x = ${formatNum(x)} (double root)`, steps: [
+        ...steps,
+        { text: `Disc = 0 → one repeated root` },
+        { text: `x = <code>${formatNum(x)}</code>` }
+      ]};
+    } else {
+      const x1 = (-b + Math.sqrt(disc))/(2*a);
+      const x2 = (-b - Math.sqrt(disc))/(2*a);
+      return { ok: true, answer: `x₁ = ${formatNum(x1)}, x₂ = ${formatNum(x2)}`, steps: [
+        ...steps,
+        { text: `x = (-b ± √disc) / 2a` },
+        { text: `x₁ = <code>${formatNum(x1)}</code>, x₂ = <code>${formatNum(x2)}</code>` }
+      ]};
     }
-  });
-
-  // Clamp x
-  if (obj.x < 0) obj.x = 0;
-  if (obj.x + obj.w > W) obj.x = W - obj.w;
+  } catch(e) {
+    throw new Error("Couldn't solve quadratic. Format: ax^2 + bx + c = 0");
+  }
 }
 
-// ── COLLISION ──────────────────────────────────────────
-function rectOverlap(a, b) {
-  return a.x < b.x + b.w && a.x + a.w > b.x &&
-         a.y < b.y + b.h && a.y + a.h > b.y;
+function approxIntegral(raw) {
+  // Symbolic: use derivative in reverse for common forms
+  try {
+    // Attempt symbolic via math.js
+    const node = math.parse(raw);
+    const d = math.derivative(node, 'x');
+    // We can't do symbolic integration directly in math.js, so use numeric approx description
+    // Instead, provide numerical approximation over [-5, 5] and show anti-derivative hint
+    const steps = [
+      { text: `Function: <code>f(x) = ${raw}</code>` },
+      { text: `Apply integration rules (power rule, substitution as needed)` },
+    ];
+    // For polynomial, derive anti-derivative
+    const antideriv = polyAntiDeriv(raw);
+    return { ok: true, answer: `∫ ${raw} dx = ${antideriv} + C`, steps: [
+      ...steps,
+      { text: `Anti-derivative: <code>${antideriv} + C</code>` }
+    ]};
+  } catch(e) {
+    throw new Error("Couldn't integrate. Try a polynomial like x^2 + 3x.");
+  }
 }
 
-// ── AI UPDATE ──────────────────────────────────────────
-function updateEnemy(e) {
-  if (e.dead) {
-    e.deathTimer++;
+function polyAntiDeriv(expr) {
+  // Simple symbolic integration for polynomials
+  const simplified = math.simplify(expr);
+  const str = simplified.toString();
+  // Evaluate at several points to get coefficient estimates, then integrate term by term
+  try {
+    // Use numeric integration to find constant
+    const terms = [];
+    // Actually build anti-derivative by derivative check
+    // Fallback: describe result symbolically
+    // For common cases, just show the numeric integral
+    const n = 1000;
+    const fn = (x) => { try { return math.evaluate(expr, {x}); } catch { return 0; } };
+    // Reconstruct: we'll attempt simple polynomial anti-differentiation
+    return integratePolynomial(expr);
+  } catch(e) {
+    return `∫(${expr})dx`;
+  }
+}
+
+function integratePolynomial(expr) {
+  // Detect terms: splits on + and - 
+  // This is a simplified polynomial integrator
+  try {
+    const scope_test = (x) => math.evaluate(expr, {x});
+    // Use finite differences to detect degree
+    const vals = [-2,-1,0,1,2,3].map(x => ({x, y: scope_test(x)}));
+    // Fit polynomial via Vandermonde (up to degree 5)
+    const degree = detectDegree(vals);
+    const coeffs = fitPolynomial(vals, degree);
+    // Build anti-derivative
+    const terms = [];
+    for (let i = degree; i >= 0; i--) {
+      const c = coeffs[degree - i];
+      if (Math.abs(c) < 1e-9) continue;
+      const newPow = i + 1;
+      const newCoeff = c / newPow;
+      if (newPow === 1) terms.push(`${formatNum(newCoeff)}`);
+      else if (newPow === 2) terms.push(`${formatNum(newCoeff)}x²`);
+      else terms.push(`${formatNum(newCoeff)}x^${newPow}`);
+    }
+    return terms.join(' + ').replace(/\+ -/g, '- ') || '0';
+  } catch(e) {
+    return `∫(${expr})dx`;
+  }
+}
+
+function detectDegree(pts) {
+  for (let d = 1; d <= 5; d++) {
+    const c = fitPolynomial(pts, d);
+    const residual = pts.reduce((s, p) => {
+      let yhat = 0;
+      for (let i = 0; i <= d; i++) yhat += c[i] * Math.pow(p.x, d-i);
+      return s + Math.pow(p.y - yhat, 2);
+    }, 0);
+    if (residual < 1e-6) return d;
+  }
+  return 3;
+}
+
+function fitPolynomial(pts, degree) {
+  // Solve via simple least squares using math.js
+  const A = pts.map(p => Array.from({length: degree+1}, (_, i) => Math.pow(p.x, degree-i)));
+  const b = pts.map(p => p.y);
+  try {
+    const Am = math.matrix(A);
+    const bm = math.matrix(b);
+    const AtA = math.multiply(math.transpose(Am), Am);
+    const Atb = math.multiply(math.transpose(Am), bm);
+    return math.lusolve(AtA, Atb).toArray().flat();
+  } catch(e) {
+    return new Array(degree+1).fill(0);
+  }
+}
+
+function definiteIntegral(raw) {
+  // Expect format: "expr [a, b]"
+  const match = raw.match(/^(.*)\s*\[([^,]+),\s*([^\]]+)\]$/);
+  if (!match) throw new Error("Format: expr [a, b] — e.g. x^2 [0, 3]");
+  const [, expr, aStr, bStr] = match;
+  const a = math.evaluate(aStr.trim()), b = math.evaluate(bStr.trim());
+  // Simpson's rule
+  const n = 1000;
+  const h = (b - a) / n;
+  let sum = 0;
+  for (let i = 0; i <= n; i++) {
+    const x = a + i * h;
+    const y = math.evaluate(expr.trim(), {x});
+    const w = (i === 0 || i === n) ? 1 : (i % 2 === 0 ? 2 : 4);
+    sum += w * y;
+  }
+  const result = sum * h / 3;
+  return { ok: true, answer: `${formatNum(result)}`, steps: [
+    { text: `Definite integral: <code>∫[${a},${b}] ${expr.trim()} dx</code>` },
+    { text: `Integrate from a = <code>${a}</code> to b = <code>${b}</code>` },
+    { text: `Numerical result (Simpson's Rule): <code>${formatNum(result)}</code>` }
+  ]};
+}
+
+function doStats(raw, op) {
+  const nums = raw.split(',').map(s => parseFloat(s.trim())).filter(n => !isNaN(n));
+  if (!nums.length) throw new Error("Enter comma-separated numbers, e.g. 4, 8, 15, 16, 23");
+  const n = nums.length;
+  const mean = nums.reduce((a,b)=>a+b,0)/n;
+  const sorted = [...nums].sort((a,b)=>a-b);
+  const median = n%2===0 ? (sorted[n/2-1]+sorted[n/2])/2 : sorted[Math.floor(n/2)];
+  const variance = nums.reduce((s,x)=>s+Math.pow(x-mean,2),0)/n;
+  const std = Math.sqrt(variance);
+  const min = sorted[0], max = sorted[n-1];
+
+  if (op === 'mean') return { ok:true, answer:`Mean = ${formatNum(mean)}`, steps:[
+    {text:`Values: <code>${nums.join(', ')}</code>`},
+    {text:`Sum = <code>${formatNum(nums.reduce((a,b)=>a+b,0))}</code>, Count = <code>${n}</code>`},
+    {text:`Mean = Sum/Count = <code>${formatNum(mean)}</code>`}
+  ]};
+
+  if (op === 'median') return { ok:true, answer:`Median = ${formatNum(median)}`, steps:[
+    {text:`Sorted: <code>${sorted.join(', ')}</code>`},
+    {text:`n = ${n}, middle position = ${n%2===0?`${n/2} and ${n/2+1}`:`${Math.floor(n/2)+1}`}`},
+    {text:`Median = <code>${formatNum(median)}</code>`}
+  ]};
+
+  if (op === 'std') return { ok:true, answer:`σ = ${formatNum(std)}`, steps:[
+    {text:`Mean: <code>${formatNum(mean)}</code>`},
+    {text:`Variance: <code>${formatNum(variance)}</code>`},
+    {text:`Std Dev σ = √Variance = <code>${formatNum(std)}</code>`}
+  ]};
+
+  if (op === 'variance') return { ok:true, answer:`σ² = ${formatNum(variance)}`, steps:[
+    {text:`Mean: <code>${formatNum(mean)}</code>`},
+    {text:`Σ(xᵢ - μ)² = <code>${formatNum(nums.reduce((s,x)=>s+(x-mean)**2,0))}</code>`},
+    {text:`Variance σ² = <code>${formatNum(variance)}</code>`}
+  ]};
+
+  // stats_all
+  return { ok:true, answer:`Mean: ${formatNum(mean)} | Median: ${formatNum(median)} | Std: ${formatNum(std)}`, steps:[
+    {text:`Count: <code>${n}</code>`},
+    {text:`Mean: <code>${formatNum(mean)}</code>`},
+    {text:`Median: <code>${formatNum(median)}</code>`},
+    {text:`Min: <code>${formatNum(min)}</code>, Max: <code>${formatNum(max)}</code>`},
+    {text:`Range: <code>${formatNum(max-min)}</code>`},
+    {text:`Variance: <code>${formatNum(variance)}</code>`},
+    {text:`Std Dev: <code>${formatNum(std)}</code>`}
+  ]};
+}
+
+// ─── Display Result ─────────────────────────────────────────────────────────
+function showResult(raw, op, result) {
+  const card = document.getElementById('resultCard');
+  card.style.display = 'block';
+
+  if (!result.ok) {
+    card.innerHTML = `
+      <div class="result-header">
+        <span class="result-label">Result</span>
+        <span class="result-badge error">Error</span>
+      </div>
+      <div class="result-body">
+        <div class="error-msg">⚠ ${result.error}</div>
+      </div>`;
     return;
   }
 
-  const dx = player.x - e.x;
-  const dist = Math.abs(dx);
-  e.facing = dx < 0 ? -1 : 1;
+  const stepsHtml = result.steps ? result.steps.map((s, i) =>
+    `<div class="step" style="animation-delay:${i*0.06}s">
+      <div class="step-num">${i+1}</div>
+      <div class="step-text">${s.text}</div>
+    </div>`
+  ).join('') : '';
 
-  // Decide state
-  if (dist > 350) {
-    e.state = 'approach';
-  } else if (dist < 180 && e.shootCooldown <= 0) {
-    e.state = 'shoot';
-  } else if (dist < 350 && Math.random() < 0.003) {
-    e.state = 'cover';
-    e.coverTimer = 60 + Math.random() * 80;
-  }
-
-  if (e.state === 'cover') {
-    e.coverTimer--;
-    e.crouching = true;
-    if (e.coverTimer <= 0) { e.state = 'approach'; e.crouching = false; }
-  } else {
-    e.crouching = false;
-  }
-
-  // Move
-  if (e.state === 'approach') {
-    const targetDist = 150 + (Math.random() < 0.3 ? 80 : 0);
-    if (dist > targetDist) {
-      e.vx = e.speed * Math.sign(dx);
-    } else {
-      e.vx = 0;
-    }
-  } else if (e.state === 'shoot') {
-    e.vx = 0;
-  } else {
-    e.vx *= 0.8;
-  }
-
-  // Shoot
-  e.shootCooldown--;
-  if (e.shootCooldown <= 0 && dist < 400 && !e.crouching) {
-    // Line of sight check (simplified: not blocked by cover)
-    let los = true;
-    covers.forEach(c => {
-      if (Math.min(e.x, player.x) < c.x + c.w &&
-          Math.max(e.x, player.x) > c.x &&
-          player.y + player.h > c.y) {
-        los = false;
-      }
-    });
-    if (los || Math.random() < 0.3) shootEnemy(e);
-  }
-
-  // Jump over cover
-  covers.forEach(c => {
-    if (Math.abs((e.x + e.w/2) - (c.x + c.w/2)) < 60 && e.onGround && e.state === 'approach') {
-      e.vy = JUMP_V * 0.85;
-    }
-  });
-
-  applyGravity(e);
-
-  // Animate
-  e.animTimer++;
-  if (e.animTimer > 8) { e.animTimer = 0; e.animFrame = (e.animFrame + 1) % 4; }
+  card.innerHTML = `
+    <div class="result-header">
+      <span class="result-label">Solution</span>
+      <span class="result-badge success">✓ Solved</span>
+    </div>
+    <div class="result-body">
+      <div class="result-answer">${result.answer}</div>
+      ${stepsHtml ? `<div class="result-steps">${stepsHtml}</div>` : ''}
+    </div>`;
 }
 
-// ── PLAYER UPDATE ──────────────────────────────────────
-function updatePlayer() {
-  const moveLeft  = keys['ArrowLeft']  || keys['KeyA'];
-  const moveRight = keys['ArrowRight'] || keys['KeyD'];
-  const jump      = keys['ArrowUp']    || keys['KeyW'];
-  const crouch    = keys['ArrowDown']  || keys['KeyS'];
-
-  player.crouching = crouch && player.onGround;
-
-  if (!player.crouching) {
-    if (moveLeft)  { player.vx = -PLAYER_SPEED; player.facing = -1; }
-    else if (moveRight) { player.vx = PLAYER_SPEED; player.facing = 1; }
-    else player.vx = 0;
-  } else {
-    player.vx = 0;
-  }
-
-  if (jump && player.onGround) player.vy = JUMP_V;
-
-  if (player.invincible > 0) player.invincible--;
-
-  applyGravity(player);
-
-  // Animate
-  if (player.vx !== 0) {
-    player.animTimer++;
-    if (player.animTimer > 8) { player.animTimer = 0; player.animFrame = (player.animFrame + 1) % 4; }
-  } else { player.animFrame = 0; }
+// ─── History ───────────────────────────────────────────────────────────────
+function addHistory(eq, ans) {
+  history.unshift({ eq, ans });
+  if (history.length > 8) history.pop();
+  renderHistory();
 }
 
-// ── UPDATE BULLETS ─────────────────────────────────────
-function updateBullets() {
-  // Player bullets
-  bullets = bullets.filter(b => {
-    b.x += b.vx;
-    b.life--;
-    if (b.life <= 0 || b.x < 0 || b.x > W) return false;
-    // Hit enemy
-    for (let e of enemies) {
-      if (!e.dead && b.x > e.x && b.x < e.x + e.w && b.y > e.y && b.y < e.y + e.h) {
-        e.hp -= 20;
-        spawnParticles(b.x, b.y, C.blood, 6, 3, 20);
-        if (e.hp <= 0) {
-          e.dead = true;
-          kills++;
-          score += 100 * wave;
-          spawnExplosion(e.x + e.w/2, e.y + e.h/2);
-          updateHUD();
-        }
-        return false;
-      }
-    }
-    return true;
-  });
-
-  // Enemy bullets
-  eBullets = eBullets.filter(b => {
-    b.x += b.vx;
-    b.life--;
-    if (b.life <= 0 || b.x < 0 || b.x > W) return false;
-    // Hit player
-    if (player.invincible <= 0 &&
-        b.x > player.x && b.x < player.x + player.w &&
-        b.y > player.y && b.y < player.y + player.h) {
-      hitPlayer(15);
-      return false;
-    }
-    return true;
-  });
-
-  // Grenades
-  grenades = grenades.filter(g => {
-    if (g.exploded) return false;
-    g.vy += GRAVITY;
-    g.x += g.vx;
-    g.y += g.vy;
-    g.life--;
-
-    if (g.y + 8 >= GROUND_Y) {
-      g.y = GROUND_Y - 8;
-      g.vy *= -0.4;
-      g.vx *= 0.7;
-    }
-    if (g.life <= 0) {
-      // Explode
-      spawnExplosion(g.x, g.y, true);
-      enemies.forEach(e => {
-        if (!e.dead && Math.hypot(e.x - g.x, e.y - g.y) < 80) {
-          e.hp -= 60;
-          if (e.hp <= 0) {
-            e.dead = true; kills++; score += 150 * wave;
-            updateHUD();
-          }
-        }
-      });
-      if (Math.hypot(player.x - g.x, player.y - g.y) < 80) hitPlayer(20);
-      g.exploded = true;
-      return false;
-    }
-    return true;
-  });
+function renderHistory() {
+  const sec = document.getElementById('historySection');
+  const list = document.getElementById('historyList');
+  if (!history.length) { sec.style.display='none'; return; }
+  sec.style.display = 'block';
+  list.innerHTML = history.map(h =>
+    `<div class="hist-item" onclick="document.getElementById('inputExpr').value='${h.eq.replace(/'/g,"\\'")}';solve()">
+      <span class="hist-eq">${h.eq}</span>
+      <span class="hist-arrow">→</span>
+      <span class="hist-ans">${h.ans}</span>
+    </div>`
+  ).join('');
 }
 
-function hitPlayer(dmg) {
-  player.hp -= dmg;
-  player.invincible = 40;
-  spawnParticles(player.x + player.w/2, player.y + player.h/2, C.blood, 6, 3, 20);
-  updateHUD();
-  if (player.hp <= 0) {
-    player.hp = 0;
-    spawnExplosion(player.x + player.w/2, player.y + player.h/2, true);
-    endGame(false);
-  }
+function clearHistory() {
+  history = [];
+  renderHistory();
 }
 
-// ── HUD ────────────────────────────────────────────────
-function updateHUD() {
-  const pct = player.hp / player.maxHp;
-  const bar = document.getElementById('health-bar');
-  bar.style.width = (pct * 100) + '%';
-  bar.className = pct < 0.35 ? 'danger' : '';
-  document.getElementById('hud-score').textContent = String(score).padStart(5,'0');
-  document.getElementById('hud-wave').textContent = wave;
-  document.getElementById('hud-kills').textContent = kills;
-  document.getElementById('hud-gren').textContent = grenadeCount;
-}
-
-// ── WAVE MANAGEMENT ────────────────────────────────────
-function checkWave() {
-  const alive = enemies.filter(e => !e.dead || e.deathTimer < 30);
-  if (alive.length === 0 && enemies.length > 0 && !waveAnnounce) {
-    if (wave >= 5) { endGame(true); return; }
-    wave++;
-    grenadeCount = Math.min(grenadeCount + 2, 5);
-    waveAnnounce = true;
-    waveAnnTimer = 120;
-    const ann = document.getElementById('wave-announce');
-    ann.textContent = `WAVE ${wave}`;
-    ann.classList.add('show');
-    updateHUD();
-    setTimeout(() => {
-      spawnWave(wave);
-      setTimeout(() => ann.classList.remove('show'), 800);
-    }, 1800);
-  }
-  if (waveAnnounce) {
-    waveAnnTimer--;
-    if (waveAnnTimer <= 0) waveAnnounce = false;
-  }
-}
-
-// ── GAME START / END ───────────────────────────────────
-function startGame() {
-  score = 0; kills = 0; wave = 1; grenadeCount = 3;
-  bullets = []; eBullets = []; grenades = []; particles = [];
-  resetPlayer();
-  spawnWave(1);
-  updateHUD();
-  state = 'playing';
-  document.getElementById('overlay').classList.add('hidden');
-  const ann = document.getElementById('wave-announce');
-  ann.textContent = 'WAVE 1 — BEGIN!';
-  ann.classList.add('show');
-  setTimeout(() => ann.classList.remove('show'), 1500);
-  loop();
-}
-
-function endGame(win) {
-  state = win ? 'winclear' : 'gameover';
-  const ov = document.getElementById('overlay');
-  ov.innerHTML = `
-    <div class="overlay-title" style="color:${win ? '#c8b560' : '#c84040'}">${win ? 'VICTORY' : 'KIA'}</div>
-    <div class="overlay-sub">${win ? 'THE LINE HOLDS. ENEMY ROUTED.' : 'SOLDIER DOWN. THE LINE IS BROKEN.'}</div>
-    <div class="overlay-score">SCORE: ${String(score).padStart(5,'0')} &nbsp;|&nbsp; KILLS: ${kills} &nbsp;|&nbsp; WAVE: ${wave}</div>
-    <button class="start-btn" onclick="startGame()">REDEPLOY</button>
-  `;
-  ov.classList.remove('hidden');
-}
-
-// ── DRAW FUNCTIONS ─────────────────────────────────────
-function drawBackground() {
-  // Sky gradient
-  const grad = ctx.createLinearGradient(0, 0, 0, GROUND_Y);
-  grad.addColorStop(0, '#080e04');
-  grad.addColorStop(0.6, '#0d1608');
-  grad.addColorStop(1, '#1a2a10');
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, W, GROUND_Y);
-
-  // Moon
-  ctx.fillStyle = C.moon;
-  ctx.shadowColor = C.moon;
-  ctx.shadowBlur = 30;
-  ctx.beginPath();
-  ctx.arc(680, 55, 22, 0, Math.PI*2);
-  ctx.fill();
-  ctx.shadowBlur = 0;
-
-  // Stars
-  ctx.fillStyle = 'rgba(200,220,160,0.7)';
-  [[30,25],[90,15],[155,40],[230,18],[340,35],[420,12],[520,28],[600,40],[750,20],[760,55]].forEach(([sx,sy]) => {
-    ctx.fillRect(sx, sy, 1.5, 1.5);
-  });
-
-  // Distant hills
-  ctx.fillStyle = '#0e1a08';
-  ctx.beginPath();
-  ctx.moveTo(0, GROUND_Y-10);
-  ctx.bezierCurveTo(100, GROUND_Y-70, 200, GROUND_Y-40, 350, GROUND_Y-80);
-  ctx.bezierCurveTo(500, GROUND_Y-110, 620, GROUND_Y-60, 800, GROUND_Y-30);
-  ctx.lineTo(800, GROUND_Y);
-  ctx.lineTo(0, GROUND_Y);
-  ctx.fill();
-
-  // Trees silhouette
-  [[50, GROUND_Y-95],[75, GROUND_Y-110],[730, GROUND_Y-100],[755, GROUND_Y-120],[775, GROUND_Y-90]].forEach(([tx,ty]) => {
-    ctx.fillStyle = '#0a1206';
-    ctx.fillRect(tx-3, ty+20, 6, 30);
-    ctx.beginPath();
-    ctx.moveTo(tx, ty);
-    ctx.lineTo(tx+18, ty+30);
-    ctx.lineTo(tx-18, ty+30);
-    ctx.closePath();
-    ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(tx, ty-15);
-    ctx.lineTo(tx+13, ty+15);
-    ctx.lineTo(tx-13, ty+15);
-    ctx.closePath();
-    ctx.fill();
-  });
-}
-
-function drawGround() {
-  // Ground base
-  ctx.fillStyle = C.ground;
-  ctx.fillRect(0, GROUND_Y, W, H - GROUND_Y);
-  // Dirt texture lines
-  ctx.fillStyle = C.dirt;
-  ctx.fillRect(0, GROUND_Y, W, 4);
-  for (let i = 0; i < 12; i++) {
-    ctx.fillRect(i*70 + Math.sin(i)*10, GROUND_Y+6, 40, 2);
-  }
-}
-
-function drawCover(c) {
-  // Sandbag style
-  ctx.fillStyle = C.coverDark;
-  ctx.fillRect(c.x+2, c.y+4, c.w, c.h);
-  ctx.fillStyle = C.cover;
-  ctx.fillRect(c.x, c.y, c.w, c.h);
-  // Bag sections
-  ctx.fillStyle = C.coverDark;
-  const bags = Math.floor(c.w / 20);
-  for (let i = 0; i < bags; i++) {
-    ctx.fillRect(c.x + i*20 + 2, c.y + 2, 16, c.h - 4);
-  }
-  // Highlight
-  ctx.fillStyle = 'rgba(200,210,160,0.08)';
-  ctx.fillRect(c.x+2, c.y+2, c.w-4, 4);
-}
-
-function drawSoldier(x, y, w, h, col, colDark, facing, frame, crouching, invincible, hp, maxHp) {
-  const ah = crouching ? h * 0.65 : h;
-  const ay = y + (h - ah);
-  const cx = x + w/2;
-
-  if (invincible > 0 && Math.floor(invincible/4) % 2 === 0) return;
-
-  // Shadow
-  ctx.fillStyle = 'rgba(0,0,0,0.3)';
-  ctx.beginPath();
-  ctx.ellipse(cx, GROUND_Y, w*0.6, 4, 0, 0, Math.PI*2);
-  ctx.fill();
-
-  // Boots
-  ctx.fillStyle = '#1a1a10';
-  if (!crouching) {
-    const legOff = [0,1,0,-1][frame]*2;
-    ctx.fillRect(x+2, ay+ah-8, w/2-2, 8);
-    ctx.fillRect(x+w/2, ay+ah-8+legOff, w/2-2, 8);
-  } else {
-    ctx.fillRect(x+2, ay+ah-6, w-4, 6);
-  }
-
-  // Pants
-  ctx.fillStyle = colDark;
-  ctx.fillRect(x+3, ay+ah-18, w-6, 12);
-
-  // Body
-  ctx.fillStyle = col;
-  ctx.fillRect(x+2, ay+(crouching?4:8), w-4, ah-18);
-
-  // Arm / gun
-  ctx.fillStyle = colDark;
-  const armY = ay + (crouching ? 10 : 16);
-  if (facing === 1) {
-    ctx.fillRect(x+w-2, armY, 10, 5);
-    ctx.fillStyle = '#333';
-    ctx.fillRect(x+w+6, armY+1, 8, 3);
-  } else {
-    ctx.fillRect(x-8, armY, 10, 5);
-    ctx.fillStyle = '#333';
-    ctx.fillRect(x-14, armY+1, 8, 3);
-  }
-
-  // Head
-  ctx.fillStyle = col;
-  ctx.fillRect(x+4, ay+2, w-8, 14);
-  // Helmet
-  ctx.fillStyle = colDark;
-  ctx.beginPath();
-  ctx.ellipse(cx, ay+5, w/2-1, 7, 0, Math.PI, 0);
-  ctx.fill();
-  ctx.fillRect(x+1, ay+5, w-2, 4);
-  // Eyes
-  ctx.fillStyle = '#ffeeaa';
-  const eyeX = facing === 1 ? x+w-8 : x+4;
-  ctx.fillRect(eyeX, ay+8, 3, 2);
-}
-
-function drawBullet(b) {
-  ctx.fillStyle = C.bullet;
-  ctx.shadowColor = C.bullet;
-  ctx.shadowBlur = 6;
-  ctx.fillRect(b.x-4, b.y-2, 8, 3);
-  ctx.shadowBlur = 0;
-}
-
-function drawEBullet(b) {
-  ctx.fillStyle = C.eBullet;
-  ctx.shadowColor = C.eBullet;
-  ctx.shadowBlur = 6;
-  ctx.fillRect(b.x-4, b.y-2, 8, 3);
-  ctx.shadowBlur = 0;
-}
-
-function drawGrenade(g) {
-  ctx.fillStyle = '#5a8a30';
-  ctx.shadowColor = '#90ff40';
-  ctx.shadowBlur = 8;
-  ctx.beginPath();
-  ctx.arc(g.x, g.y, 5, 0, Math.PI*2);
-  ctx.fill();
-  ctx.shadowBlur = 0;
-}
-
-function drawParticles() {
-  particles.forEach(p => {
-    const a = p.life / p.maxLife;
-    ctx.globalAlpha = a;
-    ctx.fillStyle = p.color;
-    ctx.fillRect(p.x-2, p.y-2, 4, 4);
-  });
-  ctx.globalAlpha = 1;
-}
-
-function drawHealthBar(x, y, w, hp, maxHp, isPlayer) {
-  const pct = hp / maxHp;
-  ctx.fillStyle = 'rgba(0,0,0,0.5)';
-  ctx.fillRect(x-1, y-1, w+2, 6);
-  ctx.fillStyle = isPlayer ? '#4a8a20' : '#8a2020';
-  ctx.fillRect(x, y, w * pct, 4);
-}
-
-// ── MAIN LOOP ──────────────────────────────────────────
-let raf;
-function loop() {
-  if (state !== 'playing') return;
-  update();
-  draw();
-  raf = requestAnimationFrame(loop);
-}
-
-function update() {
-  updatePlayer();
-  enemies.forEach(e => updateEnemy(e));
-  enemies = enemies.filter(e => !e.dead || e.deathTimer < 60);
-  updateBullets();
-
-  // Update particles
-  particles.forEach(p => {
-    p.x += p.vx;
-    p.y += p.vy;
-    p.vy += 0.1;
-    p.life--;
-  });
-  particles = particles.filter(p => p.life > 0);
-
-  // Check enemy-player collision
-  enemies.forEach(e => {
-    if (!e.dead && player.invincible <= 0 && rectOverlap(player, e)) {
-      hitPlayer(8);
-    }
-  });
-
-  checkWave();
-}
-
-function draw() {
-  ctx.clearRect(0, 0, W, H);
-  drawBackground();
-  drawGround();
-  covers.forEach(drawCover);
-
-  // Bullets
-  bullets.forEach(drawBullet);
-  eBullets.forEach(drawEBullet);
-  grenades.forEach(drawGrenade);
-
-  // Enemies
-  enemies.forEach(e => {
-    if (!e.dead) {
-      drawSoldier(e.x, e.y, e.w, e.h, C.enemy, C.enemyDark, e.facing, e.animFrame, e.crouching, 0, e.hp, e.maxHp);
-      drawHealthBar(e.x, e.y - 8, e.w, e.hp, e.maxHp, false);
-    }
-  });
-
-  // Player
-  drawSoldier(player.x, player.y, player.w, player.h, C.player, C.playerDark, player.facing, player.animFrame, player.crouching, player.invincible, player.hp, player.maxHp);
-
-  // Particles (on top)
-  drawParticles();
-
-  // Atmospheric vignette
-  const vign = ctx.createRadialGradient(W/2, H/2, H*0.3, W/2, H/2, H);
-  vign.addColorStop(0, 'rgba(0,0,0,0)');
-  vign.addColorStop(1, 'rgba(0,0,0,0.55)');
-  ctx.fillStyle = vign;
-  ctx.fillRect(0, 0, W, H);
-}
-
-// ── START BUTTON ───────────────────────────────────────
-document.getElementById('start-btn').addEventListener('click', startGame);
-document.addEventListener('keydown', e => {
-  if ((e.code === 'Enter' || e.code === 'Space') && state === 'menu') {
-    startGame();
-  }
-});
+init();
 </script>
 
 </body>
