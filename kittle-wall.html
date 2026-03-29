@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kittle Wall — Math Tools</title>
+  <meta name="description" content="A wall of George Kittle photos submitted by the community.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="legal-page">
+    <a href="index.html" class="legal-back">← Back to Math Tools</a>
+
+    <h1>Kittle Wall</h1>
+    <p style="color: var(--text-secondary); margin-bottom: 8px;">Community-submitted photos of George Kittle. Send yours to <a href="mailto:kittle@goingcougars.org">kittle@goingcougars.org</a>.</p>
+
+    <div class="kittle-grid" id="kittleGrid"></div>
+  </div>
+
+  <script>
+    // To add a new image: drop the file into images/kittle/ in the repo,
+    // then add the filename to this array.
+    const KITTLE_IMAGES = [
+      // "kittle1.jpg",
+      // "kittle2.png",
+    ];
+
+    const grid = document.getElementById('kittleGrid');
+
+    if (KITTLE_IMAGES.length === 0) {
+      grid.innerHTML = '<p class="kittle-empty">No photos yet — be the first to send one!</p>';
+    } else {
+      KITTLE_IMAGES.forEach(function(filename) {
+        var card = document.createElement('div');
+        card.className = 'kittle-card';
+        var img = document.createElement('img');
+        img.src = 'images/kittle/' + filename;
+        img.alt = 'George Kittle';
+        img.loading = 'lazy';
+        card.appendChild(img);
+        grid.appendChild(card);
+      });
+    }
+  </script>
+</body>
+</html>

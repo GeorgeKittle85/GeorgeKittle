@@ -640,6 +640,61 @@ body::before {
 @media (max-width: 480px) {
   .main-header h1 { font-size: 22px; }
   .card { padding: 20px; }
+  .mobile-toggle { display: none; }
+  .main-content { padding-top: 24px; }
+}
+
+/* ---- KITTLE WALL LINK ---- */
+.kittle-wall-link {
+  text-align: center;
+  margin-top: 24px;
+  padding-bottom: 8px;
+}
+.kittle-wall-link a {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-decoration: none;
+  letter-spacing: 0.05em;
+  transition: color var(--transition-fast);
+}
+.kittle-wall-link a:hover {
+  color: var(--text-secondary);
+}
+
+/* ---- KITTLE WALL GALLERY ---- */
+.kittle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+.kittle-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: border-color var(--transition-fast), transform var(--transition-fast);
+}
+.kittle-card:hover {
+  border-color: var(--border-accent);
+  transform: translateY(-2px);
+}
+.kittle-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+}
+.kittle-empty {
+  color: var(--text-muted);
+  font-size: 14px;
+  text-align: center;
+  padding: 40px 0;
+}
+@media (max-width: 480px) {
+  .kittle-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
 }
 
 /* ---- LEGAL PAGES ---- */
