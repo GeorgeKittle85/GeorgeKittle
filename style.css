@@ -618,10 +618,6 @@ body::before {
   .main-content {
     margin-left: 0;
     padding: 24px 16px;
-    padding-top: 64px;
-  }
-  .mobile-toggle {
-    display: block;
   }
   .mobile-overlay.open {
     display: block;
