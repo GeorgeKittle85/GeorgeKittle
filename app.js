@@ -22,7 +22,7 @@ document.getElementById(‘mobileOverlay’).classList.toggle(‘open’);
 }
 
 // –– UTILITY ––
-function clearInputs(…ids) {
+function clearInputs(...ids) {
 ids.forEach(id => {
 const el = document.getElementById(id);
 if (el) {
