@@ -615,21 +615,24 @@ body::before {
 /* ---- RESPONSIVE ---- */
 @media (max-width: 768px) {
   .sidebar {
-    transform: translateX(-100%);
-  }
-  .sidebar.open {
-    transform: translateX(0);
+    width: 200px;
+    min-width: 200px;
   }
   .main-content {
-    margin-left: 0;
-    padding: 24px 16px;
-    padding-top: 64px;
+    margin-left: 200px;
+    padding: 24px 12px;
   }
   .mobile-toggle {
-    display: block;
+    display: none;
   }
-  .mobile-overlay.open {
-    display: block;
+  .nav-item {
+    font-size: 13px;
+    padding: 9px 10px;
+    gap: 8px;
+  }
+  .nav-section-label {
+    font-size: 9px;
+    padding: 10px 10px 4px;
   }
   .home-grid {
     grid-template-columns: 1fr;
@@ -643,6 +646,23 @@ body::before {
 }
 
 @media (max-width: 480px) {
+  .sidebar {
+    width: 160px;
+    min-width: 160px;
+  }
+  .main-content {
+    margin-left: 160px;
+    padding: 16px 8px;
+  }
+  .nav-item {
+    font-size: 12px;
+    padding: 8px 8px;
+    gap: 6px;
+  }
+  .nav-item .nav-icon {
+    font-size: 14px;
+    width: 16px;
+  }
   .main-header h1 { font-size: 22px; }
   .card { padding: 20px; }
 }
@@ -1741,4 +1761,66 @@ body::before {
 .gc-toast.show {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
+}
+
+/* ---- TERMS NOTICE ---- */
+.terms-notice {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: -20px;
+  margin-bottom: 20px;
+}
+.terms-notice a {
+  color: var(--accent-cyan);
+  text-decoration: none;
+}
+.terms-notice a:hover {
+  text-decoration: underline;
+}
+
+/* ---- KITTLE WALL LINK (dashboard) ---- */
+.kittle-wall-link {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 11px;
+}
+.kittle-wall-link a {
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+.kittle-wall-link a:hover {
+  color: var(--accent-cyan);
+}
+
+/* ---- KITTLE WALL PAGE ---- */
+.kittle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+.kittle-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+.kittle-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+.kittle-card img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  display: block;
+}
+.kittle-empty {
+  color: var(--text-muted);
+  font-style: italic;
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px 0;
 }
