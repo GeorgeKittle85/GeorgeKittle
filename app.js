@@ -419,7 +419,7 @@ const cos = Math.cos(rad);
 const tan = Math.abs(cos) < 1e-12 ? undefined : sin / cos;
 const csc = Math.abs(sin) < 1e-12 ? undefined : 1 / sin;
 const sec = Math.abs(cos) < 1e-12 ? undefined : 1 / cos;
-const cot = tan === undefined ? (Math.abs(sin) < 1e-12 ? undefined : 0) : 1 / tan;
+const cot = Math.abs(sin) < 1e-12 ? undefined : cos / sin;
 
 const items = [
 { label: 'sin θ', value: fmt(sin) },
@@ -567,12 +567,12 @@ offsets.forEach(h => {
 let html = '<div class="result-label">Numerical Approach</div>';
 html += `<div class="result-step" style="font-weight:600">lim x→${a} [${expr}]</div>`;
 
-html += '<div class="result-step" style="margin-top:8px"><strong>From the left (x → ${a}⁻):</strong></div>';
+html += `<div class="result-step" style="margin-top:8px"><strong>From the left (x → ${a}⁻):</strong></div>`;
 leftVals.forEach(v => {
   html += `<div class="result-step">  x = ${(a + v.h).toFixed(6)} → f(x) = ${fmt(v.val)}</div>`;
 });
 
-html += '<div class="result-step" style="margin-top:8px"><strong>From the right (x → ${a}⁺):</strong></div>';
+html += `<div class="result-step" style="margin-top:8px"><strong>From the right (x → ${a}⁺):</strong></div>`;
 rightVals.forEach(v => {
   html += `<div class="result-step">  x = ${(a + v.h).toFixed(6)} → f(x) = ${fmt(v.val)}</div>`;
 });
@@ -1670,7 +1670,7 @@ function gcCheck() {
 
   patterns.forEach(p => {
     let match;
-    const regex = new RegExp(p.regex);
+    const regex = new RegExp(p.regex.source, p.regex.flags);
     while ((match = regex.exec(input)) !== null) {
       gcIssues.push({
         type: p.type,
