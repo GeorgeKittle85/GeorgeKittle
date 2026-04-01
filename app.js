@@ -1,5 +1,10 @@
 /* ============================================
 MATH TOOLS — Core Application Logic
+============================================
+
+Linked files:
+- index.html (main HTML structure and styling via style.css)
+- style.css (visual styling and layout)
 ============================================ */
 
 // –– NAVIGATION ––
