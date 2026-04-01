@@ -1623,6 +1623,206 @@ if (modal) modal.remove();
 }
 
 // ============================================
+// GRAMMAR CHECKER
+// ============================================
+var gcIssues = [];
+var gcFixedText = '';
+
+function gcCheck() {
+  const input = document.getElementById('gc-input').value;
+  const wordCount = input.trim().split(/\s+/).filter(w => w.length > 0).length;
+  const charCount = input.length;
+  document.getElementById('gc-word-count').textContent = `${wordCount} words · ${charCount} characters`;
+
+  if (!input.trim()) {
+    document.getElementById('gc-results-area').style.display = 'none';
+    return;
+  }
+
+  // Simple grammar/spelling checks
+  gcIssues = [];
+  gcFixedText = input;
+
+  // Check for double spaces
+  const doubleSpaceMatches = input.matchAll(/  +/g);
+  for (const match of doubleSpaceMatches) {
+    gcIssues.push({
+      type: 'punctuation',
+      message: 'Extra space detected',
+      suggestion: 'Remove extra spaces',
+      start: match.index,
+      end: match.index + match[0].length,
+      replacement: ' '
+    });
+  }
+
+  // Check for common spelling/grammar patterns
+  const patterns = [
+    { regex: /\bteh\b/gi, type: 'spelling', suggestion: 'the' },
+    { regex: /\brecieve\b/gi, type: 'spelling', suggestion: 'receive' },
+    { regex: /\boccured\b/gi, type: 'spelling', suggestion: 'occurred' },
+    { regex: /\btaht\b/gi, type: 'spelling', suggestion: 'that' },
+    { regex: /\byour\s+a\b/gi, type: 'grammar', suggestion: 'you\'re a' },
+    { regex: /\bits\s+is\b/gi, type: 'grammar', suggestion: 'it\'s is' },
+    { regex: /\.{2,}/g, type: 'punctuation', suggestion: '.' },
+    { regex: /([a-z])\s{0,1}\?\s{0,1}([a-z])/g, type: 'punctuation', suggestion: 'Add proper spacing after punctuation' }
+  ];
+
+  patterns.forEach(p => {
+    let match;
+    const regex = new RegExp(p.regex);
+    while ((match = regex.exec(input)) !== null) {
+      gcIssues.push({
+        type: p.type,
+        message: `Possible ${p.type} issue`,
+        suggestion: p.suggestion,
+        start: match.index,
+        end: match.index + match[0].length,
+        text: match[0]
+      });
+      regex.lastIndex = match.index + 1;
+    }
+  });
+
+  // Check for missing spaces after punctuation
+  const punctSpaceMatches = input.matchAll(/[.!?][a-zA-Z]/g);
+  for (const match of punctSpaceMatches) {
+    gcIssues.push({
+      type: 'punctuation',
+      message: 'Missing space after punctuation',
+      suggestion: 'Add space after punctuation',
+      start: match.index + 1,
+      end: match.index + 2,
+      replacement: ' ' + input[match.index + 1]
+    });
+  }
+
+  // Remove duplicates
+  const uniqueIssues = [];
+  const seen = new Set();
+  gcIssues.forEach(issue => {
+    const key = `${issue.start}-${issue.end}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      uniqueIssues.push(issue);
+    }
+  });
+  gcIssues = uniqueIssues.sort((a, b) => a.start - b.start);
+
+  // Display results
+  gcRenderResults();
+}
+
+function gcRenderResults() {
+  const resultsArea = document.getElementById('gc-results-area');
+  resultsArea.style.display = 'block';
+
+  const totalIssues = gcIssues.length;
+  const score = Math.max(0, 100 - (totalIssues * 5));
+
+  // Update score circle
+  document.getElementById('gc-score-number').textContent = Math.round(score);
+  const percentage = score / 100;
+  const circumference = 2 * Math.PI * 52;
+  const offset = circumference * (1 - percentage);
+  document.getElementById('gc-ring-fill').style.strokeDashoffset = offset;
+
+  // Update score label and detail
+  let label = 'Excellent';
+  if (score < 50) label = 'Poor';
+  else if (score < 75) label = 'Fair';
+  else if (score < 90) label = 'Good';
+  document.getElementById('gc-score-label').textContent = label;
+  document.getElementById('gc-score-detail').textContent = `${totalIssues} issue${totalIssues !== 1 ? 's' : ''} found`;
+
+  // Render issue list
+  const issueList = document.getElementById('gc-issue-list');
+  issueList.innerHTML = '';
+
+  if (totalIssues === 0) {
+    document.getElementById('gc-no-issues').style.display = 'block';
+    document.getElementById('gc-corrected-card').style.display = 'none';
+  } else {
+    document.getElementById('gc-no-issues').style.display = 'none';
+    gcIssues.forEach((issue, i) => {
+      const div = document.createElement('div');
+      div.className = `gc-issue-item gc-issue-${issue.type}`;
+      div.dataset.filter = issue.type;
+      const text = document.getElementById('gc-input').value;
+      const context = text.substring(Math.max(0, issue.start - 30), Math.min(text.length, issue.end + 30));
+      div.innerHTML = `
+        <div class="gc-issue-type">${issue.type.toUpperCase()}</div>
+        <div class="gc-issue-body">
+          <div class="gc-issue-message">${issue.message}</div>
+          <div class="gc-issue-context">...${context}...</div>
+          <div class="gc-issue-suggestion"><strong>Suggestion:</strong> ${issue.suggestion}</div>
+        </div>
+      `;
+      issueList.appendChild(div);
+    });
+  }
+
+  if (totalIssues > 0) {
+    document.getElementById('gc-corrected-card').style.display = 'block';
+    gcFixedText = gcApplyFixes(document.getElementById('gc-input').value);
+    document.getElementById('gc-corrected-text').textContent = gcFixedText;
+  }
+}
+
+function gcApplyFixes(text) {
+  let fixed = text;
+  const offsetMap = [];
+  let totalOffset = 0;
+
+  gcIssues.forEach(issue => {
+    if (issue.replacement) {
+      const before = fixed;
+      fixed = fixed.substring(0, issue.start + totalOffset) + issue.replacement + fixed.substring(issue.end + totalOffset);
+      totalOffset += issue.replacement.length - (issue.end - issue.start);
+    }
+  });
+
+  return fixed;
+}
+
+function gcClear() {
+  document.getElementById('gc-input').value = '';
+  document.getElementById('gc-results-area').style.display = 'none';
+  document.getElementById('gc-word-count').textContent = '0 words · 0 characters';
+  gcIssues = [];
+}
+
+function gcFixAll() {
+  if (gcFixedText) {
+    document.getElementById('gc-input').value = gcFixedText;
+    gcCheck();
+  }
+}
+
+function gcCopyFixed() {
+  if (gcFixedText) {
+    navigator.clipboard.writeText(gcFixedText).then(() => {
+      alert('Corrected text copied to clipboard!');
+    });
+  }
+}
+
+function gcFilter(type, btn) {
+  const allBtns = document.querySelectorAll('.gc-filter-btn');
+  allBtns.forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const items = document.querySelectorAll('.gc-issue-item');
+  items.forEach(item => {
+    if (type === 'all') {
+      item.style.display = 'block';
+    } else {
+      item.style.display = item.dataset.filter === type ? 'block' : 'none';
+    }
+  });
+}
+
+// ============================================
 // INIT - Render study tools on page load
 // ============================================
 window.addEventListener('DOMContentLoaded', function() {
