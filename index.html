@@ -4,11 +4,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Tools - Work Smarter</title>
+  <title>Math Tools — Solve Smarter</title>
   <meta name="description" content="Free math tools for students: equation solvers, graphing calculator, derivatives, integrals, statistics, trigonometry, and more. From Algebra through AP Calculus BC.">
   <meta name="keywords" content="math tools, equation solver, graphing calculator, derivative calculator, integral calculator, statistics, trigonometry, AP calculus, algebra">
-  <meta name="author" content="Student Tools">
-  <meta property="og:title" content="Student Tools - Work Smarter">
+  <meta name="author" content="Math Tools">
+  <meta property="og:title" content="Math Tools — Solve Smarter">
   <meta property="og:description" content="Free math tools for every high school course: Algebra through AP Calculus BC and AP Statistics.">
   <meta property="og:type" content="website">
   <link rel="canonical" href="">
@@ -17,7 +17,7 @@
 
   <!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
 
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="css/style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.0/math.min.js"></script>
 </head>
 <body>
@@ -37,13 +37,14 @@
       <a href="#" class="sidebar-logo" onclick="showPanel('home')">
         <div class="logo-icon">∑</div>
         <div>
-          <div class="logo-text">Student Tools</div>
-          <div class="logo-sub">Work Smarter</div>
+          <div class="logo-text">Math Tools</div>
+          <div class="logo-sub">Solve Smarter</div>
         </div>
       </a>
     </div>
 
-    <nav class="sidebar-nav">
+```
+<nav class="sidebar-nav">
   <div class="nav-section-label">Dashboard</div>
   <div class="nav-item active" data-panel="home" onclick="showPanel('home')">
     <span class="nav-icon">🏠</span> Home
@@ -111,11 +112,18 @@
   <div class="nav-item" data-panel="quizmaker" onclick="showPanel('quizmaker')">
     <span class="nav-icon">✏️</span> Quiz Maker
   </div>
+
+  <div class="nav-section-label">Writing</div>
+  <div class="nav-item" data-panel="grammar" onclick="showPanel('grammar')">
+    <span class="nav-icon">📝</span> Grammar Checker
+  </div>
 </nav>
 
 <div class="sidebar-footer">
-  <a href="terms.html">Terms</a> · <a href="privacy.html">Privacy</a> · <a href="contact.html">Contact</a>
-    </div>
+  <a href="terms.html">Terms</a> · <a href="privacy.html">Privacy</a>
+  <br>© 2026 Math Tools
+</div>
+```
 
   </aside>
 
@@ -123,10 +131,11 @@
 
   <main class="main-content">
 
-    <!-- ======== HOME ======== -->
+```
+<!-- ======== HOME ======== -->
 <div class="tool-panel active" id="panel-home">
   <div class="main-header">
-    <h1>Student Tools</h1>
+    <h1>Math Tools</h1>
     <p>Your playbook for every course — from Algebraic Problem Solving to AP Calculus BC &amp; Statistics.</p>
   </div>
 
@@ -209,20 +218,18 @@
       <div class="card-courses">Study Tools</div>
       <div class="card-preview">Build custom quizzes with multiple choice &amp; true/false questions.</div>
     </div>
+    <div class="home-card animate-in" onclick="showPanel('grammar')">
+      <div class="card-emoji">📝</div>
+      <div class="card-name">Grammar Checker</div>
+      <div class="card-courses">Writing Tools</div>
+      <div class="card-preview">Paste or write your essay — catch grammar, spelling, and style issues.</div>
+    </div>
   </div>
 
   <!-- AdSense slot placeholder (bottom) -->
   <div class="ad-placeholder" id="ad-bottom-banner">
     <span>Ad Space — Bottom Banner</span>
   </div>
-
-  <p style="text-align:center; font-size:12px; color:var(--text-muted); margin-top:24px;">
-    By using this website, you agree to the <a href="terms.html">terms of service</a> and <a href="privacy.html">privacy policy</a>.
-  </p>
-
-  <p style="text-align:center; margin-top:16px;">
-    <a href="kittle-wall.html" style="font-size:11px; color:var(--text-muted);">Kittle Wall</a>
-  </p>
 </div>
 
 <!-- ======== LINEAR EQUATION SOLVER ======== -->
@@ -841,6 +848,93 @@
   </div>
 </div>
 
+<!-- ======== GRAMMAR CHECKER ======== -->
+<div class="tool-panel" id="panel-grammar">
+  <div class="main-header">
+    <h1>Grammar Checker</h1>
+    <p>Paste or type your essay — we'll flag issues and help you fix them one by one or all at once.</p>
+  </div>
+
+  <div class="ad-placeholder" id="ad-grammar-top">
+    <span>Ad Space — Grammar Checker</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Your Essay</div>
+    <div class="card-desc">Paste your text below or start writing. We'll scan for grammar, spelling, punctuation, and style issues.</div>
+    <div class="form-group">
+      <textarea class="form-textarea" id="gc-input" rows="12" placeholder="Paste or type your essay here..."></textarea>
+    </div>
+    <div class="gc-toolbar">
+      <div class="gc-word-count" id="gc-word-count">0 words · 0 characters</div>
+      <div class="btn-group" style="margin-top:0">
+        <button class="btn btn-primary" onclick="gcCheck()">Check Grammar</button>
+        <button class="btn btn-secondary" onclick="gcClear()">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Section (hidden until check runs) -->
+  <div id="gc-results-area" style="display:none">
+
+    <!-- Score Overview -->
+    <div class="card" id="gc-score-card">
+      <div class="gc-score-row">
+        <div class="gc-score-circle" id="gc-score-circle">
+          <svg viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="52" class="gc-ring-bg"/>
+            <circle cx="60" cy="60" r="52" class="gc-ring-fill" id="gc-ring-fill"/>
+          </svg>
+          <div class="gc-score-number" id="gc-score-number">100</div>
+        </div>
+        <div class="gc-score-info">
+          <div class="gc-score-label" id="gc-score-label">Excellent</div>
+          <div class="gc-score-detail" id="gc-score-detail">0 issues found</div>
+          <div class="btn-group" style="margin-top:12px">
+            <button class="btn btn-primary btn-sm" onclick="gcFixAll()" id="gc-fix-all-btn">Fix All Issues</button>
+            <button class="btn btn-secondary btn-sm" onclick="gcCopyFixed()">Copy Corrected Text</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Corrected Text Preview -->
+    <div class="card" id="gc-corrected-card" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div class="card-title" style="margin-bottom:0">Corrected Essay</div>
+        <button class="btn btn-sm btn-secondary" onclick="gcCopyFixed()">Copy to Clipboard</button>
+      </div>
+      <div class="gc-corrected-text" id="gc-corrected-text"></div>
+    </div>
+
+    <!-- Issue List -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+        <div class="card-title" style="margin-bottom:0">Issues Found</div>
+        <div class="gc-filter-group" id="gc-filter-group">
+          <button class="gc-filter-btn active" data-filter="all" onclick="gcFilter('all', this)">All</button>
+          <button class="gc-filter-btn" data-filter="grammar" onclick="gcFilter('grammar', this)">Grammar</button>
+          <button class="gc-filter-btn" data-filter="spelling" onclick="gcFilter('spelling', this)">Spelling</button>
+          <button class="gc-filter-btn" data-filter="punctuation" onclick="gcFilter('punctuation', this)">Punctuation</button>
+          <button class="gc-filter-btn" data-filter="style" onclick="gcFilter('style', this)">Style</button>
+        </div>
+      </div>
+      <div id="gc-issue-list">
+        <!-- Issues render here -->
+      </div>
+      <div class="empty-state" id="gc-no-issues" style="display:none">
+        <div class="empty-icon">🎉</div>
+        <p>No issues found — your writing is clean!</p>
+      </div>
+    </div>
+
+    <div class="ad-placeholder" id="ad-grammar-bottom">
+      <span>Ad Space — Grammar Bottom</span>
+    </div>
+  </div>
+</div>
+```
+
   </main>
 </div>
 
@@ -851,7 +945,7 @@
   <button class="btn btn-sm btn-primary" onclick="acceptCookies()">Got it</button>
 </div>
 
-<script src="app.js"></script>
+<script src="js/app.js"></script>
 
 </body>
 </html>
