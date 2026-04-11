@@ -623,16 +623,19 @@ body::before {
   .main-content {
     margin-left: 0;
     padding: 24px 16px;
-    padding-top: 64px;
+    padding-top: 24px;
   }
   .mobile-toggle {
-    display: block;
+    display: none;
   }
   .mobile-overlay.open {
     display: block;
   }
   .home-grid {
     grid-template-columns: 1fr;
+  }
+  .kittle-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   }
   .form-row {
     grid-template-columns: 1fr;
@@ -796,6 +799,54 @@ body::before {
 .home-card:nth-child(11) { animation-delay: 0.55s; }
 .home-card:nth-child(12) { animation-delay: 0.6s; }
 
+/* ---- HOME FOOTER NOTICE ---- */
+.home-footer-notice {
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-subtle);
+  text-align: center;
+}
+
+.home-footer-notice p {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.home-footer-notice a {
+  color: var(--accent-cyan);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.home-footer-notice a:hover {
+  color: var(--accent-cyan);
+  text-decoration: underline;
+}
+
+/* ---- HOME KITTLE WALL LINK ---- */
+.home-kittle-wall-link {
+  margin-top: 12px;
+  text-align: center;
+}
+
+.home-kittle-wall-link p {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.home-kittle-wall-link a {
+  color: var(--accent-cyan);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.home-kittle-wall-link a:hover {
+  color: var(--accent-cyan);
+  text-decoration: underline;
+}
+
 /* ============================================
    STUDY TOOLS — Flashcards & Quizzes
    ============================================ */
@@ -912,6 +963,48 @@ body::before {
   font-size: 14px;
   color: var(--text-secondary);
   font-weight: 500;
+}
+
+/* ============================================
+   KITTLE WALL — Photo Gallery
+   ============================================ */
+
+/* ---- KITTLE GRID ---- */
+.kittle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.kittle-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all var(--transition-smooth);
+  position: relative;
+  aspect-ratio: 1;
+}
+
+.kittle-card:hover {
+  border-color: var(--border-accent);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-glow);
+}
+
+.kittle-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.kittle-empty {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 40px 20px;
+  grid-column: 1 / -1;
 }
 
 /* ---- FLASHCARD FLIP ---- */
