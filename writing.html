@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Writing Tools - Write Smarter</title>
+  <meta name="description" content="Free writing tools for students: grammar checker for essays and assignments. Catch grammar, spelling, and punctuation issues.">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js"></script>
+</head>
+<body>
+
+<button class="mobile-toggle" onclick="toggleSidebar()" aria-label="Toggle menu">&#9776;</button>
+<div class="mobile-overlay" id="mobileOverlay" onclick="toggleSidebar()"></div>
+
+<div class="app-wrapper">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="index.html" class="sidebar-logo">
+        <div class="logo-icon">&#x270D;&#xFE0F;</div>
+        <div>
+          <div class="logo-text">Writing Tools</div>
+          <div class="logo-sub">Write Smarter</div>
+        </div>
+      </a>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Dashboard</div>
+      <div class="nav-item active" data-panel="home" onclick="showPanel('home')">
+        <span class="nav-icon">&#x1F3E0;</span> Home
+      </div>
+
+      <div class="nav-section-label">Writing Tools</div>
+      <div class="nav-item" data-panel="grammar" onclick="showPanel('grammar')">
+        <span class="nav-icon">&#x1F4DD;</span> Grammar Checker
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="index.html">&larr; Back to Student Tools</a><br>
+      <a href="terms.html">Terms</a> &middot; <a href="privacy.html">Privacy</a>
+      <br>2026 Student Tools
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+<!-- ======== HOME ======== -->
+<div class="tool-panel active" id="panel-home">
+  <div class="main-header">
+    <h1>Writing Tools</h1>
+    <p>Polish your essays and assignments with tools that catch what you miss.</p>
+  </div>
+
+  <div class="home-grid">
+    <div class="home-card animate-in" onclick="showPanel('grammar')">
+      <div class="card-emoji">&#x1F4DD;</div>
+      <div class="card-name">Grammar Checker</div>
+      <div class="card-courses">Writing Tools</div>
+      <div class="card-preview">Paste or write your essay — catch grammar, spelling, and style issues.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ======== GRAMMAR CHECKER ======== -->
+<div class="tool-panel" id="panel-grammar">
+  <div class="main-header">
+    <h1>Grammar Checker</h1>
+    <p>Paste or type your essay — we'll flag issues and help you fix them one by one or all at once.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Your Essay</div>
+    <div class="card-desc">Paste your text below or start writing. We'll scan for grammar, spelling, punctuation, and style issues.</div>
+    <div class="form-group">
+      <textarea class="form-textarea" id="gc-input" rows="12" placeholder="Paste or type your essay here..."></textarea>
+    </div>
+    <div class="gc-toolbar">
+      <div class="gc-word-count" id="gc-word-count">0 words &middot; 0 characters</div>
+      <div class="btn-group" style="margin-top:0">
+        <button class="btn btn-primary" onclick="gcCheck()">Check Grammar</button>
+        <button class="btn btn-secondary" onclick="gcClear()">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Section (hidden until check runs) -->
+  <div id="gc-results-area" style="display:none">
+
+    <!-- Score Overview -->
+    <div class="card" id="gc-score-card">
+      <div class="gc-score-row">
+        <div class="gc-score-circle" id="gc-score-circle">
+          <svg viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="52" class="gc-ring-bg"/>
+            <circle cx="60" cy="60" r="52" class="gc-ring-fill" id="gc-ring-fill"/>
+          </svg>
+          <div class="gc-score-number" id="gc-score-number">100</div>
+        </div>
+        <div class="gc-score-info">
+          <div class="gc-score-label" id="gc-score-label">Excellent</div>
+          <div class="gc-score-detail" id="gc-score-detail">0 issues found</div>
+          <div class="btn-group" style="margin-top:12px">
+            <button class="btn btn-primary btn-sm" onclick="gcFixAll()" id="gc-fix-all-btn">Fix All Issues</button>
+            <button class="btn btn-secondary btn-sm" onclick="gcCopyFixed()">Copy Corrected Text</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Corrected Text Preview -->
+    <div class="card" id="gc-corrected-card" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div class="card-title" style="margin-bottom:0">Corrected Essay</div>
+        <button class="btn btn-sm btn-secondary" onclick="gcCopyFixed()">Copy to Clipboard</button>
+      </div>
+      <div class="gc-corrected-text" id="gc-corrected-text"></div>
+    </div>
+
+    <!-- Issue List -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+        <div class="card-title" style="margin-bottom:0">Issues Found</div>
+        <div class="gc-filter-group" id="gc-filter-group">
+          <button class="gc-filter-btn active" data-filter="all" onclick="gcFilter('all', this)">All</button>
+          <button class="gc-filter-btn" data-filter="grammar" onclick="gcFilter('grammar', this)">Grammar</button>
+          <button class="gc-filter-btn" data-filter="spelling" onclick="gcFilter('spelling', this)">Spelling</button>
+          <button class="gc-filter-btn" data-filter="punctuation" onclick="gcFilter('punctuation', this)">Punctuation</button>
+          <button class="gc-filter-btn" data-filter="style" onclick="gcFilter('style', this)">Style</button>
+        </div>
+      </div>
+      <div id="gc-issue-list">
+        <!-- Issues render here -->
+      </div>
+      <div class="empty-state" id="gc-no-issues" style="display:none">
+        <div class="empty-icon">&#x1F389;</div>
+        <p>No issues found — your writing is clean!</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+  </main>
+</div>
+
+<!-- Cookie consent banner -->
+<div class="cookie-banner" id="cookieBanner">
+  <span>This site uses cookies to improve your experience. See our <a href="privacy.html">Privacy Policy</a>.</span>
+  <button class="btn btn-sm btn-primary" onclick="acceptCookies()">Got it</button>
+</div>
+
+</body>
+</html>

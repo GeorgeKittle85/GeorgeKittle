@@ -1,5 +1,5 @@
 /* ============================================
-MATH TOOLS - Core Application Logic
+STUDENT TOOLS - Core Application Logic
 ============================================ */
 
 // -- NAVIGATION --
@@ -1656,35 +1656,262 @@ function gcCheck() {
     });
   }
 
-  // Check for common spelling/grammar patterns
-  const patterns = [
-    { regex: /\bteh\b/gi, type: 'spelling', suggestion: 'the' },
-    { regex: /\brecieve\b/gi, type: 'spelling', suggestion: 'receive' },
-    { regex: /\boccured\b/gi, type: 'spelling', suggestion: 'occurred' },
-    { regex: /\btaht\b/gi, type: 'spelling', suggestion: 'that' },
-    { regex: /\byour\s+a\b/gi, type: 'grammar', suggestion: 'you\'re a' },
-    { regex: /\bits\s+is\b/gi, type: 'grammar', suggestion: 'it\'s is' },
-    { regex: /\.{2,}/g, type: 'punctuation', suggestion: '.' },
-    { regex: /([a-z])\s{0,1}\?\s{0,1}([a-z])/g, type: 'punctuation', suggestion: 'Add proper spacing after punctuation' }
+  // --- SPELLING PATTERNS ---
+  const spellingPatterns = [
+    { regex: /\bteh\b/gi, fix: 'the' },
+    { regex: /\brecieve\b/gi, fix: 'receive' },
+    { regex: /\boccured\b/gi, fix: 'occurred' },
+    { regex: /\btaht\b/gi, fix: 'that' },
+    { regex: /\bdefinately\b/gi, fix: 'definitely' },
+    { regex: /\bseperate\b/gi, fix: 'separate' },
+    { regex: /\baccomodate\b/gi, fix: 'accommodate' },
+    { regex: /\boccurence\b/gi, fix: 'occurrence' },
+    { regex: /\bneccessary\b/gi, fix: 'necessary' },
+    { regex: /\bneccesary\b/gi, fix: 'necessary' },
+    { regex: /\bwierd\b/gi, fix: 'weird' },
+    { regex: /\bbeleive\b/gi, fix: 'believe' },
+    { regex: /\bbelive\b/gi, fix: 'believe' },
+    { regex: /\bacheive\b/gi, fix: 'achieve' },
+    { regex: /\barguement\b/gi, fix: 'argument' },
+    { regex: /\bbegining\b/gi, fix: 'beginning' },
+    { regex: /\bcalender\b/gi, fix: 'calendar' },
+    { regex: /\bcommitee\b/gi, fix: 'committee' },
+    { regex: /\bcomittee\b/gi, fix: 'committee' },
+    { regex: /\bconcious\b/gi, fix: 'conscious' },
+    { regex: /\benviroment\b/gi, fix: 'environment' },
+    { regex: /\bexplaination\b/gi, fix: 'explanation' },
+    { regex: /\bforiegn\b/gi, fix: 'foreign' },
+    { regex: /\bgoverment\b/gi, fix: 'government' },
+    { regex: /\bgovernement\b/gi, fix: 'government' },
+    { regex: /\bgrammer\b/gi, fix: 'grammar' },
+    { regex: /\bindependant\b/gi, fix: 'independent' },
+    { regex: /\bknowlege\b/gi, fix: 'knowledge' },
+    { regex: /\bmispell\b/gi, fix: 'misspell' },
+    { regex: /\bnoticable\b/gi, fix: 'noticeable' },
+    { regex: /\brestarant\b/gi, fix: 'restaurant' },
+    { regex: /\bresturaunt\b/gi, fix: 'restaurant' },
+    { regex: /\bsentance\b/gi, fix: 'sentence' },
+    { regex: /\btommorow\b/gi, fix: 'tomorrow' },
+    { regex: /\btommorrow\b/gi, fix: 'tomorrow' },
+    { regex: /\buntill\b/gi, fix: 'until' },
+    { regex: /\bwritting\b/gi, fix: 'writing' },
+    { regex: /\bthier\b/gi, fix: 'their' },
+    { regex: /\bfreind\b/gi, fix: 'friend' },
+    { regex: /\bbeautifull\b/gi, fix: 'beautiful' },
+    { regex: /\bsuccesful\b/gi, fix: 'successful' },
+    { regex: /\bsuccessfull\b/gi, fix: 'successful' },
+    { regex: /\bdissapear\b/gi, fix: 'disappear' },
+    { regex: /\bdisapear\b/gi, fix: 'disappear' },
+    { regex: /\bembarass\b/gi, fix: 'embarrass' },
+    { regex: /\bguarantee\b/gi, fix: null },
+    { regex: /\bgaurante\b/gi, fix: 'guarantee' },
+    { regex: /\bgaruntee\b/gi, fix: 'guarantee' },
+    { regex: /\bharrass\b/gi, fix: 'harass' },
+    { regex: /\bimediately\b/gi, fix: 'immediately' },
+    { regex: /\bimmediatly\b/gi, fix: 'immediately' },
+    { regex: /\bliason\b/gi, fix: 'liaison' },
+    { regex: /\bmillenium\b/gi, fix: 'millennium' },
+    { regex: /\bneice\b/gi, fix: 'niece' },
+    { regex: /\bpersue\b/gi, fix: 'pursue' },
+    { regex: /\bprivelege\b/gi, fix: 'privilege' },
+    { regex: /\bprivilege\b/gi, fix: null },
+    { regex: /\brythm\b/gi, fix: 'rhythm' },
+    { regex: /\brhythm\b/gi, fix: null },
+    { regex: /\bsuprise\b/gi, fix: 'surprise' },
+    { regex: /\bwether\b/gi, fix: 'whether' },
+    { regex: /\bwhich\b/gi, fix: null },
+    { regex: /\bpossesion\b/gi, fix: 'possession' },
+    { regex: /\brefered\b/gi, fix: 'referred' },
+    { regex: /\breferance\b/gi, fix: 'reference' },
+    { regex: /\batempt\b/gi, fix: 'attempt' },
+    { regex: /\bapparent\b/gi, fix: null },
+    { regex: /\bapperance\b/gi, fix: 'appearance' },
+    { regex: /\baudiance\b/gi, fix: 'audience' },
+    { regex: /\bbuisness\b/gi, fix: 'business' },
+    { regex: /\bcompletly\b/gi, fix: 'completely' },
+    { regex: /\bdifferant\b/gi, fix: 'different' },
+    { regex: /\bexperiance\b/gi, fix: 'experience' },
+    { regex: /\bfinally\b/gi, fix: null },
+    { regex: /\bfinaly\b/gi, fix: 'finally' },
+    { regex: /\bgeneraly\b/gi, fix: 'generally' },
+    { regex: /\bhappend\b/gi, fix: 'happened' },
+    { regex: /\bhavent\b/gi, fix: "haven't" },
+    { regex: /\bdidnt\b/gi, fix: "didn't" },
+    { regex: /\bdoesnt\b/gi, fix: "doesn't" },
+    { regex: /\bwasnt\b/gi, fix: "wasn't" },
+    { regex: /\bwerent\b/gi, fix: "weren't" },
+    { regex: /\bwouldnt\b/gi, fix: "wouldn't" },
+    { regex: /\bcouldnt\b/gi, fix: "couldn't" },
+    { regex: /\bshouldnt\b/gi, fix: "shouldn't" },
+    { regex: /\bisnt\b/gi, fix: "isn't" },
+    { regex: /\barent\b/gi, fix: "aren't" },
+    { regex: /\bwont\b/gi, fix: "won't" },
+    { regex: /\bdont\b/gi, fix: "don't" },
+    { regex: /\bcant\b/gi, fix: "can't" },
+    { regex: /\boccasionaly\b/gi, fix: 'occasionally' },
+    { regex: /\bparticularly\b/gi, fix: null },
+    { regex: /\bparticularly\b/gi, fix: null },
+    { regex: /\bparticlarly\b/gi, fix: 'particularly' },
+    { regex: /\bprobably\b/gi, fix: null },
+    { regex: /\bprobaly\b/gi, fix: 'probably' },
+    { regex: /\breally\b/gi, fix: null },
+    { regex: /\brealy\b/gi, fix: 'really' },
+    { regex: /\bsimiliar\b/gi, fix: 'similar' },
+    { regex: /\bsincerly\b/gi, fix: 'sincerely' },
+    { regex: /\bspecialy\b/gi, fix: 'specially' },
+    { regex: /\bstrenth\b/gi, fix: 'strength' },
+    { regex: /\bthough\b/gi, fix: null },
+    { regex: /\bthougt\b/gi, fix: 'thought' },
+    { regex: /\bthough\b/gi, fix: null },
+    { regex: /\bthrought\b/gi, fix: 'through' },
+    { regex: /\btrough\b/gi, fix: 'through' },
+    { regex: /\btogeather\b/gi, fix: 'together' },
+    { regex: /\btruly\b/gi, fix: null },
+    { regex: /\btruely\b/gi, fix: 'truly' },
+    { regex: /\buntil\b/gi, fix: null },
+    { regex: /\bvarious\b/gi, fix: null },
+    { regex: /\bvarius\b/gi, fix: 'various' },
+    { regex: /\bwednesday\b/gi, fix: null },
+    { regex: /\bwensday\b/gi, fix: 'Wednesday' },
+    { regex: /\bfeburary\b/gi, fix: 'February' },
+    { regex: /\bjanuary\b/gi, fix: null },
+    { regex: /\blibary\b/gi, fix: 'library' },
+    { regex: /\babelity\b/gi, fix: 'ability' },
+    { regex: /\babsense\b/gi, fix: 'absence' },
+    { regex: /\bacademic\b/gi, fix: null },
+    { regex: /\bacidentally\b/gi, fix: 'accidentally' },
+    { regex: /\bacheivement\b/gi, fix: 'achievement' },
+    { regex: /\backnowlege\b/gi, fix: 'acknowledge' },
+    { regex: /\bagressive\b/gi, fix: 'aggressive' },
+    { regex: /\bamatuer\b/gi, fix: 'amateur' },
+    { regex: /\banalize\b/gi, fix: 'analyze' },
+    { regex: /\bancient\b/gi, fix: null },
+    { regex: /\banounce\b/gi, fix: 'announce' },
+    { regex: /\banxious\b/gi, fix: null },
+    { regex: /\bapologize\b/gi, fix: null },
+    { regex: /\bapologise\b/gi, fix: null },
+    { regex: /\bappologize\b/gi, fix: 'apologize' },
   ];
 
-  patterns.forEach(p => {
+  // Only push issues for patterns that have a fix (skip null fixes which are just anchors)
+  spellingPatterns.forEach(p => {
+    if (p.fix === null) return;
     let match;
     const regex = new RegExp(p.regex.source, p.regex.flags);
     while ((match = regex.exec(input)) !== null) {
+      const originalWord = match[0];
+      const fixedWord = originalWord[0] === originalWord[0].toUpperCase()
+        ? p.fix.charAt(0).toUpperCase() + p.fix.slice(1)
+        : p.fix;
       gcIssues.push({
-        type: p.type,
-        message: `Possible ${p.type} issue`,
-        suggestion: p.suggestion,
+        type: 'spelling',
+        message: `"${originalWord}" is likely misspelled`,
+        suggestion: fixedWord,
         start: match.index,
         end: match.index + match[0].length,
-        text: match[0]
+        replacement: fixedWord
       });
       regex.lastIndex = match.index + 1;
     }
   });
 
-  // Check for missing spaces after punctuation
+  // --- GRAMMAR PATTERNS ---
+  const grammarPatterns = [
+    // Homophone: your + verb → you're + verb
+    { regex: /\byour\s+(going|doing|being|making|coming|running|getting|trying|looking|working|playing|saying|thinking|taking|leaving|having|giving|telling|asking|using|moving|living|reading|writing|learning|sitting|standing|walking|talking|eating|sleeping|welcome|right|wrong|correct|sure|ready|able|supposed|allowed|invited|not)\b/gi, type: 'grammar', message: 'Possible confusion of "your" (possessive) with "you\'re" (you are)', suggFn: function(m) { return "you're " + m.match(/\s+(\S+)$/)[1]; } },
+    // Homophone: there + verb → they're + verb
+    { regex: /\bthere\s+(going|doing|being|making|coming|running|getting|trying|looking|working|playing|not|always|never|also|still|already|probably|usually)\b/gi, type: 'grammar', message: 'Possible confusion of "there" (place) with "they\'re" (they are)', suggFn: function(m) { return "they're " + m.match(/\s+(\S+)$/)[1]; } },
+    // Homophone: its + common follow words → it's
+    { regex: /\bits\s+(a|the|an|not|very|really|also|been|going|important|clear|possible|true|hard|easy|great|good|bad|best|worst|time|necessary|obvious|likely|unlikely)\b/gi, type: 'grammar', message: 'Possible confusion of "its" (possessive) with "it\'s" (it is)', suggFn: function(m) { return "it's " + m.match(/\s+(\S+)$/)[1]; } },
+    // could/should/would/must of → have
+    { regex: /\bcould\s+of\b/gi, type: 'grammar', message: '"Could of" should be "could have"', fix: 'could have' },
+    { regex: /\bshould\s+of\b/gi, type: 'grammar', message: '"Should of" should be "should have"', fix: 'should have' },
+    { regex: /\bwould\s+of\b/gi, type: 'grammar', message: '"Would of" should be "would have"', fix: 'would have' },
+    { regex: /\bmust\s+of\b/gi, type: 'grammar', message: '"Must of" should be "must have"', fix: 'must have' },
+    { regex: /\bmight\s+of\b/gi, type: 'grammar', message: '"Might of" should be "might have"', fix: 'might have' },
+    // Subject-verb agreement
+    { regex: /\bhe\s+don't\b/gi, type: 'grammar', message: 'Subject-verb agreement: use "doesn\'t" with "he"', fix: 'he doesn\'t' },
+    { regex: /\bshe\s+don't\b/gi, type: 'grammar', message: 'Subject-verb agreement: use "doesn\'t" with "she"', fix: 'she doesn\'t' },
+    { regex: /\bit\s+don't\b/gi, type: 'grammar', message: 'Subject-verb agreement: use "doesn\'t" with "it"', fix: 'it doesn\'t' },
+    { regex: /\bthey\s+was\b/gi, type: 'grammar', message: 'Subject-verb agreement: use "were" with "they"', fix: 'they were' },
+    { regex: /\bwe\s+was\b/gi, type: 'grammar', message: 'Subject-verb agreement: use "were" with "we"', fix: 'we were' },
+    { regex: /\byou\s+was\b/gi, type: 'grammar', message: 'Subject-verb agreement: use "were" with "you"', fix: 'you were' },
+    { regex: /\bhe\s+have\b/gi, type: 'grammar', message: 'Subject-verb agreement: use "has" with "he"', fix: 'he has' },
+    { regex: /\bshe\s+have\b/gi, type: 'grammar', message: 'Subject-verb agreement: use "has" with "she"', fix: 'she has' },
+    { regex: /\bit\s+have\b/gi, type: 'grammar', message: 'Subject-verb agreement: use "has" with "it"', fix: 'it has' },
+    { regex: /\bi\s+is\b/gi, type: 'grammar', message: 'Subject-verb agreement: use "am" with "I"', fix: 'I am' },
+    { regex: /\bi\s+has\b/gi, type: 'grammar', message: 'Subject-verb agreement: use "have" with "I"', fix: 'I have' },
+    { regex: /\bhe\s+go\b/gi, type: 'grammar', message: 'Subject-verb agreement: use "goes" with "he"', fix: 'he goes' },
+    { regex: /\bshe\s+go\b/gi, type: 'grammar', message: 'Subject-verb agreement: use "goes" with "she"', fix: 'she goes' },
+    { regex: /\bit\s+go\b/gi, type: 'grammar', message: 'Subject-verb agreement: use "goes" with "it"', fix: 'it goes' },
+    // Common mistakes
+    { regex: /\bsuppose\s+to\b/gi, type: 'grammar', message: '"Suppose to" should be "supposed to"', fix: 'supposed to' },
+    { regex: /\buse\s+to\b/gi, type: 'grammar', message: '"Use to" should be "used to"', fix: 'used to' },
+    { regex: /\balot\b/gi, type: 'grammar', message: '"Alot" is not a word — use "a lot"', fix: 'a lot' },
+    { regex: /\byour\s+a\b/gi, type: 'grammar', message: '"Your a" should be "you\'re a"', fix: "you're a" },
+    { regex: /\byour\s+an\b/gi, type: 'grammar', message: '"Your an" should be "you\'re an"', fix: "you're an" },
+    // then/than confusion
+    { regex: /\bbetter\s+then\b/gi, type: 'grammar', message: 'Use "than" for comparisons, not "then"', fix: 'better than' },
+    { regex: /\bworse\s+then\b/gi, type: 'grammar', message: 'Use "than" for comparisons, not "then"', fix: 'worse than' },
+    { regex: /\bmore\s+then\b/gi, type: 'grammar', message: 'Use "than" for comparisons, not "then"', fix: 'more than' },
+    { regex: /\bless\s+then\b/gi, type: 'grammar', message: 'Use "than" for comparisons, not "then"', fix: 'less than' },
+    { regex: /\brather\s+then\b/gi, type: 'grammar', message: 'Use "than" for comparisons, not "then"', fix: 'rather than' },
+    { regex: /\bother\s+then\b/gi, type: 'grammar', message: 'Use "than" after "other", not "then"', fix: 'other than' },
+    // affect/effect confusion
+    { regex: /\bthe\s+affect\b/gi, type: 'grammar', message: '"Affect" is usually a verb; "effect" is usually a noun', fix: 'the effect' },
+    { regex: /\ban\s+affect\b/gi, type: 'grammar', message: '"Affect" is usually a verb; "effect" is usually a noun', fix: 'an effect' },
+    // Miscellaneous
+    { regex: /\bi\s+could\s+care\s+less\b/gi, type: 'grammar', message: 'The correct phrase is "I couldn\'t care less"', fix: "I couldn't care less" },
+    { regex: /\bfor\s+all\s+intensive\s+purposes\b/gi, type: 'grammar', message: 'The correct phrase is "for all intents and purposes"', fix: 'for all intents and purposes' },
+    { regex: /\bshould\s+of\s+went\b/gi, type: 'grammar', message: 'Use "should have gone"', fix: 'should have gone' },
+    { regex: /\birregardless\b/gi, type: 'grammar', message: '"Irregardless" is nonstandard — use "regardless"', fix: 'regardless' },
+  ];
+
+  grammarPatterns.forEach(p => {
+    let match;
+    const regex = new RegExp(p.regex.source, p.regex.flags);
+    while ((match = regex.exec(input)) !== null) {
+      const originalText = match[0];
+      let fixText;
+      if (p.suggFn) {
+        fixText = p.suggFn(originalText);
+      } else {
+        fixText = p.fix;
+      }
+      // Preserve original capitalization for the first letter
+      if (originalText[0] === originalText[0].toUpperCase() && fixText) {
+        fixText = fixText.charAt(0).toUpperCase() + fixText.slice(1);
+      }
+      gcIssues.push({
+        type: p.type,
+        message: p.message,
+        suggestion: fixText,
+        start: match.index,
+        end: match.index + match[0].length,
+        replacement: fixText
+      });
+      regex.lastIndex = match.index + 1;
+    }
+  });
+
+  // --- PUNCTUATION PATTERNS ---
+  // Multiple periods
+  const multiPeriodRegex = /\.{2,}/g;
+  let mpMatch;
+  while ((mpMatch = multiPeriodRegex.exec(input)) !== null) {
+    // Skip ellipsis (exactly 3 dots)
+    if (mpMatch[0].length === 3) continue;
+    gcIssues.push({
+      type: 'punctuation',
+      message: 'Multiple periods detected',
+      suggestion: '.',
+      start: mpMatch.index,
+      end: mpMatch.index + mpMatch[0].length,
+      replacement: '.'
+    });
+  }
+
+  // Missing space after punctuation
   const punctSpaceMatches = input.matchAll(/[.!?][a-zA-Z]/g);
   for (const match of punctSpaceMatches) {
     gcIssues.push({
@@ -1695,6 +1922,85 @@ function gcCheck() {
       end: match.index + 2,
       replacement: ' ' + input[match.index + 1]
     });
+  }
+
+  // --- ARTICLE ERRORS: "a" before vowel sound ---
+  const articleRegex = /\ba\s+(a[a-z]*|e[a-z]*|i[a-z]*|o[a-z]*|u[a-z]*)\b/gi;
+  let artMatch;
+  const articleExceptions = ['a', 'use', 'used', 'user', 'useful', 'union', 'unique', 'unit', 'united', 'universal', 'university', 'uniform', 'unicorn', 'usual', 'usually', 'utility', 'uranium', 'one', 'once', 'european'];
+  while ((artMatch = articleRegex.exec(input)) !== null) {
+    const followWord = artMatch[1].toLowerCase();
+    if (articleExceptions.includes(followWord)) continue;
+    const fixedArticle = artMatch[0][0] === 'A' ? 'An' : 'an';
+    gcIssues.push({
+      type: 'grammar',
+      message: 'Use "an" before words starting with a vowel sound',
+      suggestion: fixedArticle + ' ' + artMatch[1],
+      start: artMatch.index,
+      end: artMatch.index + artMatch[0].length,
+      replacement: fixedArticle + ' ' + artMatch[1]
+    });
+  }
+
+  // --- DOUBLE WORD DETECTION ---
+  const doubleWordRegex = /\b(\w+)\s+\1\b/gi;
+  let dwMatch;
+  while ((dwMatch = doubleWordRegex.exec(input)) !== null) {
+    gcIssues.push({
+      type: 'grammar',
+      message: `Repeated word: "${dwMatch[1]}"`,
+      suggestion: dwMatch[1],
+      start: dwMatch.index,
+      end: dwMatch.index + dwMatch[0].length,
+      replacement: dwMatch[1]
+    });
+    doubleWordRegex.lastIndex = dwMatch.index + dwMatch[1].length + 1;
+  }
+
+  // --- CAPITALIZATION: first character of text ---
+  if (input.length > 0 && /[a-z]/.test(input[0])) {
+    gcIssues.push({
+      type: 'style',
+      message: 'Sentence should start with a capital letter',
+      suggestion: input[0].toUpperCase(),
+      start: 0,
+      end: 1,
+      replacement: input[0].toUpperCase()
+    });
+  }
+
+  // --- CAPITALIZATION: after sentence-ending punctuation ---
+  const sentenceCapRegex = /[.!?]\s+([a-z])/g;
+  let scMatch;
+  while ((scMatch = sentenceCapRegex.exec(input)) !== null) {
+    const lowerChar = scMatch[1];
+    const charPos = scMatch.index + scMatch[0].length - 1;
+    gcIssues.push({
+      type: 'style',
+      message: 'Capitalize the first word of a new sentence',
+      suggestion: lowerChar.toUpperCase(),
+      start: charPos,
+      end: charPos + 1,
+      replacement: lowerChar.toUpperCase()
+    });
+  }
+
+  // --- STANDALONE LOWERCASE "i" ---
+  const loneIRegex = /(?:^|[\s,;:!?])(i)(?=[\s,;:!?.'"]|$)/g;
+  let liMatch;
+  while ((liMatch = loneIRegex.exec(input)) !== null) {
+    const iPos = liMatch.index + liMatch[0].indexOf('i');
+    if (input[iPos] === 'i') {
+      gcIssues.push({
+        type: 'grammar',
+        message: 'The pronoun "I" should always be capitalized',
+        suggestion: 'I',
+        start: iPos,
+        end: iPos + 1,
+        replacement: 'I'
+      });
+    }
+    loneIRegex.lastIndex = liMatch.index + 1;
   }
 
   // Remove duplicates

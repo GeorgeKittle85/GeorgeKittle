@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Math Tools - Solve Smarter</title>
+  <meta name="description" content="Free math tools for students: equation solvers, graphing calculator, derivatives, integrals, statistics, trigonometry, and more.">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.0/math.min.js"></script>
+  <script src="app.js"></script>
+</head>
+<body>
+
+<button class="mobile-toggle" onclick="toggleSidebar()" aria-label="Toggle menu">&#9776;</button>
+<div class="mobile-overlay" id="mobileOverlay" onclick="toggleSidebar()"></div>
+
+<div class="app-wrapper">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="index.html" class="sidebar-logo">
+        <div class="logo-icon">&#x03A3;</div>
+        <div>
+          <div class="logo-text">Math Tools</div>
+          <div class="logo-sub">Solve Smarter</div>
+        </div>
+      </a>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Dashboard</div>
+      <div class="nav-item active" data-panel="home" onclick="showPanel('home')">
+        <span class="nav-icon">&#x1F3E0;</span> Home
+      </div>
+
+      <div class="nav-section-label">Algebra</div>
+      <div class="nav-item" data-panel="linear" onclick="showPanel('linear')">
+        <span class="nav-icon">&#x1F4D0;</span> Linear Equations
+      </div>
+      <div class="nav-item" data-panel="quadratic" onclick="showPanel('quadratic')">
+        <span class="nav-icon">&#x1F4C8;</span> Quadratic Solver
+      </div>
+      <div class="nav-item" data-panel="systems" onclick="showPanel('systems')">
+        <span class="nav-icon">&#x1F517;</span> Systems of Equations
+      </div>
+      <div class="nav-item" data-panel="polynomial" onclick="showPanel('polynomial')">
+        <span class="nav-icon">&#x1F4CA;</span> Polynomial Tools
+      </div>
+
+      <div class="nav-section-label">Functions &amp; Graphing</div>
+      <div class="nav-item" data-panel="graphing" onclick="showPanel('graphing')">
+        <span class="nav-icon">&#x1F4C9;</span> Graphing Calculator
+      </div>
+      <div class="nav-item" data-panel="logarithm" onclick="showPanel('logarithm')">
+        <span class="nav-icon">&#x1F522;</span> Logarithm Calculator
+      </div>
+
+      <div class="nav-section-label">Trigonometry</div>
+      <div class="nav-item" data-panel="trig" onclick="showPanel('trig')">
+        <span class="nav-icon">&#x1F504;</span> Trig Calculator
+      </div>
+      <div class="nav-item" data-panel="unitcircle" onclick="showPanel('unitcircle')">
+        <span class="nav-icon">&#x2B55;</span> Unit Circle
+      </div>
+
+      <div class="nav-section-label">Calculus</div>
+      <div class="nav-item" data-panel="limits" onclick="showPanel('limits')">
+        <span class="nav-icon">&#x1F3AF;</span> Limits
+      </div>
+      <div class="nav-item" data-panel="derivative" onclick="showPanel('derivative')">
+        <span class="nav-icon">&#x26A1;</span> Derivative Calculator
+      </div>
+      <div class="nav-item" data-panel="integral" onclick="showPanel('integral')">
+        <span class="nav-icon">&#x222B;</span> Integral Calculator
+      </div>
+      <div class="nav-item" data-panel="series" onclick="showPanel('series')">
+        <span class="nav-icon">&#x267E;&#xFE0F;</span> Sequences &amp; Series
+      </div>
+
+      <div class="nav-section-label">Statistics</div>
+      <div class="nav-item" data-panel="stats" onclick="showPanel('stats')">
+        <span class="nav-icon">&#x1F4CA;</span> Descriptive Stats
+      </div>
+      <div class="nav-item" data-panel="probability" onclick="showPanel('probability')">
+        <span class="nav-icon">&#x1F3B2;</span> Probability
+      </div>
+      <div class="nav-item" data-panel="regression" onclick="showPanel('regression')">
+        <span class="nav-icon">&#x1F4C8;</span> Regression
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="index.html">&larr; Back to Student Tools</a><br>
+      <a href="terms.html">Terms</a> &middot; <a href="privacy.html">Privacy</a>
+      <br>2026 Student Tools
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+<!-- ======== HOME ======== -->
+<div class="tool-panel active" id="panel-home">
+  <div class="main-header">
+    <h1>Math Tools</h1>
+    <p>Your playbook for every course — from Algebraic Problem Solving to AP Calculus BC &amp; Statistics.</p>
+  </div>
+
+  <div class="home-grid">
+    <div class="home-card animate-in" onclick="showPanel('linear')">
+      <div class="card-emoji">&#x1F4D0;</div>
+      <div class="card-name">Linear Equations</div>
+      <div class="card-courses">Math 1 &middot; Algebraic Problem Solving</div>
+      <div class="card-preview">Solve ax + b = c with step-by-step breakdowns.</div>
+    </div>
+    <div class="home-card animate-in" onclick="showPanel('quadratic')">
+      <div class="card-emoji">&#x1F4C8;</div>
+      <div class="card-name">Quadratic Solver</div>
+      <div class="card-courses">Math 2 &middot; Math 3</div>
+      <div class="card-preview">Find roots, vertex, axis of symmetry, and discriminant.</div>
+    </div>
+    <div class="home-card animate-in" onclick="showPanel('systems')">
+      <div class="card-emoji">&#x1F517;</div>
+      <div class="card-name">Systems of Equations</div>
+      <div class="card-courses">Math 1 &middot; Math 2</div>
+      <div class="card-preview">Solve 2x2 and 3x3 systems via elimination.</div>
+    </div>
+    <div class="home-card animate-in" onclick="showPanel('polynomial')">
+      <div class="card-emoji">&#x1F4CA;</div>
+      <div class="card-name">Polynomial Tools</div>
+      <div class="card-courses">Math 2 &middot; Math 3 &middot; Advanced Math 2</div>
+      <div class="card-preview">Factor, evaluate, and find roots of polynomials.</div>
+    </div>
+    <div class="home-card animate-in" onclick="showPanel('graphing')">
+      <div class="card-emoji">&#x1F4C9;</div>
+      <div class="card-name">Graphing Calculator</div>
+      <div class="card-courses">All Courses</div>
+      <div class="card-preview">Plot any function on a full interactive canvas.</div>
+    </div>
+    <div class="home-card animate-in" onclick="showPanel('logarithm')">
+      <div class="card-emoji">&#x1F522;</div>
+      <div class="card-name">Logarithm Calculator</div>
+      <div class="card-courses">Math 3 &middot; AP Pre-Calculus</div>
+      <div class="card-preview">Compute logs in any base, convert between forms.</div>
+    </div>
+    <div class="home-card animate-in" onclick="showPanel('trig')">
+      <div class="card-emoji">&#x1F504;</div>
+      <div class="card-name">Trig Calculator</div>
+      <div class="card-courses">Math 2 &middot; Math 3 &middot; AP Pre-Calculus</div>
+      <div class="card-preview">All six trig functions, conversions, and identities.</div>
+    </div>
+    <div class="home-card animate-in" onclick="showPanel('unitcircle')">
+      <div class="card-emoji">&#x2B55;</div>
+      <div class="card-name">Unit Circle</div>
+      <div class="card-courses">Math 3 &middot; AP Pre-Calculus</div>
+      <div class="card-preview">Interactive unit circle with exact values.</div>
+    </div>
+    <div class="home-card animate-in" onclick="showPanel('limits')">
+      <div class="card-emoji">&#x1F3AF;</div>
+      <div class="card-name">Limits</div>
+      <div class="card-courses">AP Calculus AB &middot; BC</div>
+      <div class="card-preview">Evaluate limits numerically from both sides.</div>
+    </div>
+    <div class="home-card animate-in" onclick="showPanel('derivative')">
+      <div class="card-emoji">&#x26A1;</div>
+      <div class="card-name">Derivative Calculator</div>
+      <div class="card-courses">AP Calculus AB &middot; BC</div>
+      <div class="card-preview">Symbolic differentiation with shown rules.</div>
+    </div>
+    <div class="home-card animate-in" onclick="showPanel('integral')">
+      <div class="card-emoji">&#x222B;</div>
+      <div class="card-name">Integral Calculator</div>
+      <div class="card-courses">AP Calculus AB &middot; BC</div>
+      <div class="card-preview">Definite and indefinite integration.</div>
+    </div>
+    <div class="home-card animate-in" onclick="showPanel('series')">
+      <div class="card-emoji">&#x267E;&#xFE0F;</div>
+      <div class="card-name">Sequences &amp; Series</div>
+      <div class="card-courses">AP Calculus BC</div>
+      <div class="card-preview">Arithmetic and geometric sequences, partial sums.</div>
+    </div>
+    <div class="home-card animate-in" onclick="showPanel('stats')">
+      <div class="card-emoji">&#x1F4CA;</div>
+      <div class="card-name">Descriptive Statistics</div>
+      <div class="card-courses">AP Statistics</div>
+      <div class="card-preview">Mean, median, mode, standard deviation, quartiles, and more.</div>
+    </div>
+    <div class="home-card animate-in" onclick="showPanel('probability')">
+      <div class="card-emoji">&#x1F3B2;</div>
+      <div class="card-name">Probability</div>
+      <div class="card-courses">AP Statistics</div>
+      <div class="card-preview">Combinations, permutations, binomial &amp; normal distributions.</div>
+    </div>
+    <div class="home-card animate-in" onclick="showPanel('regression')">
+      <div class="card-emoji">&#x1F4C8;</div>
+      <div class="card-name">Regression</div>
+      <div class="card-courses">AP Statistics</div>
+      <div class="card-preview">Find the best-fit line for your data.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ======== LINEAR EQUATION SOLVER ======== -->
+<div class="tool-panel" id="panel-linear">
+  <div class="main-header">
+    <h1>Linear Equation Solver</h1>
+    <p>Solve equations of the form ax + b = c — step by step.</p>
+  </div>
+  <div class="card">
+    <div class="card-title">Solve: ax + b = c</div>
+    <div class="card-desc">Enter coefficients to find x. Like a tight end finding the open lane, we'll find the solution every time.</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">a</label>
+        <input type="number" class="form-input" id="lin-a" placeholder="e.g. 3" step="any">
+      </div>
+      <div class="form-group">
+        <label class="form-label">b</label>
+        <input type="number" class="form-input" id="lin-b" placeholder="e.g. 5" step="any">
+      </div>
+      <div class="form-group">
+        <label class="form-label">c</label>
+        <input type="number" class="form-input" id="lin-c" placeholder="e.g. 14" step="any">
+      </div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="solveLinear()">Solve</button>
+      <button class="btn btn-secondary" onclick="clearInputs('lin-a','lin-b','lin-c','linear-result')">Clear</button>
+    </div>
+    <div class="result-box" id="linear-result"></div>
+  </div>
+</div>
+
+<!-- ======== QUADRATIC SOLVER ======== -->
+<div class="tool-panel" id="panel-quadratic">
+  <div class="main-header">
+    <h1>Quadratic Solver</h1>
+    <p>Solve ax&sup2; + bx + c = 0 — roots, vertex, discriminant, and more.</p>
+  </div>
+  <div class="card">
+    <div class="card-title">Solve: ax&sup2; + bx + c = 0</div>
+    <div class="card-desc">Enter your coefficients. We'll break down the discriminant like game film — showing every detail.</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">a</label>
+        <input type="number" class="form-input" id="quad-a" placeholder="e.g. 1" step="any">
+      </div>
+      <div class="form-group">
+        <label class="form-label">b</label>
+        <input type="number" class="form-input" id="quad-b" placeholder="e.g. -5" step="any">
+      </div>
+      <div class="form-group">
+        <label class="form-label">c</label>
+        <input type="number" class="form-input" id="quad-c" placeholder="e.g. 6" step="any">
+      </div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="solveQuadratic()">Solve</button>
+      <button class="btn btn-secondary" onclick="clearInputs('quad-a','quad-b','quad-c','quadratic-result')">Clear</button>
+    </div>
+    <div class="result-box" id="quadratic-result"></div>
+  </div>
+</div>
+
+<!-- ======== SYSTEMS OF EQUATIONS ======== -->
+<div class="tool-panel" id="panel-systems">
+  <div class="main-header">
+    <h1>Systems of Equations</h1>
+    <p>Solve 2x2 and 3x3 systems using Cramer's rule.</p>
+  </div>
+  <div class="card">
+    <div class="card-title">2x2 System</div>
+    <div class="card-desc">a&#x2081;x + b&#x2081;y = c&#x2081; and a&#x2082;x + b&#x2082;y = c&#x2082;</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">a&#x2081;</label><input type="number" class="form-input" id="sys-a1" step="any"></div>
+      <div class="form-group"><label class="form-label">b&#x2081;</label><input type="number" class="form-input" id="sys-b1" step="any"></div>
+      <div class="form-group"><label class="form-label">c&#x2081;</label><input type="number" class="form-input" id="sys-c1" step="any"></div>
+    </div>
+    <div class="form-row" style="margin-top:8px">
+      <div class="form-group"><label class="form-label">a&#x2082;</label><input type="number" class="form-input" id="sys-a2" step="any"></div>
+      <div class="form-group"><label class="form-label">b&#x2082;</label><input type="number" class="form-input" id="sys-b2" step="any"></div>
+      <div class="form-group"><label class="form-label">c&#x2082;</label><input type="number" class="form-input" id="sys-c2" step="any"></div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="solveSystem2()">Solve System</button>
+      <button class="btn btn-secondary" onclick="clearInputs('sys-a1','sys-b1','sys-c1','sys-a2','sys-b2','sys-c2','system-result')">Clear</button>
+    </div>
+    <div class="result-box" id="system-result"></div>
+  </div>
+</div>
+
+<!-- ======== POLYNOMIAL TOOLS ======== -->
+<div class="tool-panel" id="panel-polynomial">
+  <div class="main-header">
+    <h1>Polynomial Tools</h1>
+    <p>Evaluate, find roots, and factor polynomials.</p>
+  </div>
+  <div class="card">
+    <div class="card-title">Polynomial Evaluator</div>
+    <div class="card-desc">Enter an expression and a value to evaluate. Uses math.js syntax: e.g. 2x^3 - 4x + 1</div>
+    <div class="form-group">
+      <label class="form-label">Expression f(x)</label>
+      <input type="text" class="form-input" id="poly-expr" placeholder="e.g. 2*x^3 - 4*x + 1">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Evaluate at x =</label>
+      <input type="number" class="form-input" id="poly-x" step="any" placeholder="e.g. 3">
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="evalPolynomial()">Evaluate</button>
+      <button class="btn btn-secondary" onclick="clearInputs('poly-expr','poly-x','poly-result')">Clear</button>
+    </div>
+    <div class="result-box" id="poly-result"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Quadratic Factorer</div>
+    <div class="card-desc">Factor ax&sup2; + bx + c into (px + q)(rx + s) if possible.</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">a</label><input type="number" class="form-input" id="fac-a" step="any"></div>
+      <div class="form-group"><label class="form-label">b</label><input type="number" class="form-input" id="fac-b" step="any"></div>
+      <div class="form-group"><label class="form-label">c</label><input type="number" class="form-input" id="fac-c" step="any"></div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="factorQuadratic()">Factor</button>
+    </div>
+    <div class="result-box" id="factor-result"></div>
+  </div>
+</div>
+
+<!-- ======== GRAPHING CALCULATOR ======== -->
+<div class="tool-panel" id="panel-graphing">
+  <div class="main-header">
+    <h1>Graphing Calculator</h1>
+    <p>Plot any function — the #1 target for visualizing math.</p>
+  </div>
+  <div class="card">
+    <div class="card-title">Function Plotter</div>
+    <div class="card-desc">Enter up to 3 functions. Uses math.js syntax: sin(x), x^2, log(x), etc.</div>
+    <div class="form-group">
+      <label class="form-label">f(x)</label>
+      <input type="text" class="form-input" id="graph-f1" placeholder="e.g. sin(x)" value="sin(x)">
+    </div>
+    <div class="form-group">
+      <label class="form-label">g(x) (optional)</label>
+      <input type="text" class="form-input" id="graph-f2" placeholder="e.g. x^2">
+    </div>
+    <div class="form-group">
+      <label class="form-label">h(x) (optional)</label>
+      <input type="text" class="form-input" id="graph-f3" placeholder="e.g. log(x)">
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">x min</label><input type="number" class="form-input" id="graph-xmin" value="-10"></div>
+      <div class="form-group"><label class="form-label">x max</label><input type="number" class="form-input" id="graph-xmax" value="10"></div>
+      <div class="form-group"><label class="form-label">y min</label><input type="number" class="form-input" id="graph-ymin" value="-10"></div>
+      <div class="form-group"><label class="form-label">y max</label><input type="number" class="form-input" id="graph-ymax" value="10"></div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="plotGraph()">Plot</button>
+      <button class="btn btn-secondary" onclick="clearGraph()">Clear</button>
+    </div>
+    <div class="graph-container">
+      <canvas id="graphCanvas" width="700" height="450"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ======== LOGARITHM CALCULATOR ======== -->
+<div class="tool-panel" id="panel-logarithm">
+  <div class="main-header">
+    <h1>Logarithm Calculator</h1>
+    <p>Compute logs in any base, convert between forms, and apply log rules.</p>
+  </div>
+  <div class="card">
+    <div class="card-title">Log Calculator</div>
+    <div class="card-desc">Find log_b(x) for any base b and value x.</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Base (b)</label>
+        <input type="number" class="form-input" id="log-base" value="10" step="any">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Value (x)</label>
+        <input type="number" class="form-input" id="log-value" step="any" placeholder="e.g. 100">
+      </div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="calcLog()">Calculate</button>
+    </div>
+    <div class="result-box" id="log-result"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Exponential &harr; Logarithmic Form</div>
+    <div class="card-desc">Convert b^y = x &harr; log_b(x) = y</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">b</label><input type="number" class="form-input" id="conv-b" step="any"></div>
+      <div class="form-group"><label class="form-label">y (exponent)</label><input type="number" class="form-input" id="conv-y" step="any"></div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="convertExpLog()">Convert</button>
+    </div>
+    <div class="result-box" id="conv-result"></div>
+  </div>
+</div>
+
+<!-- ======== TRIG CALCULATOR ======== -->
+<div class="tool-panel" id="panel-trig">
+  <div class="main-header">
+    <h1>Trigonometry Calculator</h1>
+    <p>All six trig functions, inverse trig, and degree/radian conversions.</p>
+  </div>
+  <div class="card">
+    <div class="card-title">Trig Function Evaluator</div>
+    <div class="card-desc">Enter an angle — we'll calculate every trig value like a tight end running every route in the tree.</div>
+    <div class="toggle-group">
+      <button class="toggle-btn active" onclick="setTrigMode('deg', this)">Degrees</button>
+      <button class="toggle-btn" onclick="setTrigMode('rad', this)">Radians</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Angle</label>
+      <input type="number" class="form-input" id="trig-angle" placeholder="e.g. 45" step="any">
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="calcTrig()">Calculate</button>
+    </div>
+    <div class="stats-grid" id="trig-result"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Degree &harr; Radian Converter</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Degrees</label>
+        <input type="number" class="form-input" id="deg-input" step="any" oninput="degToRad()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Radians</label>
+        <input type="number" class="form-input" id="rad-input" step="any" oninput="radToDeg()">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======== UNIT CIRCLE ======== -->
+<div class="tool-panel" id="panel-unitcircle">
+  <div class="main-header">
+    <h1>Unit Circle Reference</h1>
+    <p>Interactive unit circle — hover or click any angle for exact values.</p>
+  </div>
+  <div class="card">
+    <div class="unit-circle-container">
+      <canvas id="unitCircleCanvas" width="420" height="420"></canvas>
+      <div id="uc-info" style="flex:1; min-width:200px;">
+        <div class="card-title" style="margin-bottom:12px">Angle Details</div>
+        <div class="result-box" id="uc-details" style="margin-top:0">Click a point on the circle...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======== LIMITS ======== -->
+<div class="tool-panel" id="panel-limits">
+  <div class="main-header">
+    <h1>Limits Calculator</h1>
+    <p>Evaluate limits numerically — approach from both sides.</p>
+  </div>
+  <div class="card">
+    <div class="card-title">Numerical Limit Evaluator</div>
+    <div class="card-desc">We'll approach the value from the left and right, closing in like a blitz off the edge.</div>
+    <div class="form-group">
+      <label class="form-label">f(x)</label>
+      <input type="text" class="form-input" id="lim-expr" placeholder="e.g. sin(x)/x">
+    </div>
+    <div class="form-group">
+      <label class="form-label">x approaches</label>
+      <input type="number" class="form-input" id="lim-val" placeholder="e.g. 0" step="any">
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="calcLimit()">Evaluate Limit</button>
+    </div>
+    <div class="result-box" id="limit-result"></div>
+  </div>
+</div>
+
+<!-- ======== DERIVATIVE CALCULATOR ======== -->
+<div class="tool-panel" id="panel-derivative">
+  <div class="main-header">
+    <h1>Derivative Calculator</h1>
+    <p>Symbolic differentiation — powered by math.js.</p>
+  </div>
+  <div class="card">
+    <div class="card-title">Find dy/dx</div>
+    <div class="card-desc">Enter f(x) and we'll find its derivative. Supports power rule, trig, exponentials, logs, and chain rule.</div>
+    <div class="form-group">
+      <label class="form-label">f(x)</label>
+      <input type="text" class="form-input" id="deriv-expr" placeholder="e.g. x^3 + 2*x^2 - 5*x + 3">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Evaluate at x = (optional)</label>
+      <input type="number" class="form-input" id="deriv-at" step="any" placeholder="Leave blank for symbolic">
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="calcDerivative()">Differentiate</button>
+    </div>
+    <div class="result-box" id="deriv-result"></div>
+  </div>
+</div>
+
+<!-- ======== INTEGRAL CALCULATOR ======== -->
+<div class="tool-panel" id="panel-integral">
+  <div class="main-header">
+    <h1>Integral Calculator</h1>
+    <p>Definite integration via numerical methods (Simpson's rule).</p>
+  </div>
+  <div class="card">
+    <div class="card-title">Definite Integral &#x222B; f(x) dx</div>
+    <div class="card-desc">Like accumulating yards after the catch — we sum up the area under the curve.</div>
+    <div class="form-group">
+      <label class="form-label">f(x)</label>
+      <input type="text" class="form-input" id="int-expr" placeholder="e.g. x^2">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Lower bound (a)</label>
+        <input type="number" class="form-input" id="int-a" step="any" placeholder="e.g. 0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Upper bound (b)</label>
+        <input type="number" class="form-input" id="int-b" step="any" placeholder="e.g. 3">
+      </div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="calcIntegral()">Integrate</button>
+    </div>
+    <div class="result-box" id="integral-result"></div>
+  </div>
+</div>
+
+<!-- ======== SEQUENCES & SERIES ======== -->
+<div class="tool-panel" id="panel-series">
+  <div class="main-header">
+    <h1>Sequences &amp; Series</h1>
+    <p>Arithmetic and geometric sequences, partial sums, convergence tests.</p>
+  </div>
+  <div class="card">
+    <div class="card-title">Arithmetic Sequence</div>
+    <div class="card-desc">a_n = a&#x2081; + (n - 1)d</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">First term (a&#x2081;)</label><input type="number" class="form-input" id="arith-a1" step="any"></div>
+      <div class="form-group"><label class="form-label">Common diff (d)</label><input type="number" class="form-input" id="arith-d" step="any"></div>
+      <div class="form-group"><label class="form-label">n terms</label><input type="number" class="form-input" id="arith-n" step="1" min="1"></div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="calcArithmetic()">Calculate</button>
+    </div>
+    <div class="result-box" id="arith-result"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Geometric Sequence</div>
+    <div class="card-desc">a_n = a&#x2081; &middot; r^(n-1)</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">First term (a&#x2081;)</label><input type="number" class="form-input" id="geo-a1" step="any"></div>
+      <div class="form-group"><label class="form-label">Common ratio (r)</label><input type="number" class="form-input" id="geo-r" step="any"></div>
+      <div class="form-group"><label class="form-label">n terms</label><input type="number" class="form-input" id="geo-n" step="1" min="1"></div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="calcGeometric()">Calculate</button>
+    </div>
+    <div class="result-box" id="geo-result"></div>
+  </div>
+</div>
+
+<!-- ======== DESCRIPTIVE STATS ======== -->
+<div class="tool-panel" id="panel-stats">
+  <div class="main-header">
+    <h1>Descriptive Statistics</h1>
+    <p>Enter your data set — we'll run the full stat line.</p>
+  </div>
+  <div class="card">
+    <div class="card-title">Data Analyzer</div>
+    <div class="card-desc">Paste numbers separated by commas or spaces. We'll calculate every stat you'd need — like a complete box score.</div>
+    <div class="form-group">
+      <label class="form-label">Data Set</label>
+      <textarea class="form-textarea" id="stats-data" rows="3" placeholder="e.g. 85, 90, 78, 92, 88, 76, 95, 82, 91, 87"></textarea>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="calcStats()">Analyze</button>
+      <button class="btn btn-secondary" onclick="clearInputs('stats-data','stats-result-grid')">Clear</button>
+    </div>
+    <div class="stats-grid" id="stats-result-grid"></div>
+    <div class="result-box" id="stats-extra" style="margin-top:16px"></div>
+  </div>
+</div>
+
+<!-- ======== PROBABILITY ======== -->
+<div class="tool-panel" id="panel-probability">
+  <div class="main-header">
+    <h1>Probability Calculator</h1>
+    <p>Combinations, permutations, and distributions.</p>
+  </div>
+  <div class="card">
+    <div class="card-title">Combinations &amp; Permutations</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">n</label><input type="number" class="form-input" id="prob-n" min="0" step="1"></div>
+      <div class="form-group"><label class="form-label">r</label><input type="number" class="form-input" id="prob-r" min="0" step="1"></div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="calcCombPerm()">Calculate</button>
+    </div>
+    <div class="result-box" id="combperm-result"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Binomial Probability</div>
+    <div class="card-desc">P(X = k) = C(n,k) &middot; p^k &middot; (1-p)^(n-k)</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">n (trials)</label><input type="number" class="form-input" id="binom-n" min="1" step="1"></div>
+      <div class="form-group"><label class="form-label">k (successes)</label><input type="number" class="form-input" id="binom-k" min="0" step="1"></div>
+      <div class="form-group"><label class="form-label">p (probability)</label><input type="number" class="form-input" id="binom-p" step="any" min="0" max="1" placeholder="0-1"></div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="calcBinomial()">Calculate</button>
+    </div>
+    <div class="result-box" id="binom-result"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Normal Distribution (Z-Score)</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Value (x)</label><input type="number" class="form-input" id="norm-x" step="any"></div>
+      <div class="form-group"><label class="form-label">Mean (&mu;)</label><input type="number" class="form-input" id="norm-mean" step="any" value="0"></div>
+      <div class="form-group"><label class="form-label">Std Dev (&sigma;)</label><input type="number" class="form-input" id="norm-sd" step="any" value="1" min="0.0001"></div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="calcNormal()">Calculate Z-Score</button>
+    </div>
+    <div class="result-box" id="normal-result"></div>
+  </div>
+</div>
+
+<!-- ======== REGRESSION ======== -->
+<div class="tool-panel" id="panel-regression">
+  <div class="main-header">
+    <h1>Linear Regression</h1>
+    <p>Find the best-fit line for your data — least squares method.</p>
+  </div>
+  <div class="card">
+    <div class="card-title">Least Squares Regression</div>
+    <div class="card-desc">Enter x and y values separated by commas. Same number of points in each.</div>
+    <div class="form-group">
+      <label class="form-label">X Values</label>
+      <input type="text" class="form-input" id="reg-x" placeholder="e.g. 1, 2, 3, 4, 5">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Y Values</label>
+      <input type="text" class="form-input" id="reg-y" placeholder="e.g. 2, 4, 5, 4, 5">
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="calcRegression()">Calculate Regression</button>
+    </div>
+    <div class="result-box" id="reg-result"></div>
+  </div>
+</div>
+
+  </main>
+</div>
+
+<!-- Cookie consent banner -->
+<div class="cookie-banner" id="cookieBanner">
+  <span>This site uses cookies to improve your experience. See our <a href="privacy.html">Privacy Policy</a>.</span>
+  <button class="btn btn-sm btn-primary" onclick="acceptCookies()">Got it</button>
+</div>
+
+</body>
+</html>
