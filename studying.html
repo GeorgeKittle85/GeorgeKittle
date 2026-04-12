@@ -39,6 +39,11 @@
       <div class="nav-item" data-panel="quizmaker" onclick="showPanel('quizmaker')">
         <span class="nav-icon">&#x270F;&#xFE0F;</span> Quiz Maker
       </div>
+
+      <div class="nav-section-label">Writing Tools</div>
+      <div class="nav-item" data-panel="grammar" onclick="showPanel('grammar')">
+        <span class="nav-icon">&#x1F4DD;</span> Grammar Check
+      </div>
     </nav>
 
     <div class="sidebar-footer">
@@ -69,6 +74,12 @@
       <div class="card-name">Quiz Maker</div>
       <div class="card-courses">Study Tools</div>
       <div class="card-preview">Build custom quizzes with multiple choice &amp; true/false questions.</div>
+    </div>
+    <div class="home-card animate-in" onclick="showPanel('grammar')">
+      <div class="card-emoji">&#x1F4DD;</div>
+      <div class="card-name">Grammar Check</div>
+      <div class="card-courses">Writing Tools</div>
+      <div class="card-preview">Paste your essay or notes — catch grammar, spelling, and punctuation issues powered by LanguageTool.</div>
     </div>
   </div>
 </div>
@@ -218,6 +229,98 @@
     <div class="btn-group" style="justify-content:center;margin-top:24px">
       <button class="btn btn-primary" onclick="qzStartQuiz()">Retake Quiz</button>
       <button class="btn btn-secondary" onclick="qzBackToEditor()">Edit Quiz</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======== GRAMMAR CHECK ======== -->
+<div class="tool-panel" id="panel-grammar">
+  <div class="main-header">
+    <h1>Grammar Check</h1>
+    <p>Paste or type your text — powered by LanguageTool to catch grammar, spelling, and punctuation issues.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Your Text</div>
+    <div class="card-desc">Paste your essay or notes below. Requests are split into 15,000-character chunks (API limit: 20,000 characters).</div>
+    <div class="form-group">
+      <textarea class="form-textarea" id="lt-input" rows="12" placeholder="Paste or type your text here..." oninput="ltUpdateCounter()"></textarea>
+    </div>
+
+    <!-- Character Cutter -->
+    <div class="lt-char-cutter">
+      <div class="lt-char-bar-wrap">
+        <div class="lt-char-fill" id="lt-char-fill"></div>
+      </div>
+      <div class="lt-char-meta">
+        <span class="gc-word-count" id="lt-word-count">0 words &middot; 0 characters</span>
+        <span class="lt-char-label" id="lt-char-label">0 / 20,000 chars</span>
+      </div>
+    </div>
+    <div class="lt-char-warning" id="lt-char-warning" style="display:none"></div>
+
+    <div class="gc-toolbar">
+      <div></div>
+      <div class="btn-group" style="margin-top:0">
+        <button class="btn btn-primary" onclick="ltCheck()">Check Grammar</button>
+        <button class="btn btn-secondary" onclick="ltClear()">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error message -->
+  <div id="lt-api-error" style="display:none" class="lt-char-warning" style="margin-top:12px"></div>
+
+  <!-- Results Section (hidden until check runs) -->
+  <div id="lt-results-area" style="display:none">
+
+    <!-- Score Overview -->
+    <div class="card" id="lt-score-card">
+      <div class="gc-score-row">
+        <div class="gc-score-circle">
+          <svg viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="52" class="gc-ring-bg"/>
+            <circle cx="60" cy="60" r="52" class="gc-ring-fill" id="lt-ring-fill"/>
+          </svg>
+          <div class="gc-score-number" id="lt-score-number">100</div>
+        </div>
+        <div class="gc-score-info">
+          <div class="gc-score-label" id="lt-score-label">Excellent</div>
+          <div class="gc-score-detail" id="lt-score-detail">0 issues found</div>
+          <div class="btn-group" style="margin-top:12px">
+            <button class="btn btn-primary btn-sm" onclick="ltFixAll()" id="lt-fix-all-btn">Fix All Issues</button>
+            <button class="btn btn-secondary btn-sm" onclick="ltCopyFixed()">Copy Corrected Text</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Corrected Text Preview -->
+    <div class="card" id="lt-corrected-card" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div class="card-title" style="margin-bottom:0">Corrected Text</div>
+        <button class="btn btn-sm btn-secondary" onclick="ltCopyFixed()">Copy to Clipboard</button>
+      </div>
+      <div class="gc-corrected-text" id="lt-corrected-text"></div>
+    </div>
+
+    <!-- Issue List -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+        <div class="card-title" style="margin-bottom:0">Issues Found</div>
+        <div class="gc-filter-group" id="lt-filter-group">
+          <button class="gc-filter-btn active" data-filter="all" onclick="ltFilter('all', this)">All</button>
+          <button class="gc-filter-btn" data-filter="grammar" onclick="ltFilter('grammar', this)">Grammar</button>
+          <button class="gc-filter-btn" data-filter="spelling" onclick="ltFilter('spelling', this)">Spelling</button>
+          <button class="gc-filter-btn" data-filter="punctuation" onclick="ltFilter('punctuation', this)">Punctuation</button>
+          <button class="gc-filter-btn" data-filter="style" onclick="ltFilter('style', this)">Style</button>
+        </div>
+      </div>
+      <div id="lt-issue-list"></div>
+      <div class="empty-state" id="lt-no-issues" style="display:none">
+        <div class="empty-icon">&#x1F389;</div>
+        <p>No issues found &mdash; your writing looks clean!</p>
+      </div>
     </div>
   </div>
 </div>
