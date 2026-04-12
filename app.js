@@ -2129,6 +2129,310 @@ function gcFilter(type, btn) {
 }
 
 // ============================================
+// LANGUAGETOOL GRAMMAR CHECKER (studying.html)
+// ============================================
+var ltIssues = [];
+var ltFixedText = '';
+var LT_CHUNK_SIZE = 15000;
+var LT_WARN_THRESHOLD = 15000;
+var LT_API_URL = 'https://api.languagetool.org/v2/check';
+
+function ltUpdateCounter() {
+  var inputEl = document.getElementById('lt-input');
+  if (!inputEl) return;
+  var text = inputEl.value;
+  var charCount = text.length;
+  var wordCount = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+
+  document.getElementById('lt-word-count').textContent = wordCount + ' words \u00b7 ' + charCount + ' characters';
+
+  var fill = document.getElementById('lt-char-fill');
+  var label = document.getElementById('lt-char-label');
+  var warning = document.getElementById('lt-char-warning');
+  var pct = Math.min(100, (charCount / 20000) * 100);
+  fill.style.width = pct + '%';
+  label.textContent = charCount.toLocaleString() + ' / 20,000 chars';
+
+  if (charCount >= 20000) {
+    fill.className = 'lt-char-fill lt-char-over';
+    warning.style.display = 'block';
+    warning.textContent = 'Text exceeds 20,000 characters and will be split into chunks for checking.';
+  } else if (charCount >= LT_WARN_THRESHOLD) {
+    fill.className = 'lt-char-fill lt-char-warn';
+    warning.style.display = 'block';
+    warning.textContent = 'Heads up: at 20,000 characters, text will automatically be split into multiple requests.';
+  } else {
+    fill.className = 'lt-char-fill';
+    warning.style.display = 'none';
+  }
+}
+
+function ltSplitIntoChunks(text, chunkSize) {
+  if (text.length <= chunkSize) {
+    return [{ text: text, offset: 0 }];
+  }
+  var chunks = [];
+  var start = 0;
+  while (start < text.length) {
+    if (start + chunkSize >= text.length) {
+      chunks.push({ text: text.slice(start), offset: start });
+      break;
+    }
+    var slice = text.slice(start, start + chunkSize);
+    // Find the last sentence boundary in the back half of the chunk
+    var bestBreak = -1;
+    var boundary = Math.floor(slice.length * 0.5);
+    for (var i = slice.length - 2; i > boundary; i--) {
+      var ch = slice[i];
+      var next = slice[i + 1];
+      if ((ch === '.' || ch === '!' || ch === '?') && (next === ' ' || next === '\n')) {
+        bestBreak = i + 2;
+        break;
+      }
+      if (ch === '\n' && next === '\n') {
+        bestBreak = i + 2;
+        break;
+      }
+    }
+    var end = bestBreak > 0 ? start + bestBreak : start + chunkSize;
+    chunks.push({ text: text.slice(start, end), offset: start });
+    start = end;
+  }
+  return chunks;
+}
+
+function ltMapCategory(categoryId) {
+  var spellingCats = ['TYPOS', 'MISSPELLING', 'TYPO'];
+  var punctCats = ['PUNCTUATION', 'TYPOGRAPHY'];
+  var styleCats = ['STYLE', 'REDUNDANCY', 'PLAIN_ENGLISH', 'CASING', 'COLLOCATIONS'];
+  if (spellingCats.indexOf(categoryId) !== -1) return 'spelling';
+  if (punctCats.indexOf(categoryId) !== -1) return 'punctuation';
+  if (styleCats.indexOf(categoryId) !== -1) return 'style';
+  return 'grammar';
+}
+
+function ltCheck() {
+  var inputEl = document.getElementById('lt-input');
+  if (!inputEl) return;
+  var text = inputEl.value;
+
+  var errEl = document.getElementById('lt-api-error');
+  if (errEl) errEl.style.display = 'none';
+
+  if (!text.trim()) {
+    document.getElementById('lt-results-area').style.display = 'none';
+    return;
+  }
+
+  var btn = document.querySelector('#panel-grammar .btn-primary');
+  var origLabel = btn.textContent;
+  btn.textContent = 'Checking\u2026';
+  btn.disabled = true;
+
+  ltIssues = [];
+  ltFixedText = '';
+
+  var chunks = ltSplitIntoChunks(text, LT_CHUNK_SIZE);
+
+  var promises = chunks.map(function(chunk) {
+    var params = new URLSearchParams();
+    params.append('text', chunk.text);
+    params.append('language', 'en-US');
+    return fetch(LT_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params.toString()
+    }).then(function(res) {
+      if (!res.ok) throw new Error('API error ' + res.status);
+      return res.json();
+    }).then(function(data) {
+      data.matches.forEach(function(match) {
+        var type = ltMapCategory(match.rule.category.id);
+        var replacement = match.replacements.length > 0 ? match.replacements[0].value : null;
+        ltIssues.push({
+          type: type,
+          message: match.message,
+          suggestion: replacement,
+          context: match.context.text,
+          contextOffset: match.context.offset,
+          contextLength: match.context.length,
+          start: chunk.offset + match.offset,
+          end: chunk.offset + match.offset + match.length,
+          replacement: replacement,
+          ignored: false
+        });
+      });
+    });
+  });
+
+  Promise.all(promises).then(function() {
+    ltIssues.sort(function(a, b) { return a.start - b.start; });
+    ltRenderResults(text);
+    btn.textContent = origLabel;
+    btn.disabled = false;
+  }).catch(function(err) {
+    btn.textContent = origLabel;
+    btn.disabled = false;
+    var errEl = document.getElementById('lt-api-error');
+    if (errEl) {
+      errEl.textContent = 'Grammar check failed: ' + err.message + '. Please try again.';
+      errEl.style.display = 'block';
+    }
+  });
+}
+
+function ltRenderResults(text) {
+  var resultsArea = document.getElementById('lt-results-area');
+  resultsArea.style.display = 'block';
+
+  var totalIssues = ltIssues.length;
+  var score = Math.max(0, 100 - totalIssues * 3);
+
+  document.getElementById('lt-score-number').textContent = Math.round(score);
+  var circumference = 2 * Math.PI * 52;
+  document.getElementById('lt-ring-fill').style.strokeDashoffset = circumference * (1 - score / 100);
+
+  var label = 'Excellent';
+  if (score < 50) label = 'Poor';
+  else if (score < 75) label = 'Fair';
+  else if (score < 90) label = 'Good';
+  document.getElementById('lt-score-label').textContent = label;
+  document.getElementById('lt-score-detail').textContent = totalIssues + ' issue' + (totalIssues !== 1 ? 's' : '') + ' found';
+
+  var issueList = document.getElementById('lt-issue-list');
+  issueList.innerHTML = '';
+
+  if (totalIssues === 0) {
+    document.getElementById('lt-no-issues').style.display = 'block';
+    document.getElementById('lt-corrected-card').style.display = 'none';
+  } else {
+    document.getElementById('lt-no-issues').style.display = 'none';
+    ltIssues.forEach(function(issue, i) {
+      var div = document.createElement('div');
+      div.className = 'gc-issue';
+      div.setAttribute('data-type', issue.type);
+      div.dataset.filter = issue.type;
+
+      var ctxBefore = ltEscape(issue.context.slice(0, issue.contextOffset));
+      var ctxBad = ltEscape(issue.context.slice(issue.contextOffset, issue.contextOffset + issue.contextLength));
+      var ctxAfter = ltEscape(issue.context.slice(issue.contextOffset + issue.contextLength));
+      var fixHtml = issue.suggestion ? ' &rarr; <span class="gc-highlight-good">' + ltEscape(issue.suggestion) + '</span>' : '';
+
+      var actionsHtml = issue.replacement
+        ? '<button class="gc-fix-btn" onclick="ltFixOne(' + i + ',this)">Apply Fix</button><button class="gc-ignore-btn" onclick="ltIgnoreOne(' + i + ',this)">Ignore</button>'
+        : '<button class="gc-ignore-btn" onclick="ltIgnoreOne(' + i + ',this)">Ignore</button>';
+
+      div.innerHTML =
+        '<div class="gc-issue-header"><span class="gc-issue-badge">' + issue.type + '</span></div>' +
+        '<div class="gc-issue-context">...<span class="gc-highlight-bad">' + ctxBad + '</span>' + ctxAfter + fixHtml + '...</div>' +
+        '<div class="gc-issue-explain">' + ltEscape(issue.message) + '</div>' +
+        '<div class="gc-issue-actions">' + actionsHtml + '</div>';
+
+      issueList.appendChild(div);
+    });
+  }
+
+  if (totalIssues > 0) {
+    document.getElementById('lt-corrected-card').style.display = 'block';
+    ltFixedText = ltApplyFixes(text);
+    document.getElementById('lt-corrected-text').textContent = ltFixedText;
+  }
+}
+
+function ltEscape(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function ltApplyFixes(text) {
+  var fixed = text;
+  var offset = 0;
+  ltIssues.forEach(function(issue) {
+    if (issue.replacement && !issue.ignored) {
+      fixed = fixed.slice(0, issue.start + offset) + issue.replacement + fixed.slice(issue.end + offset);
+      offset += issue.replacement.length - (issue.end - issue.start);
+    }
+  });
+  return fixed;
+}
+
+function ltFixOne(index, btn) {
+  var issue = ltIssues[index];
+  if (!issue || issue.ignored || !issue.replacement) return;
+  var inputEl = document.getElementById('lt-input');
+  var text = inputEl.value;
+  inputEl.value = text.slice(0, issue.start) + issue.replacement + text.slice(issue.end);
+  ltUpdateCounter();
+  var delta = issue.replacement.length - (issue.end - issue.start);
+  issue.ignored = true;
+  for (var i = index + 1; i < ltIssues.length; i++) {
+    ltIssues[i].start += delta;
+    ltIssues[i].end += delta;
+  }
+  var cards = document.querySelectorAll('#lt-issue-list .gc-issue');
+  if (cards[index]) cards[index].classList.add('gc-issue-fixed');
+  ltFixedText = ltApplyFixes(document.getElementById('lt-input').value);
+  document.getElementById('lt-corrected-text').textContent = ltFixedText;
+}
+
+function ltIgnoreOne(index, btn) {
+  ltIssues[index].ignored = true;
+  var cards = document.querySelectorAll('#lt-issue-list .gc-issue');
+  if (cards[index]) cards[index].classList.add('gc-issue-fixed');
+}
+
+function ltFixAll() {
+  if (ltFixedText) {
+    document.getElementById('lt-input').value = ltFixedText;
+    ltUpdateCounter();
+    ltCheck();
+  }
+}
+
+function ltCopyFixed() {
+  if (!ltFixedText) return;
+  navigator.clipboard.writeText(ltFixedText).then(function() {
+    ltShowToast('Corrected text copied!');
+  });
+}
+
+function ltShowToast(msg) {
+  var toast = document.getElementById('lt-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'lt-toast';
+    toast.className = 'gc-toast';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(function() { toast.classList.remove('show'); }, 2500);
+}
+
+function ltClear() {
+  document.getElementById('lt-input').value = '';
+  document.getElementById('lt-results-area').style.display = 'none';
+  var errEl = document.getElementById('lt-api-error');
+  if (errEl) errEl.style.display = 'none';
+  ltUpdateCounter();
+  ltIssues = [];
+  ltFixedText = '';
+}
+
+function ltFilter(type, btn) {
+  document.querySelectorAll('#lt-filter-group .gc-filter-btn').forEach(function(b) {
+    b.classList.remove('active');
+  });
+  btn.classList.add('active');
+  document.querySelectorAll('#lt-issue-list .gc-issue').forEach(function(item) {
+    item.style.display = (type === 'all' || item.dataset.filter === type) ? 'block' : 'none';
+  });
+}
+
+// ============================================
 // INIT - Render study tools on page load
 // ============================================
 window.addEventListener('DOMContentLoaded', function() {
