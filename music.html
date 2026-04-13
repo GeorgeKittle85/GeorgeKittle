@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Music Tools - Play Better</title>
+  <meta name="description" content="Free music tools for students: multi-tempo metronome, sheet music creator, and instrument tuner. Play better in band and orchestra.">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="music-style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vexflow/3.0.9/vexflow-min.js"></script>
+  <script src="music-app.js"></script>
+</head>
+<body>
+
+<button class="mobile-toggle" onclick="toggleSidebar()" aria-label="Toggle menu">&#9776;</button>
+<div class="mobile-overlay" id="mobileOverlay" onclick="toggleSidebar()"></div>
+
+<div class="app-wrapper">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="index.html" class="sidebar-logo">
+        <div class="logo-icon">&#x1F3B5;</div>
+        <div>
+          <div class="logo-text">Music Tools</div>
+          <div class="logo-sub">Play Better</div>
+        </div>
+      </a>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Dashboard</div>
+      <div class="nav-item active" data-panel="home" onclick="showPanel('home')">
+        <span class="nav-icon">&#x1F3E0;</span> Home
+      </div>
+
+      <div class="nav-section-label">Rhythm</div>
+      <div class="nav-item" data-panel="metronome" onclick="showPanel('metronome')">
+        <span class="nav-icon">&#x1F3B6;</span> Band Metronome
+      </div>
+
+      <div class="nav-section-label">Notation</div>
+      <div class="nav-item" data-panel="sheetmusic" onclick="showPanel('sheetmusic')">
+        <span class="nav-icon">&#x1F3BC;</span> Sheet Music Creator
+      </div>
+
+      <div class="nav-section-label">Pitch</div>
+      <div class="nav-item" data-panel="tuner" onclick="showPanel('tuner')">
+        <span class="nav-icon">&#x1F3A4;</span> Instrument Tuner
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="index.html">&larr; Back to Student Tools</a><br>
+      <a href="contact.html">Contact</a> &middot; <a href="terms.html">Terms</a> &middot; <a href="privacy.html">Privacy</a>
+      <br>2026 Student Tools
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+<!-- ======== HOME ======== -->
+<div class="tool-panel active" id="panel-home">
+  <div class="main-header">
+    <h1>Music Tools</h1>
+    <p>Your toolkit for band and orchestra &mdash; tempo, notation, and tuning all in one place.</p>
+  </div>
+
+  <div class="home-grid">
+    <div class="home-card animate-in" onclick="showPanel('metronome')">
+      <div class="card-emoji">&#x1F3B6;</div>
+      <div class="card-name">Band Metronome</div>
+      <div class="card-courses">Rhythm &middot; All Ensembles</div>
+      <div class="card-preview">Multi-tempo metronome with tempo changes, count-ins, and a visual timeline. Set your whole song's tempo map and play through it &mdash; like a tight end running every route in the playbook.</div>
+    </div>
+    <div class="home-card animate-in" onclick="showPanel('sheetmusic')">
+      <div class="card-emoji">&#x1F3BC;</div>
+      <div class="card-name">Sheet Music Creator</div>
+      <div class="card-courses">Notation &middot; Composition</div>
+      <div class="card-preview">Build sheet music note by note. Pick your clef, key, and time signature, then add notes and rests. Download your score as PNG or SVG.</div>
+    </div>
+    <div class="home-card animate-in" onclick="showPanel('tuner')">
+      <div class="card-emoji">&#x1F3A4;</div>
+      <div class="card-name">Instrument Tuner</div>
+      <div class="card-courses">Pitch &middot; Band &amp; Orchestra</div>
+      <div class="card-preview">Chromatic tuner for every band and orchestra instrument. Uses your mic to detect pitch with a real-time gauge &mdash; dialed in tighter than a Kittle route.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ======== BAND METRONOME ======== -->
+<div class="tool-panel" id="panel-metronome">
+  <div class="main-header">
+    <h1>Band Metronome</h1>
+    <p>Multi-tempo metronome &mdash; set tempo changes for your whole song and play through them.</p>
+  </div>
+
+  <!-- Status Banner -->
+  <div class="met-status-banner" id="met-statusBanner" style="display:none"></div>
+
+  <!-- Song Setup -->
+  <div class="card">
+    <div class="card-title">Song Setup</div>
+    <div class="card-desc">Configure time signature, count-in, and accent settings before building your tempo map.</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Time Signature</label>
+        <select class="form-select" id="met-timeSig" onchange="metSetBeatDots(parseInt(this.value), -1); metRenderSegments();">
+          <option value="2">2/4</option>
+          <option value="3">3/4</option>
+          <option value="4" selected>4/4</option>
+          <option value="5">5/4</option>
+          <option value="6">6/8</option>
+          <option value="7">7/8</option>
+          <option value="12">12/8</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Count-in</label>
+        <select class="form-select" id="met-countIn">
+          <option value="0">None</option>
+          <option value="1" selected>1 measure</option>
+          <option value="2">2 measures</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Accent Beat 1</label>
+        <select class="form-select" id="met-accentMode">
+          <option value="1" selected>Yes &mdash; high click</option>
+          <option value="0">No &mdash; flat click</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tempo Segments -->
+  <div class="card">
+    <div class="card-title">Tempo Segments</div>
+    <div class="card-desc">Build your tempo map segment by segment. Each segment can have a different BPM.</div>
+
+    <div id="met-tempoList" style="margin-bottom:16px"></div>
+
+    <div class="form-row" style="margin-bottom:16px">
+      <div class="form-group">
+        <label class="form-label">BPM</label>
+        <input type="number" class="form-input" id="met-addBpm" value="120" min="20" max="300" placeholder="e.g. 120">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Measures</label>
+        <input type="number" class="form-input" id="met-addMeasures" value="8" min="1" max="999" placeholder="e.g. 8">
+      </div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="metAddSegment()">+ Add Segment</button>
+      <button class="btn btn-secondary" onclick="metLoadExample()">Load Example</button>
+      <button class="btn btn-secondary" onclick="metClearAll()" style="color:var(--accent-red)">Clear All</button>
+    </div>
+  </div>
+
+  <!-- Playback -->
+  <div class="card">
+    <div class="card-title">Playback</div>
+
+    <div class="met-beat-display" id="met-beatDisplay"></div>
+
+    <div class="met-now-playing">
+      <div class="met-np-bpm" id="met-npBpm">&mdash;</div>
+      <div class="met-np-label" id="met-npLabel">BPM</div>
+      <div class="met-np-progress" id="met-npProgress">Add segments and press Start</div>
+    </div>
+
+    <div class="met-progress-bar-wrap">
+      <div class="met-progress-bar-fill" id="met-progressFill"></div>
+    </div>
+
+    <div class="btn-group" style="justify-content:center">
+      <button class="btn btn-primary" id="met-startBtn" onclick="metStartMetronome()">&#9654; Start</button>
+      <button class="btn btn-secondary" id="met-restartBtn" onclick="metRestartMetronome()" disabled>&#8634; Restart</button>
+      <button class="btn btn-secondary" id="met-stopBtn" onclick="metStopMetronome()" disabled style="color:var(--accent-red)">&#9632; Stop</button>
+    </div>
+
+    <div class="met-toggles">
+      <label class="met-toggle-wrap">
+        <span>Click Sound</span>
+        <label class="met-toggle">
+          <input type="checkbox" id="met-soundToggle" checked>
+          <span class="met-toggle-slider"></span>
+        </label>
+      </label>
+      <label class="met-toggle-wrap">
+        <span>Visual Flash</span>
+        <label class="met-toggle">
+          <input type="checkbox" id="met-flashToggle" checked>
+          <span class="met-toggle-slider"></span>
+        </label>
+      </label>
+    </div>
+  </div>
+
+  <!-- Timeline -->
+  <div class="card" style="padding:16px 20px">
+    <div class="card-title" style="margin-bottom:8px">Song Timeline</div>
+    <div class="met-tl-bar" id="met-tlBar"></div>
+  </div>
+</div>
+
+
+<!-- ======== SHEET MUSIC CREATOR ======== -->
+<div class="tool-panel" id="panel-sheetmusic">
+  <div class="main-header">
+    <h1>Sheet Music Creator</h1>
+    <p>Build sheet music note by note &mdash; then download your score as an image.</p>
+  </div>
+
+  <!-- Score Settings -->
+  <div class="card">
+    <div class="card-title">Score Settings</div>
+    <div class="card-desc">Set your clef, key signature, and time signature before adding notes.</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Clef</label>
+        <select class="form-select" id="sm-clef" onchange="smSetClef(this.value)">
+          <option value="treble" selected>Treble</option>
+          <option value="bass">Bass</option>
+          <option value="alto">Alto</option>
+          <option value="tenor">Tenor</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Key Signature</label>
+        <select class="form-select" id="sm-keysig" onchange="smSetKeySig(this.value)">
+          <option value="Cb">Cb Major / Ab Minor</option>
+          <option value="Gb">Gb Major / Eb Minor</option>
+          <option value="Db">Db Major / Bb Minor</option>
+          <option value="Ab">Ab Major / F Minor</option>
+          <option value="Eb">Eb Major / C Minor</option>
+          <option value="Bb">Bb Major / G Minor</option>
+          <option value="F">F Major / D Minor</option>
+          <option value="C" selected>C Major / A Minor</option>
+          <option value="G">G Major / E Minor</option>
+          <option value="D">D Major / B Minor</option>
+          <option value="A">A Major / F# Minor</option>
+          <option value="E">E Major / C# Minor</option>
+          <option value="B">B Major / G# Minor</option>
+          <option value="F#">F# Major / D# Minor</option>
+          <option value="C#">C# Major / A# Minor</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Time Signature</label>
+        <select class="form-select" id="sm-timesig" onchange="smSetTimeSig(this.value)">
+          <option value="2/4">2/4</option>
+          <option value="3/4">3/4</option>
+          <option value="4/4" selected>4/4</option>
+          <option value="5/4">5/4</option>
+          <option value="6/8">6/8</option>
+          <option value="3/8">3/8</option>
+          <option value="9/8">9/8</option>
+          <option value="12/8">12/8</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Note Input -->
+  <div class="card">
+    <div class="card-title">Add Notes</div>
+    <div class="card-desc">Select a duration, accidental, and octave &mdash; then click a note name to add it. Kittle-level precision for every pitch.</div>
+
+    <!-- Duration Selection -->
+    <div style="margin-bottom:16px">
+      <label class="form-label">Duration</label>
+      <div class="sm-btn-row">
+        <button class="btn btn-secondary sm-dur-btn" onclick="smSetDuration('w', this)">Whole</button>
+        <button class="btn btn-secondary sm-dur-btn" onclick="smSetDuration('h', this)">Half</button>
+        <button class="btn btn-secondary sm-dur-btn active" onclick="smSetDuration('q', this)">Quarter</button>
+        <button class="btn btn-secondary sm-dur-btn" onclick="smSetDuration('8', this)">8th</button>
+        <button class="btn btn-secondary sm-dur-btn" onclick="smSetDuration('16', this)">16th</button>
+      </div>
+    </div>
+
+    <!-- Accidental Selection -->
+    <div style="margin-bottom:16px">
+      <label class="form-label">Accidental</label>
+      <div class="sm-btn-row">
+        <button class="btn btn-secondary sm-acc-btn active" onclick="smSetAccidental('', this)">&#9838; Natural</button>
+        <button class="btn btn-secondary sm-acc-btn" onclick="smSetAccidental('#', this)">&#9839; Sharp</button>
+        <button class="btn btn-secondary sm-acc-btn" onclick="smSetAccidental('b', this)">&#9837; Flat</button>
+      </div>
+    </div>
+
+    <!-- Octave Selection -->
+    <div style="margin-bottom:16px">
+      <label class="form-label">Octave</label>
+      <div class="sm-btn-row">
+        <select class="form-select" id="sm-octave" onchange="smSetOctave(parseInt(this.value))" style="max-width:200px">
+          <option value="2">2 (Low)</option>
+          <option value="3">3</option>
+          <option value="4" selected>4 (Middle C octave)</option>
+          <option value="5">5</option>
+          <option value="6">6 (High)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Note Buttons -->
+    <div style="margin-bottom:16px">
+      <label class="form-label">Notes</label>
+      <div class="sm-btn-row" id="sm-note-buttons"></div>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-secondary" onclick="smAddRest()">+ Add Rest</button>
+      <button class="btn btn-secondary" onclick="smClearAll()" style="color:var(--accent-red)">Clear All Notes</button>
+    </div>
+  </div>
+
+  <!-- Note List -->
+  <div class="card">
+    <div class="card-title">Note Sequence</div>
+    <div class="card-desc">Your notes in order. Click &#x2715; to remove any note.</div>
+    <div class="sm-note-list" id="sm-note-list"></div>
+  </div>
+
+  <!-- Rendered Score -->
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+      <div class="card-title" style="margin-bottom:0">Score Preview</div>
+      <div class="btn-group" style="margin-top:0">
+        <button class="btn btn-primary btn-sm" onclick="smDownloadPNG()">Download PNG</button>
+        <button class="btn btn-secondary btn-sm" onclick="smDownloadSVG()">Download SVG</button>
+      </div>
+    </div>
+    <div class="sm-score-container" id="sm-vexflow-output">
+      <div style="text-align:center;color:var(--text-muted);padding:40px 20px;">Add notes to see your sheet music here</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ======== INSTRUMENT TUNER ======== -->
+<div class="tool-panel" id="panel-tuner">
+  <div class="main-header">
+    <h1>Instrument Tuner</h1>
+    <p>Chromatic tuner for every band and orchestra instrument &mdash; uses your microphone.</p>
+  </div>
+
+  <!-- Instrument & Settings -->
+  <div class="card">
+    <div class="card-title">Tuner Settings</div>
+    <div class="card-desc">Select your instrument and reference pitch. The tuner works for all standard band and orchestra instruments.</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Instrument</label>
+        <select class="form-select" id="tuner-instrument" onchange="tunerSetInstrument(this.value)">
+          <option value="chromatic">Chromatic (All Notes)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">A4 Reference (Hz)</label>
+        <div style="display:flex;align-items:center;gap:12px">
+          <input type="range" id="tuner-a4-slider" min="430" max="450" value="440" style="flex:1" oninput="tunerSetA4(this.value)">
+          <span class="form-label" id="tuner-a4-display" style="min-width:55px;text-align:right;margin-bottom:0">440 Hz</span>
+        </div>
+      </div>
+    </div>
+    <div id="tuner-ref-notes"></div>
+  </div>
+
+  <!-- Tuner Display -->
+  <div class="card">
+    <div class="card-title">Pitch Display</div>
+
+    <div class="tuner-display">
+      <!-- Gauge -->
+      <div class="tuner-gauge">
+        <div class="tuner-gauge-labels">
+          <span class="tuner-flat-label">&#9837; Flat</span>
+          <span class="tuner-sharp-label">Sharp &#9839;</span>
+        </div>
+        <div class="tuner-gauge-track">
+          <div class="tuner-gauge-center"></div>
+          <div class="tuner-needle" id="tuner-needle"></div>
+        </div>
+        <div class="tuner-gauge-ticks">
+          <span>-50</span><span>-25</span><span>0</span><span>+25</span><span>+50</span>
+        </div>
+      </div>
+
+      <!-- Note display -->
+      <div class="tuner-indicator" id="tuner-indicator">
+        <div class="tuner-note-display" id="tuner-note-display">&mdash;</div>
+        <div class="tuner-octave-display" id="tuner-octave-display"></div>
+      </div>
+      <div class="tuner-freq-display" id="tuner-freq-display">&mdash; Hz</div>
+      <div class="tuner-cents-display" id="tuner-cents-display"></div>
+      <div class="tuner-status" id="tuner-status">Press Start to begin</div>
+    </div>
+
+    <div class="btn-group" style="justify-content:center;margin-top:20px">
+      <button class="btn btn-primary" id="tuner-startBtn" onclick="tunerStart()">&#x1F3A4; Start Tuner</button>
+      <button class="btn btn-secondary" id="tuner-stopBtn" onclick="tunerStop()" disabled style="color:var(--accent-red)">&#9632; Stop</button>
+      <button class="btn btn-secondary" onclick="tunerPlayReference()" title="Play A4 reference tone">&#x1F50A; Play A4</button>
+    </div>
+  </div>
+</div>
+
+
+  </main>
+</div>
+
+<!-- Cookie consent banner -->
+<div class="cookie-banner" id="cookieBanner">
+  <span>This site uses cookies to improve your experience. See our <a href="privacy.html">Privacy Policy</a>.</span>
+  <button class="btn btn-sm btn-primary" onclick="acceptCookies()">Got it</button>
+</div>
+
+</body>
+</html>
