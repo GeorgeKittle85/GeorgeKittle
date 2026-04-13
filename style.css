@@ -2005,6 +2005,13 @@ body::before {
   border-color: var(--accent-purple);
 }
 
+.landing-card-music::before {
+  background: linear-gradient(90deg, var(--accent-orange), var(--accent-yellow));
+}
+.landing-card-music:hover {
+  border-color: var(--accent-orange);
+}
+
 .landing-card-icon {
   font-size: 36px;
   margin-bottom: 16px;
