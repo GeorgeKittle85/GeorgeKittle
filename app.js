@@ -14,6 +14,10 @@ if (nav) nav.classList.add('active');
 document.getElementById('sidebar').classList.remove('open');
 document.getElementById('mobileOverlay').classList.remove('open');
 window.scrollTo(0, 0);
+if (id === 'gamestudy' && typeof gsPopulateQuizDropdown === 'function') {
+  gsPopulateQuizDropdown();
+  gsRenderHighScore();
+}
 }
 
 function toggleSidebar() {
@@ -1432,7 +1436,14 @@ qzOpenEditor(quizId);
 qzStartQuiz();
 }
 
-function qzStartQuiz() {
+// Holds the (possibly shuffled) questions used during an active quiz
+var qzActiveQuestions = [];
+var qzIsShuffled = false;
+
+function qzShuffleQuiz() { qzStartQuiz(true); }
+
+function qzStartQuiz(shuffled) {
+shuffled = shuffled || false;
 var quiz = qzQuizzes.find(function(q) { return q.id === qzCurrentQuizId; });
 if (!quiz || quiz.questions.length === 0) {
 alert('Add some questions first!');
@@ -1445,15 +1456,29 @@ alert('Some questions are empty - fill them in first.');
 return;
 }
 
+qzIsShuffled = shuffled;
+qzActiveQuestions = quiz.questions.slice();
+if (shuffled) {
+  for (var i = qzActiveQuestions.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = qzActiveQuestions[i];
+    qzActiveQuestions[i] = qzActiveQuestions[j];
+    qzActiveQuestions[j] = tmp;
+  }
+}
+
 qzAnswers = {};
 qzShowView('qz-take-mode');
+
+var badgeArea = document.getElementById('qz-shuffle-badge-area');
+if (badgeArea) badgeArea.innerHTML = shuffled ? '<span class="shuffle-badge">🔀 Shuffled</span>' : '';
 
 var container = document.getElementById('qz-questions-container');
 var letters = ['A', 'B', 'C', 'D'];
 
-container.innerHTML = quiz.questions.map(function(q, qi) {
+container.innerHTML = qzActiveQuestions.map(function(q, qi) {
 var html = '<div class="quiz-question-block" id="qz-block-' + qi + '">' +
-'<div class="quiz-q-number">Question ' + (qi + 1) + ' of ' + quiz.questions.length + '</div>' +
+'<div class="quiz-q-number">Question ' + (qi + 1) + ' of ' + qzActiveQuestions.length + '</div>' +
 '<div class="quiz-q-text">' + escHtml(q.question) + '</div>';
 
 if (q.type === 'tf') {
@@ -1480,10 +1505,10 @@ document.getElementById('qz-submit-btn').style.display = 'inline-flex';
 }
 
 function qzSelectAnswer(qi, oi) {
-var quiz = qzQuizzes.find(function(q) { return q.id === qzCurrentQuizId; });
-if (!quiz) return;
+var q = qzActiveQuestions[qi];
+if (!q) return;
 
-quiz.questions[qi].options.forEach(function(_, optIdx) {
+q.options.forEach(function(_, optIdx) {
 var el = document.getElementById('qz-opt-' + qi + '-' + optIdx);
 if (el) el.classList.remove('selected');
 });
@@ -1494,17 +1519,16 @@ qzAnswers[qi] = oi;
 }
 
 function qzSubmit() {
-var quiz = qzQuizzes.find(function(q) { return q.id === qzCurrentQuizId; });
-if (!quiz) return;
+if (!qzActiveQuestions || qzActiveQuestions.length === 0) return;
 
-var total = quiz.questions.length;
+var total = qzActiveQuestions.length;
 var unanswered = total - Object.keys(qzAnswers).length;
 if (unanswered > 0) {
 if (!confirm('You have ' + unanswered + ' unanswered question' + (unanswered > 1 ? 's' : '') + '. Submit anyway?')) return;
 }
 
 var correct = 0;
-var results = quiz.questions.map(function(q, qi) {
+var results = qzActiveQuestions.map(function(q, qi) {
 var userAnswer = qzAnswers[qi] !== undefined ? qzAnswers[qi] : -1;
 var isCorrect = userAnswer === q.correct;
 if (isCorrect) correct++;
@@ -1531,7 +1555,7 @@ document.getElementById('qz-score-box').innerHTML =
 var letters = ['A', 'B', 'C', 'D'];
 var review = document.getElementById('qz-results-review');
 
-review.innerHTML = quiz.questions.map(function(q, qi) {
+review.innerHTML = qzActiveQuestions.map(function(q, qi) {
 var r = results[qi];
 var blockClass = r.isCorrect ? 'correct' : 'incorrect';
 
@@ -2433,9 +2457,433 @@ function ltFilter(type, btn) {
 }
 
 // ============================================
+// GAME STUDY - "Quiz Blaster" arcade game
+// ============================================
+var gsQuestions = [];     // [{ question, options:[...], correct: index }]
+var gsOrder = [];         // indexes into gsQuestions for current run
+var gsPos = 0;            // position in gsOrder
+var gsScore = 0;
+var gsStreak = 0;
+var gsLives = 3;
+var gsMode = 'time';      // 'time' | 'lives' | 'sprint'
+var gsQPerTimer = 10;     // seconds per question (for lives/sprint) or global time (time mode)
+var gsGlobalTimer = null; // time mode interval
+var gsQuestionTimer = null;
+var gsTimeLeft = 0;
+var gsCorrectCount = 0;
+var gsWrongCount = 0;
+var gsTotalAnswered = 0;
+var gsLocked = false;     // lock input between questions
+var gsActiveSource = 'quiz';
+
+function gsInit() {
+  gsPopulateQuizDropdown();
+  gsRenderHighScore();
+}
+
+function gsPopulateQuizDropdown() {
+  var sel = document.getElementById('gs-quiz-select');
+  if (!sel) return;
+  if (!qzQuizzes || qzQuizzes.length === 0) {
+    sel.innerHTML = '<option value="">(no quizzes yet - create one first)</option>';
+    return;
+  }
+  var html = '';
+  qzQuizzes.forEach(function(q) {
+    html += '<option value="' + q.id + '">' + escHtml(q.name) + ' (' + q.questions.length + ')</option>';
+  });
+  sel.innerHTML = html;
+}
+
+function gsSwitchTab(which, btn) {
+  gsActiveSource = which;
+  document.querySelectorAll('#panel-gamestudy .gs-tab-btn').forEach(function(b) { b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  document.querySelectorAll('#panel-gamestudy .gs-tab-panel').forEach(function(p) { p.classList.remove('active'); });
+  var target = document.getElementById('gs-tab-' + which);
+  if (target) target.classList.add('active');
+}
+
+function gsRenderHighScore() {
+  var hs = parseInt(localStorage.getItem('mt_gs_highscore') || '0', 10);
+  var el = document.getElementById('gs-hs-value');
+  if (el) el.textContent = hs;
+}
+
+function gsParseTextLines(raw) {
+  var out = [];
+  raw.split(/\r?\n/).forEach(function(line) {
+    line = line.trim();
+    if (!line || line.charAt(0) === '#') return;
+    var parts;
+    if (line.indexOf('|') !== -1) parts = line.split('|');
+    else parts = line.split(',');
+    parts = parts.map(function(p) { return p.trim(); }).filter(function(p) { return p.length > 0; });
+    if (parts.length < 3) return; // need question + correct + at least 1 wrong
+    var question = parts[0];
+    var correct = parts[1];
+    var wrongs = parts.slice(2, 5);
+    // Build options (up to 4). Correct goes in at random slot.
+    var options = wrongs.slice();
+    var correctIdx = Math.floor(Math.random() * (options.length + 1));
+    options.splice(correctIdx, 0, correct);
+    out.push({ question: question, options: options, correct: correctIdx });
+  });
+  return out;
+}
+
+function gsParseJson(raw) {
+  var data;
+  try { data = JSON.parse(raw); } catch(e) { return []; }
+  if (!Array.isArray(data)) return [];
+  var out = [];
+  data.forEach(function(item) {
+    if (!item || typeof item.question !== 'string') return;
+    if (Array.isArray(item.options) && typeof item.correct === 'number') {
+      if (item.options.length >= 2 && item.correct >= 0 && item.correct < item.options.length) {
+        out.push({ question: item.question, options: item.options.slice(0, 4), correct: item.correct });
+      }
+    } else if (typeof item.correct === 'string' && Array.isArray(item.wrong)) {
+      var options = item.wrong.slice(0, 3);
+      var correctIdx = Math.floor(Math.random() * (options.length + 1));
+      options.splice(correctIdx, 0, item.correct);
+      out.push({ question: item.question, options: options, correct: correctIdx });
+    }
+  });
+  return out;
+}
+
+function gsHandleFile(ev) {
+  var file = ev.target.files[0];
+  var statusEl = document.getElementById('gs-upload-status');
+  if (!file) { if (statusEl) statusEl.textContent = ''; return; }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var content = e.target.result;
+    var parsed = [];
+    if (file.name.toLowerCase().endsWith('.json')) {
+      parsed = gsParseJson(content);
+    } else {
+      parsed = gsParseTextLines(content);
+    }
+    if (parsed.length === 0) {
+      statusEl.innerHTML = '<span style="color:var(--accent-red)">Could not parse any questions from this file. Check the format.</span>';
+      gsQuestions = [];
+    } else {
+      statusEl.innerHTML = '<span style="color:var(--accent-green)">\u2713 Loaded ' + parsed.length + ' question' + (parsed.length !== 1 ? 's' : '') + ' from ' + escHtml(file.name) + '</span>';
+      gsQuestions = parsed;
+    }
+  };
+  reader.onerror = function() {
+    if (statusEl) statusEl.innerHTML = '<span style="color:var(--accent-red)">Failed to read file.</span>';
+  };
+  reader.readAsText(file);
+}
+
+function gsLoadFromQuiz(quizId) {
+  var quiz = qzQuizzes.find(function(q) { return q.id === quizId; });
+  if (!quiz) return [];
+  var out = [];
+  quiz.questions.forEach(function(q) {
+    if (!q.question || !q.question.trim()) return;
+    var opts = q.options.slice();
+    // For T/F ensure exactly two options
+    out.push({ question: q.question, options: opts, correct: q.correct });
+  });
+  return out;
+}
+
+function gsGatherQuestions() {
+  if (gsActiveSource === 'quiz') {
+    var sel = document.getElementById('gs-quiz-select');
+    if (!sel || !sel.value) return [];
+    return gsLoadFromQuiz(sel.value);
+  } else if (gsActiveSource === 'paste') {
+    var raw = document.getElementById('gs-paste-input').value || '';
+    return gsParseTextLines(raw);
+  } else if (gsActiveSource === 'upload') {
+    return gsQuestions.slice();
+  }
+  return [];
+}
+
+function gsStartGame() {
+  var questions = gsGatherQuestions();
+  if (!questions || questions.length === 0) {
+    alert('Add some questions first! Pick a saved quiz, paste lines in the format shown, or upload a file.');
+    return;
+  }
+
+  gsQuestions = questions;
+  gsOrder = [];
+  for (var i = 0; i < gsQuestions.length; i++) gsOrder.push(i);
+  // Shuffle order
+  for (var i = gsOrder.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = gsOrder[i]; gsOrder[i] = gsOrder[j]; gsOrder[j] = tmp;
+  }
+
+  gsPos = 0;
+  gsScore = 0;
+  gsStreak = 0;
+  gsCorrectCount = 0;
+  gsWrongCount = 0;
+  gsTotalAnswered = 0;
+  gsLives = 3;
+  gsLocked = false;
+
+  gsMode = document.getElementById('gs-mode').value;
+  gsQPerTimer = parseInt(document.getElementById('gs-difficulty').value, 10) || 10;
+
+  document.getElementById('gs-setup-view').style.display = 'none';
+  document.getElementById('gs-over-view').style.display = 'none';
+  document.getElementById('gs-play-view').style.display = 'block';
+
+  // Configure HUD labels
+  var centerLabel = document.getElementById('gs-center-label');
+  if (gsMode === 'time') {
+    centerLabel.textContent = 'Time';
+    gsTimeLeft = 60;
+    document.getElementById('gs-center-value').textContent = gsTimeLeft;
+    gsClearGlobalTimer();
+    gsGlobalTimer = setInterval(function() {
+      gsTimeLeft--;
+      document.getElementById('gs-center-value').textContent = gsTimeLeft;
+      if (gsTimeLeft <= 0) gsEndGame('Time\'s Up!');
+    }, 1000);
+  } else if (gsMode === 'lives') {
+    centerLabel.textContent = 'Q-Time';
+    document.getElementById('gs-center-value').textContent = gsQPerTimer;
+  } else {
+    centerLabel.textContent = 'Remaining';
+    document.getElementById('gs-center-value').textContent = gsOrder.length;
+  }
+
+  gsUpdateHUD();
+  gsShowQuestion();
+}
+
+function gsUpdateHUD() {
+  document.getElementById('gs-score').textContent = gsScore;
+  document.getElementById('gs-streak').textContent = '×' + Math.max(1, gsStreak + 1);
+  var hearts = '';
+  for (var i = 0; i < gsLives; i++) hearts += '♥';
+  for (var i = gsLives; i < 3; i++) hearts += '<span style="opacity:0.25">♥</span>';
+  document.getElementById('gs-lives').innerHTML = hearts;
+  document.getElementById('gs-qcount').textContent = gsTotalAnswered;
+}
+
+function gsShowQuestion() {
+  if (gsMode !== 'time' && gsPos >= gsOrder.length) {
+    // Ran out of questions in sprint/lives mode
+    gsEndGame(gsMode === 'sprint' ? 'Sprint Complete!' : 'Out of Questions');
+    return;
+  }
+  // In time mode loop over questions indefinitely
+  var idx = gsOrder[gsPos % gsOrder.length];
+  var q = gsQuestions[idx];
+  if (!q) { gsEndGame('No more questions'); return; }
+
+  gsLocked = false;
+  document.getElementById('gs-feedback').innerHTML = '';
+  document.getElementById('gs-question-text').textContent = q.question;
+
+  var grid = document.getElementById('gs-options-grid');
+  var letters = ['A', 'B', 'C', 'D'];
+  var html = '';
+  q.options.forEach(function(opt, oi) {
+    html += '<button class="gs-option-btn" data-oi="' + oi + '" onclick="gsAnswer(' + oi + ')">' +
+      '<span class="gs-option-letter">' + letters[oi] + '</span>' +
+      '<span class="gs-option-text">' + escHtml(opt) + '</span>' +
+      '</button>';
+  });
+  grid.innerHTML = html;
+
+  // Per-question timer (not used in time mode which uses global timer)
+  gsClearQuestionTimer();
+  if (gsMode !== 'time') {
+    gsTimeLeft = gsQPerTimer;
+    document.getElementById('gs-center-value').textContent = gsTimeLeft;
+    gsSetTimerBar(100);
+    var startTs = Date.now();
+    var durationMs = gsQPerTimer * 1000;
+    gsQuestionTimer = setInterval(function() {
+      var remaining = Math.max(0, durationMs - (Date.now() - startTs));
+      var secs = Math.ceil(remaining / 1000);
+      if (secs !== gsTimeLeft) {
+        gsTimeLeft = secs;
+        document.getElementById('gs-center-value').textContent = gsTimeLeft;
+      }
+      gsSetTimerBar((remaining / durationMs) * 100);
+      if (remaining <= 0) {
+        gsClearQuestionTimer();
+        gsTimeOut();
+      }
+    }, 50);
+  } else {
+    // In time mode use global timer as timer bar reference
+    gsSetTimerBar((gsTimeLeft / 60) * 100);
+  }
+}
+
+function gsSetTimerBar(pct) {
+  var bar = document.getElementById('gs-timer-bar');
+  if (!bar) return;
+  bar.style.width = Math.max(0, Math.min(100, pct)) + '%';
+  if (pct < 25) bar.style.background = 'var(--accent-red)';
+  else if (pct < 50) bar.style.background = 'var(--accent-orange)';
+  else bar.style.background = 'linear-gradient(90deg, var(--accent-cyan), var(--accent-green))';
+}
+
+function gsAnswer(oi) {
+  if (gsLocked) return;
+  gsLocked = true;
+  gsClearQuestionTimer();
+
+  var idx = gsOrder[gsPos % gsOrder.length];
+  var q = gsQuestions[idx];
+  var isCorrect = (oi === q.correct);
+  gsTotalAnswered++;
+
+  // Highlight buttons
+  var btns = document.querySelectorAll('#gs-options-grid .gs-option-btn');
+  btns.forEach(function(b) {
+    var bi = parseInt(b.getAttribute('data-oi'), 10);
+    if (bi === q.correct) b.classList.add('gs-correct');
+    else if (bi === oi) b.classList.add('gs-wrong');
+    b.disabled = true;
+  });
+
+  var feedback = document.getElementById('gs-feedback');
+  if (isCorrect) {
+    gsCorrectCount++;
+    gsStreak++;
+    var streakMult = Math.min(5, 1 + Math.floor(gsStreak / 3));
+    var timeBonus = gsMode !== 'time' ? Math.max(0, gsTimeLeft) : 0;
+    var gained = 10 * streakMult + timeBonus;
+    gsScore += gained;
+    feedback.innerHTML = '<span class="gs-fb-correct">\u2713 Correct! +' + gained +
+      (streakMult > 1 ? ' (×' + streakMult + ' streak)' : '') +
+      (timeBonus ? ' +' + timeBonus + ' time bonus' : '') + '</span>';
+    var card = document.getElementById('gs-question-card');
+    card.classList.remove('gs-shake');
+    card.classList.add('gs-pulse');
+    setTimeout(function() { card.classList.remove('gs-pulse'); }, 400);
+  } else {
+    gsWrongCount++;
+    gsStreak = 0;
+    gsScore = Math.max(0, gsScore - 3);
+    feedback.innerHTML = '<span class="gs-fb-wrong">\u2717 Wrong! -3</span>';
+    var card = document.getElementById('gs-question-card');
+    card.classList.remove('gs-pulse');
+    card.classList.add('gs-shake');
+    setTimeout(function() { card.classList.remove('gs-shake'); }, 400);
+    if (gsMode === 'lives') {
+      gsLives--;
+      if (gsLives <= 0) {
+        gsUpdateHUD();
+        setTimeout(function() { gsEndGame('No Lives Left'); }, 900);
+        return;
+      }
+    }
+  }
+
+  gsUpdateHUD();
+
+  setTimeout(function() {
+    gsPos++;
+    gsShowQuestion();
+  }, 900);
+}
+
+function gsTimeOut() {
+  if (gsLocked) return;
+  gsLocked = true;
+  gsStreak = 0;
+  gsTotalAnswered++;
+  gsWrongCount++;
+  var idx = gsOrder[gsPos % gsOrder.length];
+  var q = gsQuestions[idx];
+  var btns = document.querySelectorAll('#gs-options-grid .gs-option-btn');
+  btns.forEach(function(b) {
+    var bi = parseInt(b.getAttribute('data-oi'), 10);
+    if (bi === q.correct) b.classList.add('gs-correct');
+    b.disabled = true;
+  });
+  document.getElementById('gs-feedback').innerHTML = '<span class="gs-fb-wrong">\u23F1 Time\u2019s up!</span>';
+  if (gsMode === 'lives') {
+    gsLives--;
+    gsUpdateHUD();
+    if (gsLives <= 0) {
+      setTimeout(function() { gsEndGame('No Lives Left'); }, 900);
+      return;
+    }
+  }
+  setTimeout(function() {
+    gsPos++;
+    gsShowQuestion();
+  }, 1100);
+}
+
+function gsClearGlobalTimer() {
+  if (gsGlobalTimer) { clearInterval(gsGlobalTimer); gsGlobalTimer = null; }
+}
+function gsClearQuestionTimer() {
+  if (gsQuestionTimer) { clearInterval(gsQuestionTimer); gsQuestionTimer = null; }
+}
+
+function gsEndGame(title) {
+  gsClearGlobalTimer();
+  gsClearQuestionTimer();
+
+  var hs = parseInt(localStorage.getItem('mt_gs_highscore') || '0', 10);
+  var newHighScore = false;
+  if (gsScore > hs) {
+    hs = gsScore;
+    localStorage.setItem('mt_gs_highscore', String(hs));
+    newHighScore = true;
+  }
+
+  document.getElementById('gs-play-view').style.display = 'none';
+  document.getElementById('gs-over-view').style.display = 'block';
+
+  document.getElementById('gs-over-title').textContent = title || 'Game Over';
+  document.getElementById('gs-over-score').textContent = gsScore;
+
+  var msg = '';
+  if (newHighScore) msg = '\u2B50 New High Score! Absolutely elite performance.';
+  else if (gsScore === 0) msg = 'Everyone starts somewhere \u2014 review the material and try again!';
+  else if (gsScore < 50) msg = 'Solid warm-up. Keep grinding those reps.';
+  else if (gsScore < 150) msg = 'Nice work! You\'re locked in.';
+  else msg = 'George Kittle TD celebration \u2014 you\'re cooking!';
+  document.getElementById('gs-over-msg').textContent = msg;
+
+  var acc = gsTotalAnswered ? Math.round((gsCorrectCount / gsTotalAnswered) * 100) : 0;
+  document.getElementById('gs-over-stats').innerHTML =
+    '<div class="gs-stat"><span>Correct</span><b>' + gsCorrectCount + '</b></div>' +
+    '<div class="gs-stat"><span>Wrong</span><b>' + gsWrongCount + '</b></div>' +
+    '<div class="gs-stat"><span>Accuracy</span><b>' + acc + '%</b></div>' +
+    '<div class="gs-stat"><span>High Score</span><b>' + hs + '</b></div>';
+}
+
+function gsQuit() {
+  if (!confirm('End the current game?')) return;
+  gsEndGame('Game Ended');
+}
+
+function gsBackToSetup() {
+  document.getElementById('gs-over-view').style.display = 'none';
+  document.getElementById('gs-play-view').style.display = 'none';
+  document.getElementById('gs-setup-view').style.display = 'block';
+  gsPopulateQuizDropdown();
+  gsRenderHighScore();
+}
+
+// ============================================
 // INIT - Render study tools on page load
 // ============================================
 window.addEventListener('DOMContentLoaded', function() {
 fcRenderDecks();
 qzRenderList();
+gsInit();
 });
