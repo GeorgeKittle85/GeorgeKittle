@@ -39,6 +39,9 @@
       <div class="nav-item" data-panel="quizmaker" onclick="showPanel('quizmaker')">
         <span class="nav-icon">&#x270F;&#xFE0F;</span> Quiz Maker
       </div>
+      <div class="nav-item" data-panel="gamestudy" onclick="showPanel('gamestudy')">
+        <span class="nav-icon">&#x1F3AE;</span> Game Study
+      </div>
 
     </nav>
 
@@ -69,7 +72,13 @@
       <div class="card-emoji">&#x270F;&#xFE0F;</div>
       <div class="card-name">Quiz Maker</div>
       <div class="card-courses">Study Tools</div>
-      <div class="card-preview">Build custom quizzes with multiple choice &amp; true/false questions.</div>
+      <div class="card-preview">Build custom quizzes with multiple choice &amp; true/false questions. Shuffle-ready!</div>
+    </div>
+    <div class="home-card animate-in" onclick="showPanel('gamestudy')">
+      <div class="card-emoji">&#x1F3AE;</div>
+      <div class="card-name">Game Study</div>
+      <div class="card-courses">Study Tools</div>
+      <div class="card-preview">Turn your questions into an arcade-style challenge. Beat the clock and chase high scores!</div>
     </div>
   </div>
 </div>
@@ -180,6 +189,7 @@
         </div>
         <div class="btn-group" style="margin-top:0">
           <button class="btn btn-primary" onclick="qzStartQuiz()">Take Quiz</button>
+          <button class="btn btn-secondary" onclick="qzShuffleQuiz()">Shuffle Take</button>
         </div>
       </div>
 
@@ -199,6 +209,7 @@
   <!-- Quiz Taking View -->
   <div id="qz-take-mode" style="display:none">
     <button class="back-link" onclick="qzBackToEditor()">&#x2190; Back to Editor</button>
+    <div id="qz-shuffle-badge-area" style="text-align:center;margin-bottom:12px"></div>
     <div id="qz-questions-container">
       <!-- Questions render here during quiz -->
     </div>
@@ -219,6 +230,152 @@
     <div class="btn-group" style="justify-content:center;margin-top:24px">
       <button class="btn btn-primary" onclick="qzStartQuiz()">Retake Quiz</button>
       <button class="btn btn-secondary" onclick="qzBackToEditor()">Edit Quiz</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ======== GAME STUDY ======== -->
+<div class="tool-panel" id="panel-gamestudy">
+  <div class="main-header">
+    <h1>Game Study &mdash; Quiz Blaster</h1>
+    <p>Turn any question set into a fast-paced arcade challenge. Load your own questions or pick a saved quiz, then race the clock!</p>
+  </div>
+
+  <!-- Setup View -->
+  <div id="gs-setup-view">
+    <div class="card">
+      <div class="card-title">Pick Your Question Source</div>
+      <div class="card-desc">Choose a saved quiz, paste questions, or upload a file. Then hit Start.</div>
+
+      <div class="gs-source-tabs">
+        <button class="gs-tab-btn active" onclick="gsSwitchTab('quiz', this)">&#x1F4DA; Use Saved Quiz</button>
+        <button class="gs-tab-btn" onclick="gsSwitchTab('paste', this)">&#x1F4DD; Paste Questions</button>
+        <button class="gs-tab-btn" onclick="gsSwitchTab('upload', this)">&#x1F4C1; Upload File</button>
+      </div>
+
+      <!-- Tab: Saved Quiz -->
+      <div class="gs-tab-panel active" id="gs-tab-quiz">
+        <div class="form-group">
+          <label class="form-label">Select a quiz</label>
+          <select class="form-input" id="gs-quiz-select"></select>
+        </div>
+        <p class="gs-hint">Don't have quizzes? Build one in <a href="#" onclick="showPanel('quizmaker');return false;">Quiz Maker</a> first.</p>
+      </div>
+
+      <!-- Tab: Paste -->
+      <div class="gs-tab-panel" id="gs-tab-paste">
+        <div class="form-group">
+          <label class="form-label">Paste your questions (one per line)</label>
+          <textarea class="form-input" id="gs-paste-input" rows="8" placeholder="Question | Correct Answer | Wrong1 | Wrong2 | Wrong3
+Capital of France? | Paris | London | Berlin | Madrid
+2 + 2 | 4 | 3 | 5 | 22"></textarea>
+        </div>
+        <p class="gs-hint">Format per line: <code>Question | CorrectAnswer | WrongAnswer | WrongAnswer | WrongAnswer</code>. Separate fields with <code>|</code> (pipe). Minimum: question + correct + one wrong.</p>
+      </div>
+
+      <!-- Tab: Upload -->
+      <div class="gs-tab-panel" id="gs-tab-upload">
+        <div class="form-group">
+          <label class="form-label">Upload a .txt, .csv, or .json file</label>
+          <input type="file" class="form-input" id="gs-file-input" accept=".txt,.csv,.json" onchange="gsHandleFile(event)">
+        </div>
+        <p class="gs-hint">
+          Supported formats:<br>
+          &bull; <b>TXT/CSV</b>: one question per line, fields separated by <code>|</code> or <code>,</code>.<br>
+          &bull; <b>JSON</b>: array of <code>{question, correct, wrong:[...]}</code> or <code>{question, options:[...], correct:0}</code>.
+        </p>
+        <div id="gs-upload-status" class="gs-hint" style="margin-top:10px"></div>
+      </div>
+
+      <div class="section-divider"><span>Game Settings</span></div>
+
+      <div class="gs-settings-row">
+        <div class="form-group">
+          <label class="form-label">Game Mode</label>
+          <select class="form-input" id="gs-mode">
+            <option value="time">Beat the Clock (60s)</option>
+            <option value="lives">Survival (3 Lives)</option>
+            <option value="sprint">Sprint (all questions, no timer)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Difficulty (time per question)</label>
+          <select class="form-input" id="gs-difficulty">
+            <option value="15">Easy &mdash; 15s per Q</option>
+            <option value="10" selected>Normal &mdash; 10s per Q</option>
+            <option value="6">Hard &mdash; 6s per Q</option>
+            <option value="4">Insane &mdash; 4s per Q</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="btn-group" style="justify-content:center;margin-top:20px">
+        <button class="btn btn-primary" onclick="gsStartGame()" style="min-width:180px;font-size:16px">&#x25B6; Start Game</button>
+      </div>
+
+      <div class="gs-highscore-card" id="gs-highscore-display">
+        <div class="gs-hs-label">&#x1F3C6; High Score</div>
+        <div class="gs-hs-value" id="gs-hs-value">0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Play View -->
+  <div id="gs-play-view" style="display:none">
+    <div class="gs-hud">
+      <div class="gs-hud-item">
+        <div class="gs-hud-label">Score</div>
+        <div class="gs-hud-value" id="gs-score">0</div>
+      </div>
+      <div class="gs-hud-item">
+        <div class="gs-hud-label">Streak</div>
+        <div class="gs-hud-value" id="gs-streak">&times;1</div>
+      </div>
+      <div class="gs-hud-item">
+        <div class="gs-hud-label" id="gs-center-label">Time</div>
+        <div class="gs-hud-value" id="gs-center-value">60</div>
+      </div>
+      <div class="gs-hud-item">
+        <div class="gs-hud-label">Lives</div>
+        <div class="gs-hud-value" id="gs-lives">&hearts;&hearts;&hearts;</div>
+      </div>
+      <div class="gs-hud-item">
+        <div class="gs-hud-label">Q</div>
+        <div class="gs-hud-value" id="gs-qcount">0</div>
+      </div>
+    </div>
+
+    <div class="gs-timer-bar-wrap">
+      <div class="gs-timer-bar" id="gs-timer-bar"></div>
+    </div>
+
+    <div class="gs-stage" id="gs-stage">
+      <div class="gs-question-card" id="gs-question-card">
+        <div class="gs-q-text" id="gs-question-text">Loading...</div>
+      </div>
+
+      <div class="gs-options-grid" id="gs-options-grid"></div>
+
+      <div class="gs-feedback" id="gs-feedback"></div>
+    </div>
+
+    <div class="btn-group" style="justify-content:center;margin-top:16px">
+      <button class="btn btn-secondary" onclick="gsQuit()">End Game</button>
+    </div>
+  </div>
+
+  <!-- Game Over View -->
+  <div id="gs-over-view" style="display:none">
+    <div class="gs-gameover-box">
+      <div class="gs-gameover-title" id="gs-over-title">Game Over</div>
+      <div class="gs-gameover-score" id="gs-over-score">0</div>
+      <div class="gs-gameover-msg" id="gs-over-msg"></div>
+      <div class="gs-gameover-stats" id="gs-over-stats"></div>
+      <div class="btn-group" style="justify-content:center;margin-top:20px">
+        <button class="btn btn-primary" onclick="gsStartGame()">Play Again</button>
+        <button class="btn btn-secondary" onclick="gsBackToSetup()">Change Setup</button>
+      </div>
     </div>
   </div>
 </div>
