@@ -1985,7 +1985,8 @@ var firstInput = overlay.querySelector('input');
 if (firstInput) firstInput.focus();
 }, 100);
 
-document.getElementById('modal-submit-btn').onclick = function() {
+var button = document.getElementById('modal-submit-btn');
+button.onclick = function() {
 var values = {};
 fields.forEach(function(f) { values[f.id] = document.getElementById(f.id).value; });
 onSubmit(values);
@@ -1995,7 +1996,7 @@ fields.forEach(function(f) {
 var input = document.getElementById(f.id);
 if (input) {
 input.addEventListener('keydown', function(e) {
-if (e.key === 'Enter') document.getElementById('modal-submit-btn').click();
+if (e.key === 'Enter') button.click();
 });
 }
 });
