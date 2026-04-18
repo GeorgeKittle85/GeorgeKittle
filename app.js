@@ -1066,6 +1066,7 @@ stActivePauseTime = null;
 stElapsedMs = 0;
 stAccumulatedMs = 0;
 
+showPanel('studytime');
 stRenderActiveSession();
 stStartTimer();
 }
