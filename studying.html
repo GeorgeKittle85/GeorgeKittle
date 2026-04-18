@@ -43,6 +43,9 @@
       <div class="nav-item" data-panel="gamestudy" onclick="showPanel('gamestudy')">
         <span class="nav-icon">&#x1F3AE;</span> Game Study
       </div>
+      <div class="nav-item" data-panel="studytime" onclick="showPanel('studytime')">
+        <span class="nav-icon">&#x23F1;&#xFE0F;</span> Study Time Tracker
+      </div>
 
     </nav>
 
@@ -376,6 +379,38 @@ Capital of France? | Paris | London | Berlin | Madrid
       <div class="btn-group" style="justify-content:center;margin-top:20px">
         <button class="btn btn-primary" onclick="gsStartGame()">Play Again</button>
         <button class="btn btn-secondary" onclick="gsBackToSetup()">Change Setup</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======== STUDY TIME TRACKER ======== -->
+<div class="tool-panel" id="panel-studytime">
+  <div class="main-header">
+    <h1>Study Time Tracker</h1>
+    <p>Track your study sessions, monitor progress, and build consistent study habits.</p>
+  </div>
+
+  <!-- Session List View -->
+  <div id="st-session-list">
+    <div id="st-stats-dashboard" class="st-stats-grid"></div>
+    <div class="section-divider" style="margin-top:24px"><span>Session History</span></div>
+    <div class="st-session-grid" id="st-session-grid">
+      <!-- Sessions render here -->
+    </div>
+  </div>
+
+  <!-- Active Session View -->
+  <div id="st-active-session" style="display:none">
+    <button class="back-link" onclick="stBackToList()">&#x2190; Back to Sessions</button>
+    <div class="st-session-container">
+      <div class="st-timer-display" id="st-timer-display">00:00:00</div>
+      <div class="st-session-info">
+        <input type="text" class="st-session-name" id="st-session-name" placeholder="Session name (optional)">
+      </div>
+      <div class="st-controls">
+        <button class="btn btn-secondary" id="st-pause-btn" onclick="stTogglePause()">Pause</button>
+        <button class="btn btn-danger" onclick="stEndSession()">End Session</button>
       </div>
     </div>
   </div>

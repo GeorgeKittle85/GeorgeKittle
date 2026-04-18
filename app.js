@@ -18,6 +18,9 @@ if (id === 'gamestudy' && typeof gsPopulateQuizDropdown === 'function') {
   gsPopulateQuizDropdown();
   gsRenderHighScore();
 }
+if (id === 'studytime' && typeof stRenderSessionList === 'function') {
+  stRenderSessionList();
+}
 }
 
 function toggleSidebar() {
@@ -991,6 +994,301 @@ return raw ? JSON.parse(raw) : fallback;
 
 function stSave(key, data) {
 try { localStorage.setItem(key, JSON.stringify(data)); } catch(e) { console.warn('Storage full:', e); }
+}
+
+// ============================================
+// STUDY TIME TRACKER
+// ============================================
+let stSessions = stLoad('mt_st_sessions', []);
+let stActiveSessionId = null;
+let stActiveStartTime = null;
+let stActivePauseTime = null;
+let stTimerInterval = null;
+let stElapsedMs = 0;
+
+function stFormatTime(ms) {
+const totalSeconds = Math.floor(ms / 1000);
+const hours = Math.floor(totalSeconds / 3600);
+const minutes = Math.floor((totalSeconds % 3600) / 60);
+const seconds = totalSeconds % 60;
+
+if (hours > 0) {
+return `${hours}h ${minutes}m ${seconds}s`;
+} else if (minutes > 0) {
+return `${minutes}m ${seconds}s`;
+} else {
+return `${seconds}s`;
+}
+}
+
+function stFormatTimeHMS(ms) {
+const totalSeconds = Math.floor(ms / 1000);
+const hours = Math.floor(totalSeconds / 3600);
+const minutes = Math.floor((totalSeconds % 3600) / 60);
+const seconds = totalSeconds % 60;
+
+return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
+function stStartSession(name = null) {
+const session = {
+id: generateId(),
+name: name || 'Session ' + new Date().toLocaleDateString(),
+startTime: Date.now(),
+endTime: null,
+duration: 0,
+pauseCount: 0,
+notes: '',
+isPaused: false,
+sessionBusts: []
+};
+
+stSessions.push(session);
+stSave('mt_st_sessions', stSessions);
+
+stActiveSessionId = session.id;
+stActiveStartTime = Date.now();
+stActivePauseTime = null;
+stElapsedMs = 0;
+
+stRenderActiveSession();
+stStartTimer();
+}
+
+function stStartTimer() {
+if (stTimerInterval) clearInterval(stTimerInterval);
+
+stTimerInterval = setInterval(() => {
+  if (!stActivePauseTime && stActiveStartTime) {
+    stElapsedMs = Date.now() - stActiveStartTime;
+    const display = document.getElementById('st-timer-display');
+    if (display) {
+      display.textContent = stFormatTimeHMS(stElapsedMs);
+      display.classList.remove('paused');
+    }
+  }
+}, 100);
+}
+
+function stTogglePause() {
+if (stActivePauseTime) {
+stResumeSession();
+} else {
+stPauseSession();
+}
+}
+
+function stPauseSession() {
+if (!stActiveSessionId) return;
+
+stActivePauseTime = Date.now();
+if (stTimerInterval) clearInterval(stTimerInterval);
+
+const display = document.getElementById('st-timer-display');
+if (display) {
+display.classList.add('paused');
+}
+
+const btn = document.getElementById('st-pause-btn');
+if (btn) btn.textContent = 'Resume';
+
+const session = stSessions.find(s => s.id === stActiveSessionId);
+if (session) {
+session.isPaused = true;
+session.pauseCount = (session.pauseCount || 0) + 1;
+stSave('mt_st_sessions', stSessions);
+}
+}
+
+function stResumeSession() {
+if (!stActiveSessionId || !stActivePauseTime) return;
+
+const pauseDuration = Date.now() - stActivePauseTime;
+stActiveStartTime = Date.now();
+stActivePauseTime = null;
+
+const display = document.getElementById('st-timer-display');
+if (display) {
+display.classList.remove('paused');
+}
+
+const btn = document.getElementById('st-pause-btn');
+if (btn) btn.textContent = 'Pause';
+
+const session = stSessions.find(s => s.id === stActiveSessionId);
+if (session) {
+session.isPaused = false;
+stSave('mt_st_sessions', stSessions);
+}
+
+stStartTimer();
+}
+
+function stEndSession(notes = null) {
+if (!stActiveSessionId) return;
+
+if (stTimerInterval) clearInterval(stTimerInterval);
+
+const session = stSessions.find(s => s.id === stActiveSessionId);
+if (session) {
+session.endTime = Date.now();
+session.duration = session.endTime - session.startTime;
+if (notes) session.notes = notes;
+stSave('mt_st_sessions', stSessions);
+}
+
+stActiveSessionId = null;
+stActiveStartTime = null;
+stActivePauseTime = null;
+stElapsedMs = 0;
+
+stRenderSessionList();
+}
+
+function stDeleteSession(sessionId) {
+if (!confirm('Delete this session?')) return;
+stSessions = stSessions.filter(s => s.id !== sessionId);
+stSave('mt_st_sessions', stSessions);
+stRenderSessionList();
+}
+
+function stRenderSessionList() {
+const listDiv = document.getElementById('st-session-list');
+if (!listDiv) return;
+
+let statsHtml = '';
+if (stSessions.length > 0) {
+const totalMs = stSessions.reduce((sum, s) => sum + (s.duration || 0), 0);
+const avgMs = totalMs / stSessions.length;
+const longestMs = Math.max(...stSessions.map(s => s.duration || 0));
+
+statsHtml = `
+  <div class="st-stat-card">
+    <span class="st-stat-label">Total Study Time</span>
+    <div class="st-stat-value">${stFormatTime(totalMs)}</div>
+  </div>
+  <div class="st-stat-card">
+    <span class="st-stat-label">Sessions</span>
+    <div class="st-stat-value">${stSessions.length}</div>
+  </div>
+  <div class="st-stat-card">
+    <span class="st-stat-label">Avg. Length</span>
+    <div class="st-stat-value">${stFormatTime(avgMs)}</div>
+  </div>
+  <div class="st-stat-card">
+    <span class="st-stat-label">Longest</span>
+    <div class="st-stat-value">${stFormatTime(longestMs)}</div>
+  </div>
+`;
+}
+
+const statsDiv = document.getElementById('st-stats-dashboard');
+if (statsDiv) statsDiv.innerHTML = statsHtml;
+
+const grid = document.getElementById('st-session-grid');
+if (!grid) return;
+
+let html = `<div class="st-new-session-card" onclick="stStartSession()">
+  <div class="st-new-session-icon">▶</div>
+  <div class="st-new-session-text">Start New Session</div>
+</div>`;
+
+stSessions.forEach(session => {
+const durationStr = stFormatTime(session.duration || 0);
+const startDate = new Date(session.startTime);
+const dateStr = startDate.toLocaleDateString();
+const timeStr = startDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+html += `<div class="st-session-card" onclick="stShowSessionDetails('${session.id}')">
+  <div class="st-session-badge">Completed</div>
+  <div class="st-session-name">${escHtml(session.name)}</div>
+  <div class="st-session-time">${dateStr} at ${timeStr}</div>
+  <div class="st-session-duration">${durationStr}</div>
+</div>`;
+});
+
+if (stSessions.length === 0) {
+html += `<div class="empty-state" style="grid-column:1/-1">
+  <div class="empty-icon">⏱️</div>
+  <p>No study sessions yet - start your first one!</p>
+</div>`;
+}
+
+grid.innerHTML = html;
+}
+
+function stRenderActiveSession() {
+const listDiv = document.getElementById('st-session-list');
+const activeDiv = document.getElementById('st-active-session');
+
+if (listDiv) listDiv.style.display = 'none';
+if (activeDiv) activeDiv.style.display = 'block';
+
+const session = stSessions.find(s => s.id === stActiveSessionId);
+if (session && activeDiv) {
+const nameInput = activeDiv.querySelector('.st-session-name');
+if (nameInput) nameInput.value = session.name;
+
+const btn = activeDiv.querySelector('#st-pause-btn');
+if (btn) btn.textContent = stActivePauseTime ? 'Resume' : 'Pause';
+}
+}
+
+function stBackToList() {
+if (stActiveSessionId) {
+if (!confirm('You have an active session. End it?')) return;
+stEndSession();
+} else {
+const listDiv = document.getElementById('st-session-list');
+const activeDiv = document.getElementById('st-active-session');
+if (listDiv) listDiv.style.display = 'block';
+if (activeDiv) activeDiv.style.display = 'none';
+}
+}
+
+function stShowSessionDetails(sessionId) {
+const session = stSessions.find(s => s.id === sessionId);
+if (!session) return;
+
+showModal(`Session Details`, [], () => {});
+
+const modal = document.getElementById('app-modal');
+if (modal) {
+const modalBox = modal.querySelector('.modal-box');
+if (modalBox) {
+  const startDate = new Date(session.startTime);
+  const endDate = new Date(session.endTime);
+
+  modalBox.innerHTML = `
+    <div class="st-detail-header">
+      <div class="st-detail-name">${escHtml(session.name)}</div>
+      <button class="btn btn-danger btn-sm" onclick="stDeleteSession('${session.id}'); closeModal()">Delete</button>
+    </div>
+    <div class="st-detail-grid">
+      <div class="st-detail-item">
+        <span class="st-detail-label">Start Time</span>
+        <div class="st-detail-value">${startDate.toLocaleString()}</div>
+      </div>
+      <div class="st-detail-item">
+        <span class="st-detail-label">End Time</span>
+        <div class="st-detail-value">${endDate.toLocaleString()}</div>
+      </div>
+      <div class="st-detail-item">
+        <span class="st-detail-label">Duration</span>
+        <div class="st-detail-value">${stFormatTime(session.duration)}</div>
+      </div>
+      <div class="st-detail-item">
+        <span class="st-detail-label">Pause Count</span>
+        <div class="st-detail-value">${session.pauseCount || 0}</div>
+      </div>
+    </div>
+    ${session.notes ? `<div class="st-detail-notes"><span class="st-detail-notes-label">Notes</span><div class="st-detail-notes-text">${escHtml(session.notes)}</div></div>` : ''}
+    <div style="margin-top:20px;text-align:right">
+      <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+    </div>
+  `;
+}
+}
 }
 
 function generateId() {
@@ -2917,4 +3215,5 @@ initTheme();
 fcRenderDecks();
 qzRenderList();
 gsInit();
+stRenderSessionList();
 });
