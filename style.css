@@ -174,30 +174,61 @@ html[data-theme="light"] body::before {
   text-transform: uppercase;
 }
 
-.theme-toggle-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-sm);
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  color: var(--text-primary);
-  font-size: 18px;
+/* ---- THEME SWITCH (fixed top-right) ---- */
+.theme-switch-wrap {
+  position: fixed;
+  top: 16px;
+  right: 20px;
+  z-index: 9999;
+}
+
+.theme-switch {
+  position: relative;
+  display: inline-block;
+  width: 52px;
+  height: 28px;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--transition-fast);
-  flex-shrink: 0;
 }
 
-.theme-toggle-btn:hover {
-  background: var(--bg-card-hover);
-  border-color: var(--accent-cyan);
-  box-shadow: 0 0 12px rgba(0,212,255,0.2);
+.theme-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
 }
 
-.theme-toggle-btn:active {
-  transform: scale(0.95);
+.theme-switch-slider {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: #1c1c2e;
+  border: 2px solid rgba(255,255,255,0.15);
+  border-radius: 28px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+.theme-switch-slider::before {
+  content: '';
+  position: absolute;
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  top: 3px;
+  background: #e8e8f0;
+  border-radius: 50%;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+.theme-switch input:checked + .theme-switch-slider {
+  background: #e8e8f0;
+  border-color: rgba(0,0,0,0.12);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.theme-switch input:checked + .theme-switch-slider::before {
+  transform: translateX(24px);
+  background: #1c1c2e;
 }
 
 .sidebar-nav {
@@ -2785,6 +2816,23 @@ html[data-theme="light"] body::before {
   display: flex;
   gap: 10px;
   justify-content: flex-end;
+}
+
+.st-delete-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+  border-radius: 4px;
+  transition: color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.st-delete-btn:hover {
+  color: var(--accent-red);
 }
 
 /* Responsive */

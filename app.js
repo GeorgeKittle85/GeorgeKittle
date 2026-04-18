@@ -50,11 +50,8 @@ updateThemeButton(newTheme);
 }
 
 function updateThemeButton(theme) {
-const btn = document.getElementById('theme-toggle-btn');
-if (btn) {
-btn.setAttribute('aria-label', theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode');
-btn.innerHTML = theme === 'light' ? '🌙' : '☀️';
-}
+const cb = document.getElementById('theme-toggle-checkbox');
+if (cb) cb.checked = theme === 'light';
 }
 
 // -- UTILITY --
@@ -1005,6 +1002,7 @@ let stActiveStartTime = null;
 let stActivePauseTime = null;
 let stTimerInterval = null;
 let stElapsedMs = 0;
+let stAccumulatedMs = 0;
 
 function stFormatTime(ms) {
 const totalSeconds = Math.floor(ms / 1000);
@@ -1066,6 +1064,7 @@ stActiveSessionId = session.id;
 stActiveStartTime = Date.now();
 stActivePauseTime = null;
 stElapsedMs = 0;
+stAccumulatedMs = 0;
 
 stRenderActiveSession();
 stStartTimer();
@@ -1076,7 +1075,7 @@ if (stTimerInterval) clearInterval(stTimerInterval);
 
 stTimerInterval = setInterval(() => {
   if (!stActivePauseTime && stActiveStartTime) {
-    stElapsedMs = Date.now() - stActiveStartTime;
+    stElapsedMs = stAccumulatedMs + (Date.now() - stActiveStartTime);
     const display = document.getElementById('st-timer-display');
     if (display) {
       display.textContent = stFormatTimeHMS(stElapsedMs);
@@ -1097,6 +1096,7 @@ stPauseSession();
 function stPauseSession() {
 if (!stActiveSessionId) return;
 
+stAccumulatedMs += Date.now() - stActiveStartTime;
 stActivePauseTime = Date.now();
 if (stTimerInterval) clearInterval(stTimerInterval);
 
@@ -1145,10 +1145,14 @@ if (!stActiveSessionId) return;
 
 if (stTimerInterval) clearInterval(stTimerInterval);
 
+const finalMs = stActivePauseTime
+  ? stAccumulatedMs
+  : stAccumulatedMs + (stActiveStartTime ? Date.now() - stActiveStartTime : 0);
+
 const session = stSessions.find(s => s.id === stActiveSessionId);
 if (session) {
 session.endTime = Date.now();
-session.duration = session.endTime - session.startTime;
+session.duration = finalMs;
 if (notes) session.notes = notes;
 stSave('mt_st_sessions', stSessions);
 }
@@ -1157,6 +1161,12 @@ stActiveSessionId = null;
 stActiveStartTime = null;
 stActivePauseTime = null;
 stElapsedMs = 0;
+stAccumulatedMs = 0;
+
+const listDiv = document.getElementById('st-session-list');
+const activeDiv = document.getElementById('st-active-session');
+if (listDiv) listDiv.style.display = 'block';
+if (activeDiv) activeDiv.style.display = 'none';
 
 stRenderSessionList();
 }
@@ -1213,7 +1223,10 @@ const dateStr = startDate.toLocaleDateString();
 const timeStr = startDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
 html += `<div class="st-session-card" onclick="stShowSessionDetails('${session.id}')">
-  <div class="st-session-badge">Completed</div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-start">
+    <div class="st-session-badge">Completed</div>
+    <button class="st-delete-btn" onclick="event.stopPropagation();stDeleteSession('${session.id}')" title="Delete session">&times;</button>
+  </div>
   <div class="st-session-name">${escHtml(session.name)}</div>
   <div class="st-session-time">${dateStr} at ${timeStr}</div>
   <div class="st-session-duration">${durationStr}</div>

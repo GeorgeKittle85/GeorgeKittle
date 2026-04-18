@@ -45,11 +45,8 @@ function toggleTheme() {
 }
 
 function updateThemeButton(theme) {
-  const btn = document.getElementById('theme-toggle-btn');
-  if (btn) {
-    btn.setAttribute('aria-label', theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode');
-    btn.innerHTML = theme === 'light' ? '🌙' : '☀️';
-  }
+  const cb = document.getElementById('theme-toggle-checkbox');
+  if (cb) cb.checked = theme === 'light';
 }
 
 // -- COOKIE BANNER --

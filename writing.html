@@ -11,6 +11,12 @@
 <body>
 
 <button class="mobile-toggle" onclick="toggleSidebar()" aria-label="Toggle menu">&#9776;</button>
+<div class="theme-switch-wrap">
+  <label class="theme-switch" title="Toggle dark/light mode">
+    <input type="checkbox" id="theme-toggle-checkbox" onchange="toggleTheme()">
+    <span class="theme-switch-slider"></span>
+  </label>
+</div>
 <div class="mobile-overlay" id="mobileOverlay" onclick="toggleSidebar()"></div>
 
 <div class="app-wrapper">
@@ -24,7 +30,6 @@
           <div class="logo-sub">Write Smarter</div>
         </div>
       </a>
-      <button id="theme-toggle-btn" class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Switch to light mode">☀️</button>
     </div>
 
     <nav class="sidebar-nav">
