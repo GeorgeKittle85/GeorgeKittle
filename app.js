@@ -997,211 +997,188 @@ try { localStorage.setItem(key, JSON.stringify(data)); } catch(e) { console.warn
 // STUDY TIME TRACKER
 // ============================================
 
-// Constants
 const STORAGE_KEY_SESSIONS = 'mt_st_sessions';
 
-// State: Sessions and timing
 let stSessions = stLoad(STORAGE_KEY_SESSIONS, []);
-let stActiveSessionId = null;
-let stActiveStartTime = null;
-let stActivePauseTime = null;
+let stActiveId = null;
+let stStartTs = null;
+let stPauseTs = null;
+let stAccMs = 0;
 let stTimerInterval = null;
-let stElapsedMs = 0;
-let stAccumulatedMs = 0;
 
 function stFormatTime(ms) {
-const totalSeconds = Math.floor(ms / 1000);
-const hours = Math.floor(totalSeconds / 3600);
-const minutes = Math.floor((totalSeconds % 3600) / 60);
-const seconds = totalSeconds % 60;
-
-if (hours > 0) {
-return `${hours}h ${minutes}m ${seconds}s`;
-} else if (minutes > 0) {
-return `${minutes}m ${seconds}s`;
-} else {
-return `${seconds}s`;
-}
+const s = Math.floor(ms / 1000);
+const h = Math.floor(s / 3600);
+const m = Math.floor((s % 3600) / 60);
+const sec = s % 60;
+if (h > 0) return `${h}h ${m}m ${sec}s`;
+if (m > 0) return `${m}m ${sec}s`;
+return `${sec}s`;
 }
 
-function stFormatTimeHMS(ms) {
-const totalSeconds = Math.floor(ms / 1000);
-const hours = Math.floor(totalSeconds / 3600);
-const minutes = Math.floor((totalSeconds % 3600) / 60);
-const seconds = totalSeconds % 60;
-
-return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+function stFormatHMS(ms) {
+const s = Math.floor(ms / 1000);
+const h = Math.floor(s / 3600);
+const m = Math.floor((s % 3600) / 60);
+const sec = s % 60;
+return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
 }
 
-function stPromptAndStart() {
+function stCreateSession() {
 const defaultName = 'Session ' + new Date().toLocaleDateString();
-showModal('Create Study Session', [
-{
-id: 'st-session-name-input',
-label: 'Session Name',
-placeholder: 'e.g., Math Chapter 5',
-value: defaultName
-}
+showModal('New Study Session', [
+{ id: 'st-name-input', label: 'Session Name', placeholder: 'e.g. Math Chapter 5', value: defaultName }
 ], function(values) {
-const name = values['st-session-name-input'].trim() || defaultName;
+const name = values['st-name-input'].trim() || defaultName;
 stStartSession(name);
 closeModal();
 });
 }
 
-function stStartSession(name = null) {
+function stStartSession(name) {
 const session = {
 id: generateId(),
-name: name || 'Session ' + new Date().toLocaleDateString(),
+name: name,
 startTime: Date.now(),
 endTime: null,
 duration: 0,
-pauseCount: 0,
-notes: '',
-isPaused: false,
-sessionBusts: []
+pauseCount: 0
 };
-
 stSessions.push(session);
 stSave(STORAGE_KEY_SESSIONS, stSessions);
 
-stActiveSessionId = session.id;
-stActiveStartTime = Date.now();
-stActivePauseTime = null;
-stElapsedMs = 0;
-stAccumulatedMs = 0;
+stActiveId = session.id;
+stStartTs = Date.now();
+stPauseTs = null;
+stAccMs = 0;
 
-showPanel('studytime');
-stRenderActiveSession();
-stStartTimer();
+stShowActiveView();
+stStartTick();
 }
 
-function stStartTimer() {
+function stStartTick() {
 if (stTimerInterval) clearInterval(stTimerInterval);
-
 stTimerInterval = setInterval(() => {
-  if (!stActivePauseTime && stActiveStartTime) {
-    stElapsedMs = stAccumulatedMs + (Date.now() - stActiveStartTime);
-    const display = document.getElementById('st-timer-display');
-    if (display) {
-      display.textContent = stFormatTimeHMS(stElapsedMs);
-      display.classList.remove('paused');
-    }
-  }
+if (stPauseTs) return;
+const elapsed = stAccMs + (Date.now() - stStartTs);
+const el = document.getElementById('st-timer-display');
+if (el) el.textContent = stFormatHMS(elapsed);
 }, 100);
 }
 
 function stTogglePause() {
-if (stActivePauseTime) {
-stResumeSession();
+if (stPauseTs) {
+stResume();
 } else {
-stPauseSession();
+stPause();
 }
 }
 
-function stPauseSession() {
-if (!stActiveSessionId) return;
-
-stAccumulatedMs += Date.now() - stActiveStartTime;
-stActivePauseTime = Date.now();
+function stPause() {
+if (!stActiveId || stPauseTs) return;
+stAccMs += Date.now() - stStartTs;
+stPauseTs = Date.now();
 if (stTimerInterval) clearInterval(stTimerInterval);
 
-const display = document.getElementById('st-timer-display');
-if (display) {
-display.classList.add('paused');
-}
-
+const timer = document.getElementById('st-timer-display');
+const label = document.getElementById('st-paused-label');
 const btn = document.getElementById('st-pause-btn');
+if (timer) timer.classList.add('paused');
+if (label) label.style.display = 'block';
 if (btn) btn.textContent = 'Resume';
 
-const session = stSessions.find(s => s.id === stActiveSessionId);
-if (session) {
-session.isPaused = true;
-session.pauseCount = (session.pauseCount || 0) + 1;
-stSave(STORAGE_KEY_SESSIONS, stSessions);
-}
+const s = stSessions.find(s => s.id === stActiveId);
+if (s) { s.pauseCount++; stSave(STORAGE_KEY_SESSIONS, stSessions); }
 }
 
-function stResumeSession() {
-if (!stActiveSessionId || !stActivePauseTime) return;
+function stResume() {
+if (!stActiveId || !stPauseTs) return;
+stStartTs = Date.now();
+stPauseTs = null;
 
-const pauseDuration = Date.now() - stActivePauseTime;
-stActiveStartTime = Date.now();
-stActivePauseTime = null;
-
-const display = document.getElementById('st-timer-display');
-if (display) {
-display.classList.remove('paused');
-}
-
+const timer = document.getElementById('st-timer-display');
+const label = document.getElementById('st-paused-label');
 const btn = document.getElementById('st-pause-btn');
+if (timer) timer.classList.remove('paused');
+if (label) label.style.display = 'none';
 if (btn) btn.textContent = 'Pause';
 
-const session = stSessions.find(s => s.id === stActiveSessionId);
-if (session) {
-session.isPaused = false;
-stSave(STORAGE_KEY_SESSIONS, stSessions);
+stStartTick();
 }
 
-stStartTimer();
-}
-
-function stEndSession(notes = null) {
-if (!stActiveSessionId) return;
+function stEndSession() {
+if (!stActiveId) return;
+if (!confirm('End this study session?')) return;
 
 if (stTimerInterval) clearInterval(stTimerInterval);
+const finalMs = stPauseTs ? stAccMs : stAccMs + (Date.now() - stStartTs);
 
-const finalMs = stActivePauseTime
-  ? stAccumulatedMs
-  : stAccumulatedMs + (stActiveStartTime ? Date.now() - stActiveStartTime : 0);
-
-const session = stSessions.find(s => s.id === stActiveSessionId);
-if (session) {
-session.endTime = Date.now();
-session.duration = finalMs;
-if (notes) session.notes = notes;
+const s = stSessions.find(s => s.id === stActiveId);
+if (s) {
+s.endTime = Date.now();
+s.duration = finalMs;
 stSave(STORAGE_KEY_SESSIONS, stSessions);
 }
 
-stActiveSessionId = null;
-stActiveStartTime = null;
-stActivePauseTime = null;
-stElapsedMs = 0;
-stAccumulatedMs = 0;
+stActiveId = null;
+stStartTs = null;
+stPauseTs = null;
+stAccMs = 0;
 
-const listDiv = document.getElementById('st-session-list');
-const activeDiv = document.getElementById('st-active-session');
-if (listDiv) listDiv.style.display = 'block';
-if (activeDiv) activeDiv.style.display = 'none';
-
-stRenderSessionList();
+stShowListView();
 }
 
-function stDeleteSession(sessionId) {
+function stDeleteSession(id) {
 if (!confirm('Delete this session?')) return;
-stSessions = stSessions.filter(s => s.id !== sessionId);
+stSessions = stSessions.filter(s => s.id !== id);
 stSave(STORAGE_KEY_SESSIONS, stSessions);
-stRenderSessionList();
+stRenderList();
 }
 
-function stRenderSessionList() {
-const listDiv = document.getElementById('st-session-list');
-if (!listDiv) return;
+function stShowActiveView() {
+const listView = document.getElementById('st-list-view');
+const activeView = document.getElementById('st-active-view');
+if (listView) listView.style.display = 'none';
+if (activeView) activeView.style.display = 'block';
 
-let statsHtml = '';
-if (stSessions.length > 0) {
-const totalMs = stSessions.reduce((sum, s) => sum + (s.duration || 0), 0);
-const avgMs = totalMs / stSessions.length;
-const longestMs = Math.max(...stSessions.map(s => s.duration || 0));
+const s = stSessions.find(s => s.id === stActiveId);
+const nameEl = document.getElementById('st-active-name');
+if (nameEl && s) nameEl.textContent = s.name;
 
-statsHtml = `
+const timer = document.getElementById('st-timer-display');
+const label = document.getElementById('st-paused-label');
+const btn = document.getElementById('st-pause-btn');
+if (timer) { timer.textContent = '00:00:00'; timer.classList.remove('paused'); }
+if (label) label.style.display = 'none';
+if (btn) btn.textContent = 'Pause';
+}
+
+function stShowListView() {
+const listView = document.getElementById('st-list-view');
+const activeView = document.getElementById('st-active-view');
+if (listView) listView.style.display = 'block';
+if (activeView) activeView.style.display = 'none';
+stRenderList();
+}
+
+function stRenderList() {
+const statsEl = document.getElementById('st-stats-grid');
+const gridEl = document.getElementById('st-session-grid');
+if (!statsEl || !gridEl) return;
+
+const completed = stSessions.filter(s => s.endTime);
+if (completed.length > 0) {
+const totalMs = completed.reduce((sum, s) => sum + s.duration, 0);
+const avgMs = totalMs / completed.length;
+const longestMs = Math.max(...completed.map(s => s.duration));
+statsEl.innerHTML = `
   <div class="st-stat-card">
     <span class="st-stat-label">Total Study Time</span>
     <div class="st-stat-value">${stFormatTime(totalMs)}</div>
   </div>
   <div class="st-stat-card">
     <span class="st-stat-label">Sessions</span>
-    <div class="st-stat-value">${stSessions.length}</div>
+    <div class="st-stat-value">${completed.length}</div>
   </div>
   <div class="st-stat-card">
     <span class="st-stat-label">Avg. Length</span>
@@ -1210,118 +1187,39 @@ statsHtml = `
   <div class="st-stat-card">
     <span class="st-stat-label">Longest</span>
     <div class="st-stat-value">${stFormatTime(longestMs)}</div>
-  </div>
-`;
+  </div>`;
+} else {
+statsEl.innerHTML = '';
 }
 
-const statsDiv = document.getElementById('st-stats-dashboard');
-if (statsDiv) statsDiv.innerHTML = statsHtml;
-
-const grid = document.getElementById('st-session-grid');
-if (!grid) return;
-
+const sorted = [...stSessions].reverse();
 let html = '';
-
-stSessions.forEach(session => {
-const durationStr = stFormatTime(session.duration || 0);
-const startDate = new Date(session.startTime);
-const dateStr = startDate.toLocaleDateString();
-const timeStr = startDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-html += `<div class="st-session-card" onclick="stShowSessionDetails('${session.id}')">
+sorted.forEach(session => {
+const start = new Date(session.startTime);
+const dateStr = start.toLocaleDateString();
+const timeStr = start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+const durStr = session.endTime ? stFormatTime(session.duration) : 'In progress';
+html += `<div class="st-session-card">
   <div style="display:flex;justify-content:space-between;align-items:flex-start">
-    <div class="st-session-badge">Completed</div>
-    <button class="st-delete-btn" onclick="event.stopPropagation();stDeleteSession('${session.id}')" title="Delete session">&times;</button>
+    <div class="st-session-badge${session.endTime ? '' : ' active'}">${session.endTime ? 'Completed' : 'Active'}</div>
+    <button class="st-delete-btn" onclick="stDeleteSession('${session.id}')" title="Delete">&times;</button>
   </div>
   <div class="st-session-name">${escHtml(session.name)}</div>
   <div class="st-session-time">${dateStr} at ${timeStr}</div>
-  <div class="st-session-duration">${durationStr}</div>
+  <div class="st-session-duration">${durStr}</div>
 </div>`;
 });
 
 if (stSessions.length === 0) {
-html += `<div class="empty-state" style="grid-column:1/-1">
-  <div class="empty-icon">⏱️</div>
-  <p>No study sessions yet - start your first one!</p>
+html = `<div class="empty-state" style="grid-column:1/-1">
+  <div class="empty-icon">&#x23F1;&#xFE0F;</div>
+  <p>No sessions yet &mdash; start your first one!</p>
 </div>`;
 }
-
-grid.innerHTML = html;
+gridEl.innerHTML = html;
 }
 
-function stRenderActiveSession() {
-const listDiv = document.getElementById('st-session-list');
-const activeDiv = document.getElementById('st-active-session');
-
-if (listDiv) listDiv.style.display = 'none';
-if (activeDiv) activeDiv.style.display = 'block';
-
-const session = stSessions.find(s => s.id === stActiveSessionId);
-if (session && activeDiv) {
-const nameInput = activeDiv.querySelector('.st-session-name');
-if (nameInput) nameInput.value = session.name;
-
-const btn = activeDiv.querySelector('#st-pause-btn');
-if (btn) btn.textContent = stActivePauseTime ? 'Resume' : 'Pause';
-}
-}
-
-function stBackToList() {
-if (stActiveSessionId) {
-if (!confirm('You have an active session. End it?')) return;
-stEndSession();
-} else {
-const listDiv = document.getElementById('st-session-list');
-const activeDiv = document.getElementById('st-active-session');
-if (listDiv) listDiv.style.display = 'block';
-if (activeDiv) activeDiv.style.display = 'none';
-}
-}
-
-function stShowSessionDetails(sessionId) {
-const session = stSessions.find(s => s.id === sessionId);
-if (!session) return;
-
-showModal(`Session Details`, [], () => {});
-
-const modal = document.getElementById('app-modal');
-if (modal) {
-const modalBox = modal.querySelector('.modal-box');
-if (modalBox) {
-  const startDate = new Date(session.startTime);
-  const endDate = new Date(session.endTime);
-
-  modalBox.innerHTML = `
-    <div class="st-detail-header">
-      <div class="st-detail-name">${escHtml(session.name)}</div>
-      <button class="btn btn-danger btn-sm" onclick="stDeleteSession('${session.id}'); closeModal()">Delete</button>
-    </div>
-    <div class="st-detail-grid">
-      <div class="st-detail-item">
-        <span class="st-detail-label">Start Time</span>
-        <div class="st-detail-value">${startDate.toLocaleString()}</div>
-      </div>
-      <div class="st-detail-item">
-        <span class="st-detail-label">End Time</span>
-        <div class="st-detail-value">${endDate.toLocaleString()}</div>
-      </div>
-      <div class="st-detail-item">
-        <span class="st-detail-label">Duration</span>
-        <div class="st-detail-value">${stFormatTime(session.duration)}</div>
-      </div>
-      <div class="st-detail-item">
-        <span class="st-detail-label">Pause Count</span>
-        <div class="st-detail-value">${session.pauseCount || 0}</div>
-      </div>
-    </div>
-    ${session.notes ? `<div class="st-detail-notes"><span class="st-detail-notes-label">Notes</span><div class="st-detail-notes-text">${escHtml(session.notes)}</div></div>` : ''}
-    <div style="margin-top:20px;text-align:right">
-      <button class="btn btn-secondary" onclick="closeModal()">Close</button>
-    </div>
-  `;
-}
-}
-}
+function stRenderSessionList() { stRenderList(); }
 
 function generateId() {
 return '_' + Math.random().toString(36).substr(2, 9);

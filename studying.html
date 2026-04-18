@@ -392,29 +392,25 @@ Capital of France? | Paris | London | Berlin | Madrid
 <div class="tool-panel" id="panel-studytime">
   <div class="main-header">
     <h1>Study Time Tracker</h1>
-    <p>Track your study sessions, monitor progress, and build consistent study habits.</p>
+    <p>Log every session. Watch your total study time grow.</p>
   </div>
 
   <!-- Session List View -->
-  <div id="st-session-list">
-    <div id="st-stats-dashboard" class="st-stats-grid"></div>
-    <div class="section-divider" style="margin-top:24px"><span>Sessions</span></div>
-    <div class="btn-group" style="margin-bottom:20px;justify-content:center">
-      <button class="btn btn-primary" onclick="stPromptAndStart()" style="min-width:200px">+ Create Study Session</button>
+  <div id="st-list-view">
+    <div class="st-stats-grid" id="st-stats-grid"></div>
+    <div class="section-divider"><span>Sessions</span></div>
+    <div class="btn-group" style="justify-content:center;margin-bottom:20px">
+      <button class="btn btn-primary" onclick="stCreateSession()" style="min-width:220px">+ New Study Session</button>
     </div>
-    <div class="st-session-grid" id="st-session-grid">
-      <!-- Sessions render here -->
-    </div>
+    <div class="st-session-grid" id="st-session-grid"></div>
   </div>
 
   <!-- Active Session View -->
-  <div id="st-active-session" style="display:none">
-    <button class="back-link" onclick="stBackToList()">&#x2190; Back to Sessions</button>
+  <div id="st-active-view" style="display:none">
     <div class="st-session-container">
+      <div class="st-active-name" id="st-active-name">Session</div>
       <div class="st-timer-display" id="st-timer-display">00:00:00</div>
-      <div class="st-session-info">
-        <input type="text" class="st-session-name" id="st-session-name" placeholder="Session name (optional)">
-      </div>
+      <div class="st-paused-label" id="st-paused-label">PAUSED</div>
       <div class="st-controls">
         <button class="btn btn-secondary" id="st-pause-btn" onclick="stTogglePause()">Pause</button>
         <button class="btn btn-danger" onclick="stEndSession()">End Session</button>
