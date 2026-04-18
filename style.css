@@ -2506,3 +2506,307 @@ html[data-theme="light"] body::before {
   .gs-gameover-score { font-size: 48px; }
   .gs-gameover-stats { grid-template-columns: 1fr; }
 }
+
+/* ============================================
+   STUDY TIME TRACKER
+   ============================================ */
+
+/* Stats Dashboard */
+.st-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.st-stat-card {
+  background: linear-gradient(135deg, var(--accent-cyan-dim) 0%, rgba(0,0,0,0.05) 100%);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  text-align: center;
+}
+
+.st-stat-card.active {
+  background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-purple) 100%);
+  color: white;
+  border-color: var(--accent-cyan);
+}
+
+.st-stat-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  display: block;
+}
+
+.st-stat-card.active .st-stat-label {
+  color: rgba(255,255,255,0.8);
+}
+
+.st-stat-value {
+  font-size: 18px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--accent-cyan);
+}
+
+.st-stat-card.active .st-stat-value {
+  color: white;
+}
+
+/* Session Grid */
+.st-session-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.st-session-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.st-session-card:hover {
+  border-color: var(--accent-cyan);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.st-session-card.st-active-session {
+  background: linear-gradient(135deg, var(--accent-cyan-dim) 0%, var(--bg-card) 100%);
+  border-color: var(--accent-cyan);
+}
+
+.st-session-badge {
+  display: inline-block;
+  background: var(--accent-purple-dim);
+  color: var(--accent-purple);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.st-session-badge.active {
+  background: var(--accent-cyan-dim);
+  color: var(--accent-cyan);
+}
+
+.st-session-name {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.st-session-time {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.st-session-duration {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent-cyan);
+  font-weight: 600;
+}
+
+.st-new-session-card {
+  background: linear-gradient(135deg, var(--accent-cyan-dim) 0%, var(--accent-purple-dim) 100%);
+  border: 2px dashed var(--accent-cyan);
+  border-radius: var(--radius-lg);
+  padding: 32px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 120px;
+}
+
+.st-new-session-card:hover {
+  border-style: solid;
+  transform: scale(1.02);
+}
+
+.st-new-session-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.st-new-session-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Active Session Container */
+.st-session-container {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: 40px 32px;
+  text-align: center;
+  max-width: 400px;
+  margin: 40px auto;
+}
+
+.st-timer-display {
+  font-family: var(--font-mono);
+  font-size: 72px;
+  font-weight: 700;
+  color: var(--accent-cyan);
+  line-height: 1;
+  margin-bottom: 24px;
+  letter-spacing: 2px;
+}
+
+.st-timer-display.paused {
+  color: var(--accent-orange);
+  opacity: 0.7;
+}
+
+.st-session-info {
+  margin-bottom: 24px;
+}
+
+.st-session-name {
+  width: 100%;
+  text-align: center;
+  font-size: 16px;
+  padding: 12px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+}
+
+.st-session-name::placeholder {
+  color: var(--text-muted);
+}
+
+.st-controls {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.st-controls .btn {
+  min-width: 140px;
+}
+
+/* Session Details Modal */
+.st-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.st-detail-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.st-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.st-detail-item {
+  background: var(--bg-input);
+  padding: 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+}
+
+.st-detail-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  display: block;
+}
+
+.st-detail-value {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--accent-cyan);
+  font-weight: 600;
+}
+
+.st-detail-notes {
+  margin-top: 20px;
+}
+
+.st-detail-notes-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  display: block;
+}
+
+.st-detail-notes-text {
+  background: var(--bg-input);
+  padding: 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  font-size: 13px;
+  min-height: 60px;
+}
+
+.st-detail-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .st-session-container {
+    padding: 24px;
+    margin: 20px auto;
+  }
+
+  .st-timer-display {
+    font-size: 48px;
+  }
+
+  .st-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .st-session-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+
+  .st-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
