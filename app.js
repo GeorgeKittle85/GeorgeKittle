@@ -1030,6 +1030,22 @@ const seconds = totalSeconds % 60;
 return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
 
+function stPromptAndStart() {
+const defaultName = 'Session ' + new Date().toLocaleDateString();
+showModal('Create Study Session', [
+{
+id: 'st-session-name-input',
+label: 'Session Name',
+placeholder: 'e.g., Math Chapter 5',
+value: defaultName
+}
+], function(values) {
+const name = values['st-session-name-input'].trim() || defaultName;
+stStartSession(name);
+closeModal();
+});
+}
+
 function stStartSession(name = null) {
 const session = {
 id: generateId(),
@@ -1188,10 +1204,7 @@ if (statsDiv) statsDiv.innerHTML = statsHtml;
 const grid = document.getElementById('st-session-grid');
 if (!grid) return;
 
-let html = `<div class="st-new-session-card" onclick="stStartSession()">
-  <div class="st-new-session-icon">▶</div>
-  <div class="st-new-session-text">Start New Session</div>
-</div>`;
+let html = '';
 
 stSessions.forEach(session => {
 const durationStr = stFormatTime(session.duration || 0);
