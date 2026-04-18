@@ -996,7 +996,12 @@ try { localStorage.setItem(key, JSON.stringify(data)); } catch(e) { console.warn
 // ============================================
 // STUDY TIME TRACKER
 // ============================================
-let stSessions = stLoad('mt_st_sessions', []);
+
+// Constants
+const STORAGE_KEY_SESSIONS = 'mt_st_sessions';
+
+// State: Sessions and timing
+let stSessions = stLoad(STORAGE_KEY_SESSIONS, []);
 let stActiveSessionId = null;
 let stActiveStartTime = null;
 let stActivePauseTime = null;
@@ -1058,7 +1063,7 @@ sessionBusts: []
 };
 
 stSessions.push(session);
-stSave('mt_st_sessions', stSessions);
+stSave(STORAGE_KEY_SESSIONS, stSessions);
 
 stActiveSessionId = session.id;
 stActiveStartTime = Date.now();
@@ -1113,7 +1118,7 @@ const session = stSessions.find(s => s.id === stActiveSessionId);
 if (session) {
 session.isPaused = true;
 session.pauseCount = (session.pauseCount || 0) + 1;
-stSave('mt_st_sessions', stSessions);
+stSave(STORAGE_KEY_SESSIONS, stSessions);
 }
 }
 
@@ -1135,7 +1140,7 @@ if (btn) btn.textContent = 'Pause';
 const session = stSessions.find(s => s.id === stActiveSessionId);
 if (session) {
 session.isPaused = false;
-stSave('mt_st_sessions', stSessions);
+stSave(STORAGE_KEY_SESSIONS, stSessions);
 }
 
 stStartTimer();
@@ -1155,7 +1160,7 @@ if (session) {
 session.endTime = Date.now();
 session.duration = finalMs;
 if (notes) session.notes = notes;
-stSave('mt_st_sessions', stSessions);
+stSave(STORAGE_KEY_SESSIONS, stSessions);
 }
 
 stActiveSessionId = null;
@@ -1175,7 +1180,7 @@ stRenderSessionList();
 function stDeleteSession(sessionId) {
 if (!confirm('Delete this session?')) return;
 stSessions = stSessions.filter(s => s.id !== sessionId);
-stSave('mt_st_sessions', stSessions);
+stSave(STORAGE_KEY_SESSIONS, stSessions);
 stRenderSessionList();
 }
 
