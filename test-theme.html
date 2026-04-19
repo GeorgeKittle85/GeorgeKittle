@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Theme Test</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="theme.js"></script>
+</head>
+<body>
+
+<div class="theme-switch-wrap">
+  <label class="theme-switch" title="Toggle dark/light mode">
+    <input type="checkbox" id="theme-toggle-checkbox" onchange="toggleTheme()">
+    <span class="theme-switch-slider"></span>
+  </label>
+</div>
+
+<div style="padding: 40px;">
+  <h1>Theme Test Page</h1>
+  <p>Current theme: <span id="theme-display">dark</span></p>
+  <p>HTML data-theme attribute: <span id="attr-display">none</span></p>
+  <button onclick="logThemeInfo()">Check Theme Info</button>
+</div>
+
+<script>
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'light' ? '' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('theme-preference', next);
+
+  const cb = document.getElementById('theme-toggle-checkbox');
+  if (cb) cb.checked = next === 'light';
+
+  console.log('Theme toggled:', { from: current, to: next });
+  logThemeInfo();
+}
+
+function initTheme() {
+  const saved = localStorage.getItem('theme-preference');
+  if (saved) {
+    document.documentElement.setAttribute('data-theme', saved);
+    const cb = document.getElementById('theme-toggle-checkbox');
+    if (cb) cb.checked = saved === 'light';
+  }
+}
+
+function logThemeInfo() {
+  const attr = document.documentElement.getAttribute('data-theme');
+  const themeDisplay = attr === 'light' ? 'light' : 'dark';
+  document.getElementById('theme-display').textContent = themeDisplay;
+  document.getElementById('attr-display').textContent = attr || '(empty)';
+  console.log('Theme info:', {
+    'data-theme attribute': attr || '(empty)',
+    'theme display': themeDisplay,
+    'localStorage': localStorage.getItem('theme-preference') || '(empty)',
+    'computed bg-color': getComputedStyle(document.body).backgroundColor,
+    'computed color': getComputedStyle(document.body).color
+  });
+}
+
+window.addEventListener('DOMContentLoaded', function() {
+  initTheme();
+  logThemeInfo();
+});
+</script>
+
+</body>
+</html>

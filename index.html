@@ -13,6 +13,7 @@
   <meta property="og:type" content="website">
   <link rel="canonical" href="">
   <link rel="stylesheet" href="style.css">
+  <script src="theme.js"></script>
 </head>
 <body>
 
@@ -87,31 +88,8 @@ function acceptCookies() {
   document.getElementById('cookieBanner').classList.remove('show');
   localStorage.setItem('cookies_accepted', 'true');
 }
-function toggleTheme() {
-  var current = document.documentElement.getAttribute('data-theme');
-  var next = current === 'light' ? '' : 'light';
-  document.documentElement.setAttribute('data-theme', next);
-  localStorage.setItem('theme-preference', next);
-  var cb = document.getElementById('theme-toggle-checkbox');
-  if (cb) cb.checked = next === 'light';
-}
-function initTheme() {
-  var saved = localStorage.getItem('theme-preference');
-  if (saved) {
-    document.documentElement.setAttribute('data-theme', saved);
-    var cb = document.getElementById('theme-toggle-checkbox');
-    if (cb) cb.checked = saved === 'light';
-  } else {
-    var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
-    if (prefersLight) {
-      document.documentElement.setAttribute('data-theme', 'light');
-      var cb = document.getElementById('theme-toggle-checkbox');
-      if (cb) cb.checked = true;
-    }
-  }
-}
+
 window.addEventListener('DOMContentLoaded', function() {
-  initTheme();
   if (!localStorage.getItem('cookies_accepted')) {
     setTimeout(function() {
       document.getElementById('cookieBanner').classList.add('show');
