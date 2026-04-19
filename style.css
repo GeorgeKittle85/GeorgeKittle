@@ -2167,6 +2167,14 @@ html[data-theme="light"] body::before {
   color: var(--text-muted);
 }
 
+/* Context link (bottom left) */
+.context-link {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 9999;
+}
+
 @media (max-width: 768px) {
   .landing-title {
     font-size: 32px;
