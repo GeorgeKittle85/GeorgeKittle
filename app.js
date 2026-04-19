@@ -28,32 +28,6 @@ document.getElementById('sidebar').classList.toggle('open');
 document.getElementById('mobileOverlay').classList.toggle('open');
 }
 
-// -- THEME SWITCHER --
-function initTheme() {
-const savedTheme = localStorage.getItem('theme-preference');
-if (savedTheme) {
-document.documentElement.setAttribute('data-theme', savedTheme);
-updateThemeButton(savedTheme);
-} else {
-const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
-const theme = prefersLight ? 'light' : '';
-if (theme) document.documentElement.setAttribute('data-theme', theme);
-}
-}
-
-function toggleTheme() {
-const currentTheme = document.documentElement.getAttribute('data-theme');
-const newTheme = currentTheme === 'light' ? '' : 'light';
-document.documentElement.setAttribute('data-theme', newTheme);
-localStorage.setItem('theme-preference', newTheme);
-updateThemeButton(newTheme);
-}
-
-function updateThemeButton(theme) {
-const cb = document.getElementById('theme-toggle-checkbox');
-if (cb) cb.checked = theme === 'light';
-}
-
 // -- UTILITY --
 function clearInputs(...ids) {
 ids.forEach(id => {
@@ -84,7 +58,6 @@ localStorage.setItem('cookies_accepted', 'true');
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-initTheme();
 if (!localStorage.getItem('cookies_accepted')) {
 setTimeout(() => {
 document.getElementById('cookieBanner').classList.add('show');
@@ -3142,7 +3115,6 @@ function gsBackToSetup() {
 // INIT - Render study tools on page load
 // ============================================
 window.addEventListener('DOMContentLoaded', function() {
-initTheme();
 fcRenderDecks();
 qzRenderList();
 gsInit();
