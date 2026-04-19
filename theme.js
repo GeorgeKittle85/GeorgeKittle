@@ -5,7 +5,7 @@
 const Theme = (() => {
   const STORAGE_KEY = 'theme-preference';
   const LIGHT_THEME = 'light';
-  const DARK_THEME = '';
+  const DARK_THEME = 'dark';
 
   function applyTheme(theme) {
     const html = document.documentElement;
@@ -22,11 +22,7 @@ const Theme = (() => {
   }
 
   function saveTheme(theme) {
-    if (theme === LIGHT_THEME) {
-      localStorage.setItem(STORAGE_KEY, LIGHT_THEME);
-    } else {
-      localStorage.removeItem(STORAGE_KEY);
-    }
+    localStorage.setItem(STORAGE_KEY, theme);
   }
 
   function getCurrentTheme() {
