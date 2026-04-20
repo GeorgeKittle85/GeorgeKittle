@@ -43,6 +43,9 @@
       <div class="nav-item" data-panel="grammar" onclick="showPanel('grammar')">
         <span class="nav-icon">&#x1F4DD;</span> Grammar Checker
       </div>
+      <div class="nav-item" data-panel="citations" onclick="showPanel('citations')">
+        <span class="nav-icon">&#x1F517;</span> Citation Formatter
+      </div>
     </nav>
 
     <div class="sidebar-footer">
@@ -67,6 +70,12 @@
       <div class="card-name">Grammar Checker</div>
       <div class="card-courses">Writing Tools</div>
       <div class="card-preview">Paste or write your essay — catch grammar, spelling, and style issues.</div>
+    </div>
+    <div class="home-card animate-in" onclick="showPanel('citations')">
+      <div class="card-emoji">&#x1F517;</div>
+      <div class="card-name">Citation Formatter</div>
+      <div class="card-courses">Writing Tools</div>
+      <div class="card-preview">Generate properly formatted citations in APA, MLA, Chicago, and Harvard styles.</div>
     </div>
   </div>
 </div>
@@ -145,6 +154,57 @@
         <div class="empty-icon">&#x1F389;</div>
         <p>No issues found — your writing is clean!</p>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======== CITATION FORMATTER ======== -->
+<div class="tool-panel" id="panel-citations">
+  <div class="main-header">
+    <h1>Citation Formatter</h1>
+    <p>Generate properly formatted citations in APA, MLA, Chicago, and Harvard styles.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Source Information</div>
+    <div class="card-desc">Fill in the details below to generate your citation.</div>
+
+    <div class="form-group">
+      <label class="form-label">Source Type</label>
+      <select class="form-select" id="cf-source-type" onchange="updateCitationFields()">
+        <option value="book">Book</option>
+        <option value="website">Website</option>
+        <option value="journal">Journal Article</option>
+        <option value="video">Video</option>
+      </select>
+    </div>
+
+    <div id="cf-fields-container">
+      <!-- Fields dynamically render here based on source type -->
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Citation Style</label>
+      <div class="cf-style-buttons">
+        <button class="cf-style-btn active" data-style="apa" onclick="selectCitationStyle('apa')">APA</button>
+        <button class="cf-style-btn" data-style="mla" onclick="selectCitationStyle('mla')">MLA</button>
+        <button class="cf-style-btn" data-style="chicago" onclick="selectCitationStyle('chicago')">Chicago</button>
+        <button class="cf-style-btn" data-style="harvard" onclick="selectCitationStyle('harvard')">Harvard</button>
+      </div>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="generateCitation()">Generate Citation</button>
+      <button class="btn btn-secondary" onclick="clearCitationForm()">Clear</button>
+    </div>
+  </div>
+
+  <!-- Citation Result (hidden until generated) -->
+  <div id="cf-result-area" style="display:none">
+    <div class="card">
+      <div class="card-title">Your Citation</div>
+      <div class="cf-citation-box" id="cf-citation-box"></div>
+      <button class="btn btn-primary" onclick="copyCitation()">Copy Citation</button>
     </div>
   </div>
 </div>
