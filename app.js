@@ -3296,5 +3296,7 @@ fcRenderDecks();
 qzRenderList();
 gsInit();
 stRenderSessionList();
-updateCitationFields();
+if (document.getElementById('cf-source-type')) {
+  updateCitationFields();
+}
 });
