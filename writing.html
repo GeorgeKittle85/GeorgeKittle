@@ -46,6 +46,9 @@
       <div class="nav-item" data-panel="citations" onclick="showPanel('citations')">
         <span class="nav-icon">&#x1F517;</span> Citation Formatter
       </div>
+      <div class="nav-item" data-panel="wordcounter" onclick="showPanel('wordcounter')">
+        <span class="nav-icon">&#x1F4CA;</span> Word Counter
+      </div>
     </nav>
 
     <div class="sidebar-footer">
@@ -76,6 +79,12 @@
       <div class="card-name">Citation Formatter</div>
       <div class="card-courses">Writing Tools</div>
       <div class="card-preview">Generate properly formatted citations in APA, MLA, Chicago, and Harvard styles.</div>
+    </div>
+    <div class="home-card animate-in" onclick="showPanel('wordcounter')">
+      <div class="card-emoji">&#x1F4CA;</div>
+      <div class="card-name">Word Counter</div>
+      <div class="card-courses">Writing Tools</div>
+      <div class="card-preview">Count words, characters, sentences, and paragraphs. Get reading time and Flesch-Kincaid readability scores for your essay.</div>
     </div>
   </div>
 </div>
@@ -205,6 +214,89 @@
       <div class="card-title">Your Citation</div>
       <div class="cf-citation-box" id="cf-citation-box"></div>
       <button class="btn btn-primary" onclick="copyCitation()">Copy Citation</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======== WORD COUNTER ======== -->
+<div class="tool-panel" id="panel-wordcounter">
+  <div class="main-header">
+    <h1>Word Counter &amp; Readability</h1>
+    <p>Paste your essay to count words, measure readability, and check reading time.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Your Text</div>
+    <div class="card-desc">Paste or type your essay below. Stats update live as you type.</div>
+    <div class="form-group">
+      <textarea class="form-textarea" id="wc-input" rows="10" placeholder="Paste or type your text here..." oninput="wcAnalyze()"></textarea>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-secondary" onclick="wcClear()">Clear</button>
+    </div>
+  </div>
+
+  <div id="wc-stats-area">
+    <div class="wc-stats-grid">
+      <div class="wc-stat-box">
+        <div class="wc-stat-value" id="wc-words">0</div>
+        <div class="wc-stat-label">Words</div>
+      </div>
+      <div class="wc-stat-box">
+        <div class="wc-stat-value" id="wc-chars">0</div>
+        <div class="wc-stat-label">Characters</div>
+      </div>
+      <div class="wc-stat-box">
+        <div class="wc-stat-value" id="wc-chars-nospace">0</div>
+        <div class="wc-stat-label">Chars (no spaces)</div>
+      </div>
+      <div class="wc-stat-box">
+        <div class="wc-stat-value" id="wc-sentences">0</div>
+        <div class="wc-stat-label">Sentences</div>
+      </div>
+      <div class="wc-stat-box">
+        <div class="wc-stat-value" id="wc-paragraphs">0</div>
+        <div class="wc-stat-label">Paragraphs</div>
+      </div>
+      <div class="wc-stat-box">
+        <div class="wc-stat-value" id="wc-read-time">0 min</div>
+        <div class="wc-stat-label">Reading Time</div>
+      </div>
+      <div class="wc-stat-box">
+        <div class="wc-stat-value" id="wc-speak-time">0 min</div>
+        <div class="wc-stat-label">Speaking Time</div>
+      </div>
+      <div class="wc-stat-box">
+        <div class="wc-stat-value" id="wc-avg-sentence">0</div>
+        <div class="wc-stat-label">Avg Words/Sentence</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:20px">
+      <div class="card-title">Readability</div>
+      <div class="card-desc">Flesch-Kincaid scores measure how easy your writing is to read.</div>
+      <div class="wc-readability-row">
+        <div class="wc-read-block">
+          <div class="wc-read-score" id="wc-fre-score">—</div>
+          <div class="wc-read-name">Flesch Reading Ease</div>
+          <div class="wc-read-detail" id="wc-fre-label">Enter text above</div>
+          <div class="wc-read-desc">0–100 scale. Higher = easier to read. Aim for 60–70 for general audiences.</div>
+        </div>
+        <div class="wc-read-block">
+          <div class="wc-read-score" id="wc-fkgl-score">—</div>
+          <div class="wc-read-name">Flesch-Kincaid Grade Level</div>
+          <div class="wc-read-detail" id="wc-fkgl-label">Enter text above</div>
+          <div class="wc-read-desc">Estimated US school grade level needed to understand the text.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:20px">
+      <div class="card-title">Top 10 Most Used Words</div>
+      <div class="card-desc">Common words (the, a, is, etc.) are excluded.</div>
+      <div id="wc-top-words" class="wc-top-words-list">
+        <span style="color:var(--text-muted)">Enter text above to see word frequency.</span>
+      </div>
     </div>
   </div>
 </div>

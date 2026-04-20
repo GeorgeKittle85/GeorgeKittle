@@ -3300,3 +3300,109 @@ if (document.getElementById('cf-source-type')) {
   updateCitationFields();
 }
 });
+
+// ============================================
+// WORD COUNTER & READABILITY ANALYZER
+// ============================================
+
+const WC_STOPWORDS = new Set([
+  'the','a','an','and','or','but','in','on','at','to','for','of','with',
+  'by','from','up','about','into','through','during','is','are','was',
+  'were','be','been','being','have','has','had','do','does','did','will',
+  'would','could','should','may','might','shall','can','that','this',
+  'these','those','it','its','as','if','then','than','so','not','no',
+  'nor','yet','both','either','neither','whether','i','you','he','she',
+  'we','they','me','him','her','us','them','my','your','his','our','their',
+  'what','which','who','whom','when','where','why','how','all','each',
+  'every','more','most','other','some','such','just','also','very'
+]);
+
+function wcCountSyllables(word) {
+  word = word.toLowerCase().replace(/[^a-z]/g, '');
+  if (word.length <= 3) return 1;
+  word = word.replace(/e$/, '');
+  const m = word.match(/[aeiouy]+/g);
+  return m ? m.length : 1;
+}
+
+function wcAnalyze() {
+  const text = document.getElementById('wc-input').value;
+
+  // Word count
+  const words = text.trim() === '' ? [] : text.trim().split(/\s+/).filter(w => w.length > 0);
+  const wordCount = words.length;
+
+  // Characters
+  const charCount = text.length;
+  const charNoSpace = text.replace(/\s/g, '').length;
+
+  // Sentences
+  const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+  const sentenceCount = sentences.length;
+
+  // Paragraphs
+  const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim().length > 0);
+  const paraCount = text.trim() === '' ? 0 : Math.max(paragraphs.length, 1);
+
+  // Reading / speaking time (avg 238 wpm reading, 130 wpm speaking)
+  const readSec = Math.round((wordCount / 238) * 60);
+  const speakSec = Math.round((wordCount / 130) * 60);
+  const fmtTime = s => s < 60 ? `${s}s` : `${Math.floor(s/60)}m ${s%60}s`;
+
+  // Average words per sentence
+  const avgSentence = sentenceCount > 0 ? (wordCount / sentenceCount).toFixed(1) : 0;
+
+  // Flesch-Kincaid scores
+  let freScore = '—', fkglScore = '—', freLabel = 'Enter text above', fkglLabel = 'Enter text above';
+  if (wordCount > 0 && sentenceCount > 0) {
+    const totalSyllables = words.reduce((sum, w) => sum + wcCountSyllables(w), 0);
+    const asl = wordCount / sentenceCount;
+    const asw = totalSyllables / wordCount;
+    const fre = 206.835 - (1.015 * asl) - (84.6 * asw);
+    const fkgl = (0.39 * asl) + (11.8 * asw) - 15.59;
+    freScore = Math.min(100, Math.max(0, fre)).toFixed(1);
+    fkglScore = Math.max(0, fkgl).toFixed(1);
+    freLabel = fre >= 90 ? 'Very Easy (5th grade)' : fre >= 80 ? 'Easy (6th grade)' :
+               fre >= 70 ? 'Fairly Easy (7th grade)' : fre >= 60 ? 'Standard (8th–9th grade)' :
+               fre >= 50 ? 'Fairly Difficult (10th–12th grade)' : fre >= 30 ? 'Difficult (College)' : 'Very Confusing (College+)';
+    fkglLabel = `~Grade ${Math.round(Math.max(0, fkgl))} level`;
+  }
+
+  // Top words
+  const freq = {};
+  words.forEach(w => {
+    const clean = w.toLowerCase().replace(/[^a-z']/g, '');
+    if (clean.length > 2 && !WC_STOPWORDS.has(clean)) {
+      freq[clean] = (freq[clean] || 0) + 1;
+    }
+  });
+  const topWords = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 10);
+
+  // Update DOM
+  document.getElementById('wc-words').textContent = wordCount.toLocaleString();
+  document.getElementById('wc-chars').textContent = charCount.toLocaleString();
+  document.getElementById('wc-chars-nospace').textContent = charNoSpace.toLocaleString();
+  document.getElementById('wc-sentences').textContent = sentenceCount.toLocaleString();
+  document.getElementById('wc-paragraphs').textContent = paraCount.toLocaleString();
+  document.getElementById('wc-read-time').textContent = wordCount === 0 ? '0s' : fmtTime(readSec);
+  document.getElementById('wc-speak-time').textContent = wordCount === 0 ? '0s' : fmtTime(speakSec);
+  document.getElementById('wc-avg-sentence').textContent = avgSentence;
+  document.getElementById('wc-fre-score').textContent = freScore;
+  document.getElementById('wc-fre-label').textContent = freLabel;
+  document.getElementById('wc-fkgl-score').textContent = fkglScore;
+  document.getElementById('wc-fkgl-label').textContent = fkglLabel;
+
+  const topEl = document.getElementById('wc-top-words');
+  if (topWords.length === 0) {
+    topEl.innerHTML = '<span style="color:var(--text-muted)">Enter text above to see word frequency.</span>';
+  } else {
+    topEl.innerHTML = topWords.map(([w, c]) =>
+      `<span class="wc-word-chip">${w}<span class="wc-word-chip-count">${c}</span></span>`
+    ).join('');
+  }
+}
+
+function wcClear() {
+  document.getElementById('wc-input').value = '';
+  wcAnalyze();
+}

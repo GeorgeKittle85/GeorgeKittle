@@ -2935,3 +2935,118 @@ html[data-theme="light"] body::before {
   word-wrap: break-word;
   white-space: normal;
 }
+
+/* ============================================
+   WORD COUNTER TOOL
+   ============================================ */
+
+.wc-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.wc-stat-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 18px 14px;
+  text-align: center;
+  transition: border-color var(--transition-fast);
+}
+
+.wc-stat-box:hover {
+  border-color: var(--border-accent);
+}
+
+.wc-stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--accent-cyan);
+  line-height: 1.1;
+  font-family: var(--font-mono);
+}
+
+.wc-stat-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 4px;
+}
+
+.wc-readability-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 600px) {
+  .wc-readability-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.wc-read-block {
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+}
+
+.wc-read-score {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--accent-cyan);
+  font-family: var(--font-mono);
+  margin-bottom: 4px;
+}
+
+.wc-read-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.wc-read-detail {
+  font-size: 12px;
+  color: var(--accent-purple);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.wc-read-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.wc-top-words-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.wc-word-chip {
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  padding: 4px 14px;
+  font-size: 13px;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.wc-word-chip-count {
+  font-size: 11px;
+  background: var(--accent-cyan-dim);
+  color: var(--accent-cyan);
+  border-radius: 999px;
+  padding: 1px 7px;
+  font-weight: 600;
+}
