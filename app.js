@@ -3112,6 +3112,183 @@ function gsBackToSetup() {
 }
 
 // ============================================
+// CITATION FORMATTER
+// ============================================
+var cfSelectedStyle = 'apa';
+var cfSourceType = 'book';
+
+const cfFields = {
+  book: [
+    { id: 'cf-author', label: 'Author(s)', placeholder: 'e.g., Smith, John' },
+    { id: 'cf-title', label: 'Book Title', placeholder: 'Enter the book title' },
+    { id: 'cf-publisher', label: 'Publisher', placeholder: 'e.g., Penguin Books' },
+    { id: 'cf-year', label: 'Year', placeholder: 'e.g., 2020' }
+  ],
+  website: [
+    { id: 'cf-author', label: 'Author(s)', placeholder: 'e.g., Smith, John (or leave blank)' },
+    { id: 'cf-title', label: 'Page Title', placeholder: 'Enter the page title' },
+    { id: 'cf-website', label: 'Website Name', placeholder: 'e.g., Wikipedia' },
+    { id: 'cf-url', label: 'URL', placeholder: 'https://example.com' },
+    { id: 'cf-year', label: 'Access Date', placeholder: 'e.g., April 20, 2026' }
+  ],
+  journal: [
+    { id: 'cf-author', label: 'Author(s)', placeholder: 'e.g., Smith, John' },
+    { id: 'cf-title', label: 'Article Title', placeholder: 'Enter the article title' },
+    { id: 'cf-journal', label: 'Journal Name', placeholder: 'e.g., Nature' },
+    { id: 'cf-volume', label: 'Volume', placeholder: 'e.g., 42' },
+    { id: 'cf-issue', label: 'Issue', placeholder: 'e.g., 3' },
+    { id: 'cf-pages', label: 'Pages', placeholder: 'e.g., 123-145' },
+    { id: 'cf-year', label: 'Year', placeholder: 'e.g., 2020' }
+  ],
+  video: [
+    { id: 'cf-creator', label: 'Creator/Channel', placeholder: 'e.g., Khan Academy' },
+    { id: 'cf-title', label: 'Video Title', placeholder: 'Enter the video title' },
+    { id: 'cf-platform', label: 'Platform', placeholder: 'e.g., YouTube' },
+    { id: 'cf-url', label: 'URL', placeholder: 'https://youtube.com/...' },
+    { id: 'cf-year', label: 'Publication Date', placeholder: 'e.g., April 20, 2020' }
+  ]
+};
+
+function updateCitationFields() {
+  cfSourceType = document.getElementById('cf-source-type').value;
+  const container = document.getElementById('cf-fields-container');
+  container.innerHTML = '';
+
+  cfFields[cfSourceType].forEach(field => {
+    const group = document.createElement('div');
+    group.className = 'form-group';
+    group.innerHTML = `
+      <label class="form-label">${field.label}</label>
+      <input type="text" class="form-input" id="${field.id}" placeholder="${field.placeholder}">
+    `;
+    container.appendChild(group);
+  });
+}
+
+function selectCitationStyle(style) {
+  cfSelectedStyle = style;
+  document.querySelectorAll('.cf-style-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  document.querySelector(`[data-style="${style}"]`).classList.add('active');
+}
+
+function generateCitation() {
+  const data = {};
+  cfFields[cfSourceType].forEach(field => {
+    data[field.id.replace('cf-', '')] = document.getElementById(field.id).value.trim();
+  });
+
+  if (!data.title) {
+    alert('Please enter a title.');
+    return;
+  }
+
+  let citation = '';
+
+  if (cfSourceType === 'book') {
+    citation = formatBookCitation(data, cfSelectedStyle);
+  } else if (cfSourceType === 'website') {
+    citation = formatWebsiteCitation(data, cfSelectedStyle);
+  } else if (cfSourceType === 'journal') {
+    citation = formatJournalCitation(data, cfSelectedStyle);
+  } else if (cfSourceType === 'video') {
+    citation = formatVideoCitation(data, cfSelectedStyle);
+  }
+
+  document.getElementById('cf-citation-box').innerHTML = citation;
+  document.getElementById('cf-result-area').style.display = 'block';
+  window.scrollIntoView({ behavior: 'smooth' });
+}
+
+function formatBookCitation(data, style) {
+  const author = data.author || 'Author Unknown';
+  const title = data.title || 'Title Unknown';
+  const publisher = data.publisher || 'Publisher Unknown';
+  const year = data.year || 'n.d.';
+
+  if (style === 'apa') {
+    return `${author} (${year}). <em>${title}</em>. ${publisher}.`;
+  } else if (style === 'mla') {
+    return `${author}. <em>${title}</em>. ${publisher}, ${year}.`;
+  } else if (style === 'chicago') {
+    return `${author}. <em>${title}</em>. ${publisher}, ${year}.`;
+  } else if (style === 'harvard') {
+    return `${author}, ${year}. <em>${title}</em>. ${publisher}.`;
+  }
+}
+
+function formatWebsiteCitation(data, style) {
+  const author = data.author || 'Author Unknown';
+  const title = data.title || 'Title Unknown';
+  const website = data.website || 'Website';
+  const url = data.url || '';
+  const date = data.year || new Date().toLocaleDateString();
+
+  if (style === 'apa') {
+    return `${author}. (n.d.). <em>${title}</em>. Retrieved from ${url}`;
+  } else if (style === 'mla') {
+    return `${author}. "${title}." <em>${website}</em>, Accessed ${date}. ${url}`;
+  } else if (style === 'chicago') {
+    return `${author}. "${title}." <em>${website}</em>. Accessed ${date}. ${url}`;
+  } else if (style === 'harvard') {
+    return `${author}, n.d. <em>${title}</em>. Available at: ${url} (Accessed: ${date}).`;
+  }
+}
+
+function formatJournalCitation(data, style) {
+  const author = data.author || 'Author Unknown';
+  const title = data.title || 'Title Unknown';
+  const journal = data.journal || 'Journal';
+  const volume = data.volume || '1';
+  const issue = data.issue || '1';
+  const pages = data.pages || '1-10';
+  const year = data.year || 'n.d.';
+
+  if (style === 'apa') {
+    return `${author} (${year}). ${title}. <em>${journal}</em>, ${volume}(${issue}), ${pages}.`;
+  } else if (style === 'mla') {
+    return `${author}. "${title}." <em>${journal}</em>, vol. ${volume}, no. ${issue}, ${year}, pp. ${pages}.`;
+  } else if (style === 'chicago') {
+    return `${author}. "${title}." <em>${journal}</em> ${volume}, no. ${issue} (${year}): ${pages}.`;
+  } else if (style === 'harvard') {
+    return `${author}, ${year}. ${title}. <em>${journal}</em>, ${volume}(${issue}), pp.${pages}.`;
+  }
+}
+
+function formatVideoCitation(data, style) {
+  const creator = data.creator || 'Creator Unknown';
+  const title = data.title || 'Title Unknown';
+  const platform = data.platform || 'Online Video';
+  const url = data.url || '';
+  const year = data.year || 'n.d.';
+
+  if (style === 'apa') {
+    return `${creator} (${year}). <em>${title}</em> [Video]. ${platform}. Retrieved from ${url}`;
+  } else if (style === 'mla') {
+    return `${creator}. "${title}." <em>${platform}</em>, ${year}, ${url}.`;
+  } else if (style === 'chicago') {
+    return `${creator}. "${title}." <em>${platform}</em>, ${year}. ${url}`;
+  } else if (style === 'harvard') {
+    return `${creator}, ${year}. <em>${title}</em>. <em>${platform}</em>. Available at: ${url}`;
+  }
+}
+
+function copyCitation() {
+  const citation = document.getElementById('cf-citation-box').innerText;
+  navigator.clipboard.writeText(citation).then(() => {
+    alert('Citation copied to clipboard!');
+  });
+}
+
+function clearCitationForm() {
+  cfFields[cfSourceType].forEach(field => {
+    document.getElementById(field.id).value = '';
+  });
+  document.getElementById('cf-result-area').style.display = 'none';
+}
+
+// ============================================
 // INIT - Render study tools on page load
 // ============================================
 window.addEventListener('DOMContentLoaded', function() {
@@ -3119,4 +3296,5 @@ fcRenderDecks();
 qzRenderList();
 gsInit();
 stRenderSessionList();
+updateCitationFields();
 });
