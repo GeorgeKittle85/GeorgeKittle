@@ -3406,3 +3406,234 @@ function wcClear() {
   document.getElementById('wc-input').value = '';
   wcAnalyze();
 }
+
+// ============================================
+// ESSAY OUTLINE BUILDER
+// ============================================
+
+const OB_TEMPLATES = {
+  argumentative: {
+    intro: {
+      label: 'Introduction',
+      fields: [
+        { key: 'hook',       label: 'Hook',                   placeholder: 'Start with a surprising statistic, question, or bold statement that grabs the reader.' },
+        { key: 'background', label: 'Background / Context',   placeholder: 'Briefly explain the topic and why it matters.' },
+        { key: 'thesis',     label: 'Thesis Statement',       placeholder: 'State your argument clearly — one sentence that tells the reader exactly what you will prove.' }
+      ]
+    },
+    body: {
+      fields: [
+        { key: 'topic',      label: 'Topic Sentence',         placeholder: 'Introduce the main point of this paragraph.' },
+        { key: 'evidence',   label: 'Evidence / Support',     placeholder: 'Provide a fact, statistic, quote, or example that backs your point.' },
+        { key: 'analysis',   label: 'Analysis',               placeholder: 'Explain how the evidence supports your argument.' },
+        { key: 'transition', label: 'Transition',             placeholder: 'Bridge to the next paragraph or point.' }
+      ]
+    },
+    counterarg: {
+      label: 'Counterargument &amp; Rebuttal',
+      fields: [
+        { key: 'counter',    label: 'Counterargument',        placeholder: 'Acknowledge the opposing viewpoint fairly.' },
+        { key: 'rebuttal',   label: 'Rebuttal',               placeholder: 'Explain why your argument is still stronger.' }
+      ]
+    },
+    conclusion: {
+      label: 'Conclusion',
+      fields: [
+        { key: 'restate',    label: 'Restate Thesis',         placeholder: 'Reword your thesis — do not copy it word-for-word.' },
+        { key: 'summary',    label: 'Summary of Points',      placeholder: 'Briefly recap the main arguments you made.' },
+        { key: 'closing',    label: 'Closing Thought',        placeholder: 'End with a call to action, prediction, or thought-provoking statement.' }
+      ]
+    }
+  },
+  expository: {
+    intro: {
+      label: 'Introduction',
+      fields: [
+        { key: 'hook',       label: 'Hook',                   placeholder: 'Open with an interesting fact or question about the topic.' },
+        { key: 'background', label: 'Background',             placeholder: 'Give the reader essential context to understand the topic.' },
+        { key: 'thesis',     label: 'Thesis Statement',       placeholder: 'State clearly what the essay will explain or inform.' }
+      ]
+    },
+    body: {
+      fields: [
+        { key: 'topic',      label: 'Topic Sentence',         placeholder: 'Introduce the main idea of this paragraph.' },
+        { key: 'facts',      label: 'Facts &amp; Details',    placeholder: 'Present objective facts, definitions, or examples.' },
+        { key: 'explain',    label: 'Explanation',            placeholder: 'Clarify the facts and connect them to the thesis.' },
+        { key: 'transition', label: 'Transition',             placeholder: 'Lead smoothly into the next paragraph.' }
+      ]
+    },
+    conclusion: {
+      label: 'Conclusion',
+      fields: [
+        { key: 'restate',    label: 'Restate Thesis',         placeholder: 'Reword your thesis in light of what you explained.' },
+        { key: 'summary',    label: 'Summary',                placeholder: 'Briefly recap the key points covered.' },
+        { key: 'closing',    label: 'Closing Thought',        placeholder: 'Leave the reader with something to think about.' }
+      ]
+    }
+  },
+  compare: {
+    intro: {
+      label: 'Introduction',
+      fields: [
+        { key: 'hook',       label: 'Hook',                   placeholder: 'Draw the reader in with a question or observation about the two subjects.' },
+        { key: 'subjects',   label: 'Introduce Both Subjects', placeholder: 'Briefly introduce the two things you are comparing.' },
+        { key: 'thesis',     label: 'Thesis Statement',       placeholder: 'State whether the subjects are more similar or different, and why it matters.' }
+      ]
+    },
+    body: {
+      fields: [
+        { key: 'topic',      label: 'Topic Sentence',         placeholder: 'Introduce the comparison point for this paragraph.' },
+        { key: 'subjectA',   label: 'Subject A',              placeholder: 'Describe or explain this aspect for Subject A.' },
+        { key: 'subjectB',   label: 'Subject B',              placeholder: 'Describe or explain this aspect for Subject B.' },
+        { key: 'analysis',   label: 'Analysis',               placeholder: 'Explain the significance of the similarity or difference.' },
+        { key: 'transition', label: 'Transition',             placeholder: 'Move to the next comparison point.' }
+      ]
+    },
+    conclusion: {
+      label: 'Conclusion',
+      fields: [
+        { key: 'restate',    label: 'Restate Thesis',         placeholder: 'Revisit your thesis now that all points have been compared.' },
+        { key: 'summary',    label: 'Summary',                placeholder: 'Briefly recap the key similarities and differences.' },
+        { key: 'closing',    label: 'Closing Thought',        placeholder: 'Explain the broader significance of the comparison.' }
+      ]
+    }
+  },
+  persuasive: {
+    intro: {
+      label: 'Introduction',
+      fields: [
+        { key: 'hook',       label: 'Hook',                   placeholder: 'Open with an emotional appeal, bold claim, or striking fact.' },
+        { key: 'background', label: 'Background',             placeholder: 'Set the scene — why should the reader care about this issue?' },
+        { key: 'thesis',     label: 'Position Statement',     placeholder: 'Clearly state your position and what you want the reader to believe or do.' }
+      ]
+    },
+    body: {
+      fields: [
+        { key: 'topic',      label: 'Topic Sentence',         placeholder: 'State the reason or benefit you will argue in this paragraph.' },
+        { key: 'evidence',   label: 'Evidence',               placeholder: 'Provide a compelling fact, story, or expert opinion.' },
+        { key: 'appeal',     label: 'Emotional / Logical Appeal', placeholder: 'Connect the evidence to the reader\'s values, logic, or emotions.' },
+        { key: 'transition', label: 'Transition',             placeholder: 'Keep the reader moving forward.' }
+      ]
+    },
+    counterarg: {
+      label: 'Counterargument &amp; Rebuttal',
+      fields: [
+        { key: 'counter',    label: 'Counterargument',        placeholder: 'Acknowledge what opponents say — shows you\'ve thought it through.' },
+        { key: 'rebuttal',   label: 'Rebuttal',               placeholder: 'Explain why your position is still correct.' }
+      ]
+    },
+    conclusion: {
+      label: 'Conclusion',
+      fields: [
+        { key: 'restate',    label: 'Restate Position',       placeholder: 'Restate your position with more conviction.' },
+        { key: 'summary',    label: 'Summary of Arguments',   placeholder: 'Recap your strongest reasons.' },
+        { key: 'cta',        label: 'Call to Action',         placeholder: 'Tell the reader exactly what you want them to believe, do, or feel.' }
+      ]
+    }
+  },
+  narrative: {
+    intro: {
+      label: 'Introduction',
+      fields: [
+        { key: 'hook',       label: 'Opening Scene / Hook',   placeholder: 'Drop the reader into the moment — start in the middle of the action.' },
+        { key: 'setting',    label: 'Setting &amp; Characters', placeholder: 'Briefly establish when, where, and who.' },
+        { key: 'thesis',     label: 'Narrative Purpose',      placeholder: 'Hint at what this story will reveal or the lesson it will teach.' }
+      ]
+    },
+    body: {
+      fields: [
+        { key: 'event',      label: 'Event / Scene',          placeholder: 'Describe what happened in this part of the story.' },
+        { key: 'detail',     label: 'Sensory Details',        placeholder: 'Add vivid sights, sounds, feelings, or dialogue.' },
+        { key: 'reflection', label: 'Reflection / Reaction',  placeholder: 'How did the narrator feel or react?' },
+        { key: 'transition', label: 'Transition',             placeholder: 'Move to the next scene or moment in time.' }
+      ]
+    },
+    conclusion: {
+      label: 'Conclusion',
+      fields: [
+        { key: 'resolution', label: 'Resolution',             placeholder: 'How did the story end or resolve?' },
+        { key: 'reflection', label: 'Reflection',             placeholder: 'What did you take away from this experience?' },
+        { key: 'closing',    label: 'Closing Image / Thought', placeholder: 'Leave the reader with a lasting impression.' }
+      ]
+    }
+  }
+};
+
+function obGenerate() {
+  const type = document.getElementById('ob-type').value;
+  const topic = document.getElementById('ob-topic').value.trim();
+  const bodyCount = parseInt(document.getElementById('ob-body-count').value, 10);
+
+  if (!topic) {
+    document.getElementById('ob-topic').focus();
+    return;
+  }
+
+  const template = OB_TEMPLATES[type];
+  let html = '';
+  let sectionIndex = 0;
+
+  // Introduction
+  html += obSection(template.intro.label, template.intro.fields, 'intro', sectionIndex++);
+
+  // Body paragraphs
+  for (let i = 0; i < bodyCount; i++) {
+    html += obSection(`Body Paragraph ${i + 1}`, template.body.fields, `body${i}`, sectionIndex++);
+  }
+
+  // Counterargument (argumentative / persuasive only)
+  if (template.counterarg) {
+    html += obSection(template.counterarg.label, template.counterarg.fields, 'counter', sectionIndex++);
+  }
+
+  // Conclusion
+  html += obSection(template.conclusion.label, template.conclusion.fields, 'conclusion', sectionIndex++);
+
+  document.getElementById('ob-outline-content').innerHTML = html;
+  document.getElementById('ob-result-area').style.display = 'block';
+}
+
+function obSection(title, fields, idPrefix, index) {
+  const colors = ['#6366f1','#22c55e','#f59e0b','#ef4444','#3b82f6','#a855f7','#14b8a6'];
+  const color = colors[index % colors.length];
+
+  let fieldsHtml = fields.map(f =>
+    `<div class="ob-field-group">
+      <div class="ob-field-label">${f.label}</div>
+      <div class="ob-field-input" contenteditable="true" data-placeholder="${f.placeholder}" id="ob-${idPrefix}-${f.key}">${f.placeholder}</div>
+    </div>`
+  ).join('');
+
+  return `<div class="ob-section" style="border-left:4px solid ${color};padding-left:16px;margin-bottom:24px">
+    <div class="ob-section-title" style="color:${color};font-weight:700;font-size:1rem;margin-bottom:12px;text-transform:uppercase;letter-spacing:0.05em">${title}</div>
+    ${fieldsHtml}
+  </div>`;
+}
+
+function obCopy() {
+  const sections = document.querySelectorAll('#ob-outline-content .ob-section');
+  let text = '';
+  sections.forEach(sec => {
+    const title = sec.querySelector('.ob-section-title').innerText;
+    text += `\n${title}\n${'─'.repeat(title.length)}\n`;
+    sec.querySelectorAll('.ob-field-group').forEach(fg => {
+      const label = fg.querySelector('.ob-field-label').innerText;
+      const value = fg.querySelector('.ob-field-input').innerText.trim();
+      text += `  ${label}: ${value}\n`;
+    });
+  });
+  navigator.clipboard.writeText(text.trim()).then(() => {
+    const btn = document.querySelector('#ob-result-area .btn-primary');
+    const orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = orig; }, 1500);
+  });
+}
+
+function obClear() {
+  document.getElementById('ob-topic').value = '';
+  document.getElementById('ob-type').value = 'argumentative';
+  document.getElementById('ob-body-count').value = '3';
+  document.getElementById('ob-result-area').style.display = 'none';
+  document.getElementById('ob-outline-content').innerHTML = '';
+}
