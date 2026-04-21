@@ -3050,3 +3050,45 @@ html[data-theme="light"] body::before {
   padding: 1px 7px;
   font-weight: 600;
 }
+
+/* ============================================================
+   ESSAY OUTLINE BUILDER
+   ============================================================ */
+
+.ob-field-group {
+  margin-bottom: 14px;
+}
+
+.ob-field-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.ob-field-input {
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  min-height: 44px;
+  cursor: text;
+  transition: border-color 0.15s, color 0.15s;
+  outline: none;
+  word-break: break-word;
+}
+
+.ob-field-input:focus {
+  border-color: var(--accent-cyan);
+  color: var(--text-primary);
+}
+
+.ob-field-input:focus,
+.ob-field-input:not(:empty) {
+  color: var(--text-primary);
+}

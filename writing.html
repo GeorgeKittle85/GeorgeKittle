@@ -49,6 +49,9 @@
       <div class="nav-item" data-panel="wordcounter" onclick="showPanel('wordcounter')">
         <span class="nav-icon">&#x1F4CA;</span> Word Counter
       </div>
+      <div class="nav-item" data-panel="outline" onclick="showPanel('outline')">
+        <span class="nav-icon">&#x1F4CB;</span> Essay Outline Builder
+      </div>
     </nav>
 
     <div class="sidebar-footer">
@@ -85,6 +88,12 @@
       <div class="card-name">Word Counter</div>
       <div class="card-courses">Writing Tools</div>
       <div class="card-preview">Count words, characters, sentences, and paragraphs. Get reading time and Flesch-Kincaid readability scores for your essay.</div>
+    </div>
+    <div class="home-card animate-in" onclick="showPanel('outline')">
+      <div class="card-emoji">&#x1F4CB;</div>
+      <div class="card-name">Essay Outline Builder</div>
+      <div class="card-courses">Writing Tools</div>
+      <div class="card-preview">Choose an essay type, enter your topic, and instantly get a structured outline with intro, body paragraphs, and conclusion you can edit and copy.</div>
     </div>
   </div>
 </div>
@@ -297,6 +306,61 @@
       <div id="wc-top-words" class="wc-top-words-list">
         <span style="color:var(--text-muted)">Enter text above to see word frequency.</span>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======== ESSAY OUTLINE BUILDER ======== -->
+<div class="tool-panel" id="panel-outline">
+  <div class="main-header">
+    <h1>Essay Outline Builder</h1>
+    <p>Pick an essay type, enter your topic, and get a ready-to-edit structured outline.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Essay Setup</div>
+    <div class="card-desc">Tell us about your essay and we'll generate a full outline for you.</div>
+
+    <div class="form-group">
+      <label class="form-label">Essay Type</label>
+      <select class="form-select" id="ob-type">
+        <option value="argumentative">Argumentative</option>
+        <option value="expository">Expository</option>
+        <option value="compare">Compare &amp; Contrast</option>
+        <option value="persuasive">Persuasive</option>
+        <option value="narrative">Narrative</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Topic / Thesis Statement</label>
+      <input class="form-input" type="text" id="ob-topic" placeholder="e.g. Social media has a negative effect on teenage mental health">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Number of Body Paragraphs</label>
+      <select class="form-select" id="ob-body-count">
+        <option value="2">2</option>
+        <option value="3" selected>3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+      </select>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="obGenerate()">Build Outline</button>
+      <button class="btn btn-secondary" onclick="obClear()">Clear</button>
+    </div>
+  </div>
+
+  <div id="ob-result-area" style="display:none">
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+        <div class="card-title" style="margin-bottom:0">Your Outline</div>
+        <button class="btn btn-sm btn-primary" onclick="obCopy()">Copy Outline</button>
+      </div>
+      <div class="card-desc" style="margin-bottom:16px">Click any field to edit it directly.</div>
+      <div id="ob-outline-content"></div>
     </div>
   </div>
 </div>
