@@ -50,6 +50,11 @@
       <div class="nav-item" data-panel="sheetmusic" onclick="showPanel('sheetmusic')">
         <span class="nav-icon">&#x1F3BC;</span> Sheet Music Creator
       </div>
+
+      <div class="nav-section-label">Theory</div>
+      <div class="nav-item" data-panel="scales" onclick="showPanel('scales')">
+        <span class="nav-icon">&#x1F3B9;</span> Scale Explorer
+      </div>
     </nav>
 
     <div class="sidebar-footer">
@@ -80,6 +85,12 @@
       <div class="card-name">Sheet Music Creator</div>
       <div class="card-courses">Notation &middot; Composition</div>
       <div class="card-preview">Build sheet music note by note. Pick your clef, key, and time signature, then add notes and rests. Download your score as PNG or SVG.</div>
+    </div>
+    <div class="home-card animate-in" onclick="showPanel('scales')">
+      <div class="card-emoji">&#x1F3B9;</div>
+      <div class="card-name">Scale Explorer</div>
+      <div class="card-courses">Theory &middot; All Ensembles</div>
+      <div class="card-preview">Pick any root note and scale type to see every note, the interval step pattern, and the diatonic chords built on each degree.</div>
     </div>
   </div>
 </div>
@@ -334,6 +345,75 @@
   </div>
 </div>
 
+
+<!-- ======== SCALE EXPLORER ======== -->
+<div class="tool-panel" id="panel-scales">
+  <div class="main-header">
+    <h1>Scale Explorer</h1>
+    <p>Pick a root note and scale type &mdash; see every note, the interval pattern, and the diatonic chords.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Scale Setup</div>
+    <div class="card-desc">Select your root note and scale type, then click Generate to see the full breakdown.</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Root Note</label>
+        <select class="form-select" id="ise-root">
+          <option value="0">C</option>
+          <option value="1">C# / D&#x266D;</option>
+          <option value="2">D</option>
+          <option value="3">D# / E&#x266D;</option>
+          <option value="4">E</option>
+          <option value="5">F</option>
+          <option value="6">F# / G&#x266D;</option>
+          <option value="7">G</option>
+          <option value="8">G# / A&#x266D;</option>
+          <option value="9">A</option>
+          <option value="10">A# / B&#x266D;</option>
+          <option value="11">B</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Scale Type</label>
+        <select class="form-select" id="ise-scale">
+          <option value="major">Major</option>
+          <option value="natminor">Natural Minor</option>
+          <option value="harmminor">Harmonic Minor</option>
+          <option value="melminor">Melodic Minor (Ascending)</option>
+          <option value="penmaj">Major Pentatonic</option>
+          <option value="penmin">Minor Pentatonic</option>
+          <option value="blues">Blues Scale</option>
+          <option value="chromatic">Chromatic</option>
+        </select>
+      </div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="iseGenerate()">Generate</button>
+      <button class="btn btn-secondary" onclick="iseClear()">Clear</button>
+    </div>
+  </div>
+
+  <div id="ise-result" style="display:none">
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px">
+        <div class="card-title" style="margin-bottom:0" id="ise-info">Scale</div>
+      </div>
+      <div class="ise-notes-row" id="ise-notes-display"></div>
+      <div class="ise-pattern-row">
+        <span class="ise-pattern-label">Interval Pattern:</span>
+        <span class="ise-pattern-value" id="ise-pattern"></span>
+      </div>
+      <div class="ise-legend">
+        <span class="ise-legend-item"><b>W</b> = Whole step (2 semitones)</span>
+        <span class="ise-legend-item"><b>H</b> = Half step (1 semitone)</span>
+        <span class="ise-legend-item"><b>A2</b> = Augmented 2nd (3 semitones)</span>
+      </div>
+    </div>
+
+    <div class="card" id="ise-chords-area" style="display:none"></div>
+  </div>
+</div>
 
   </main>
 </div>
