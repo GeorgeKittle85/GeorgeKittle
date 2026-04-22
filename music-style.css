@@ -341,6 +341,130 @@
 
 
 /* ============================================
+   SCALE EXPLORER STYLES
+   ============================================ */
+
+.ise-notes-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.ise-note-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  min-width: 60px;
+  transition: border-color var(--transition-fast);
+}
+
+.ise-note-pill.ise-root {
+  border-color: var(--accent-cyan);
+  background: var(--accent-cyan-dim);
+}
+
+.ise-degree {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ise-root .ise-degree {
+  color: var(--accent-cyan);
+}
+
+.ise-notename {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+}
+
+.ise-root .ise-notename {
+  color: var(--accent-cyan);
+}
+
+.ise-pattern-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.ise-pattern-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.ise-pattern-value {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent-purple);
+  background: var(--accent-purple-dim);
+  padding: 4px 12px;
+  border-radius: 6px;
+  letter-spacing: 0.04em;
+}
+
+.ise-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 4px;
+}
+
+.ise-legend-item {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.ise-chords-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.ise-chord-card {
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ise-chord-numeral {
+  font-size: 18px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--accent-cyan);
+}
+
+.ise-chord-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.ise-chord-notes {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+
+/* ============================================
    RESPONSIVE OVERRIDES
    ============================================ */
 
@@ -348,4 +472,6 @@
   .met-np-bpm { font-size: 40px; }
   .sm-note-btn { width: 42px; height: 42px; font-size: 16px !important; }
   .sm-dur-btn, .sm-acc-btn { min-width: 60px; font-size: 12px; padding: 6px 10px; }
+  .ise-note-pill { min-width: 50px; padding: 8px 10px; }
+  .ise-chords-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
 }

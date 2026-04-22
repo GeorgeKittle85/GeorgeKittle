@@ -717,3 +717,111 @@ function smDownloadSVG() {
   link.href = URL.createObjectURL(blob);
   link.click();
 }
+
+
+// ============================================
+// ============================================
+//  TOOL 3 — INTERVAL & SCALE EXPLORER
+// ============================================
+// ============================================
+
+var ISE_NOTES_DISPLAY = ['C','C#/D♭','D','D#/E♭','E','F','F#/G♭','G','G#/A♭','A','A#/B♭','B'];
+var ISE_NOTES_SHARP   = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+var ISE_NOTES_FLAT    = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+
+var ISE_SCALES = {
+  major:     { name: 'Major',                   degrees: ['1','2','3','4','5','6','7'],                                   offsets: [0,2,4,5,7,9,11],       pattern: 'W–W–H–W–W–W–H' },
+  natminor:  { name: 'Natural Minor',            degrees: ['1','2','♭3','4','5','♭6','♭7'],                offsets: [0,2,3,5,7,8,10],       pattern: 'W–H–W–W–H–W–W' },
+  harmminor: { name: 'Harmonic Minor',           degrees: ['1','2','♭3','4','5','♭6','7'],                      offsets: [0,2,3,5,7,8,11],       pattern: 'W–H–W–W–H–A2–H' },
+  melminor:  { name: 'Melodic Minor (Ascending)',degrees: ['1','2','♭3','4','5','6','7'],                             offsets: [0,2,3,5,7,9,11],       pattern: 'W–H–W–W–W–W–H' },
+  penmaj:    { name: 'Major Pentatonic',         degrees: ['1','2','3','5','6'],                                          offsets: [0,2,4,7,9],            pattern: 'W–W–A2–W–A2' },
+  penmin:    { name: 'Minor Pentatonic',         degrees: ['1','♭3','4','5','♭7'],                              offsets: [0,3,5,7,10],           pattern: 'A2–W–W–A2–W' },
+  blues:     { name: 'Blues',                    degrees: ['1','♭3','4','♭5','5','♭7'],                    offsets: [0,3,5,6,7,10],         pattern: 'A2–W–H–H–A2–W' },
+  chromatic: { name: 'Chromatic',               degrees: ['1','♭2','2','♭3','3','4','♭5','5','♭6','6','♭7','7'], offsets: [0,1,2,3,4,5,6,7,8,9,10,11], pattern: 'H–H–H–H–H–H–H–H–H–H–H–H' }
+};
+
+var ISE_DIATONIC_QUALITIES = {
+  major:    ['M','m','m','M','M','m','dim'],
+  natminor: ['m','dim','M','m','m','M','M']
+};
+
+var ISE_DIATONIC_NUMERALS = {
+  major:    ['I','ii','iii','IV','V','vi','vii°'],
+  natminor: ['i','ii°','III','iv','v','VI','VII']
+};
+
+function iseNoteAt(rootIdx, semitoneOffset) {
+  return ISE_NOTES_DISPLAY[(rootIdx + semitoneOffset) % 12];
+}
+
+function iseShortName(displayNote) {
+  // Return just the sharp name (first part before /) for chord names
+  return displayNote.split('/')[0];
+}
+
+function iseGenerate() {
+  var rootIdx   = parseInt(document.getElementById('ise-root').value, 10);
+  var scaleKey  = document.getElementById('ise-scale').value;
+  var scale     = ISE_SCALES[scaleKey];
+
+  // Build note list
+  var notes = scale.offsets.map(function(off, i) {
+    return { display: iseNoteAt(rootIdx, off), degree: scale.degrees[i] };
+  });
+
+  // Show result area
+  document.getElementById('ise-result').style.display = 'block';
+
+  // Info heading
+  document.getElementById('ise-info').textContent =
+    iseShortName(ISE_NOTES_DISPLAY[rootIdx]) + ' ' + scale.name + ' — ' + notes.length + ' notes';
+
+  // Note pills
+  var pillsHTML = notes.map(function(n, i) {
+    var isRoot = i === 0;
+    return '<div class="ise-note-pill' + (isRoot ? ' ise-root' : '') + '">' +
+           '<div class="ise-degree">' + n.degree + '</div>' +
+           '<div class="ise-notename">' + n.display + '</div>' +
+           '</div>';
+  }).join('');
+  document.getElementById('ise-notes-display').innerHTML = pillsHTML;
+
+  // Pattern
+  document.getElementById('ise-pattern').textContent = scale.pattern;
+
+  // Diatonic chords
+  var chordsArea = document.getElementById('ise-chords-area');
+  var qualities  = ISE_DIATONIC_QUALITIES[scaleKey];
+  if (qualities) {
+    var numerals = ISE_DIATONIC_NUMERALS[scaleKey];
+    var thirdOff = { M: 4, m: 3, dim: 3 };
+    var fifthOff = { M: 7, m: 7, dim: 6 };
+    var qLabel   = { M: 'Major', m: 'minor', dim: 'dim°' };
+
+    var chordCards = notes.map(function(n, i) {
+      var q         = qualities[i];
+      var chordRoot = (rootIdx + scale.offsets[i]) % 12;
+      var third     = iseShortName(ISE_NOTES_DISPLAY[(chordRoot + thirdOff[q]) % 12]);
+      var fifth     = iseShortName(ISE_NOTES_DISPLAY[(chordRoot + fifthOff[q]) % 12]);
+      var rootName  = iseShortName(n.display);
+      return '<div class="ise-chord-card">' +
+               '<div class="ise-chord-numeral">' + numerals[i] + '</div>' +
+               '<div class="ise-chord-name">' + rootName + ' ' + qLabel[q] + '</div>' +
+               '<div class="ise-chord-notes">' + rootName + ' – ' + third + ' – ' + fifth + '</div>' +
+             '</div>';
+    }).join('');
+
+    chordsArea.innerHTML =
+      '<div class="card-title" style="margin-bottom:12px">Diatonic Chords (Triads)</div>' +
+      '<div class="card-desc" style="margin-bottom:16px">Each chord is built on a scale degree using only notes from the scale.</div>' +
+      '<div class="ise-chords-grid">' + chordCards + '</div>';
+    chordsArea.style.display = 'block';
+  } else {
+    chordsArea.style.display = 'none';
+  }
+}
+
+function iseClear() {
+  document.getElementById('ise-result').style.display = 'none';
+  document.getElementById('ise-chords-area').style.display = 'none';
+}
