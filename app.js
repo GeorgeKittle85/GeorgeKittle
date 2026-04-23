@@ -3637,3 +3637,202 @@ function obClear() {
   document.getElementById('ob-result-area').style.display = 'none';
   document.getElementById('ob-outline-content').innerHTML = '';
 }
+
+// ============================================
+// POMODORO TIMER
+// ============================================
+var pomState = {
+  phase: 'work',       // 'work' | 'short' | 'long'
+  running: false,
+  intervalId: null,
+  remaining: 0,        // seconds
+  total: 0,            // seconds for current phase
+  round: 1,
+  workMin: 25,
+  shortMin: 5,
+  longMin: 15,
+  roundsPerLong: 4,
+  // stats
+  sessionsCompleted: 0,
+  focusMin: 0,
+  breaksTaken: 0,
+  currentStreak: 0,
+  bestStreak: 0
+};
+
+function pomSecondsForPhase(phase) {
+  if (phase === 'work')  return pomState.workMin  * 60;
+  if (phase === 'short') return pomState.shortMin * 60;
+  return pomState.longMin * 60;
+}
+
+function pomPhaseLabel(phase) {
+  if (phase === 'work')  return 'Work Session';
+  if (phase === 'short') return 'Short Break';
+  return 'Long Break — Great Job!';
+}
+
+function pomNextPhase() {
+  if (pomState.phase === 'work') {
+    pomState.sessionsCompleted++;
+    pomState.focusMin += pomState.workMin;
+    pomState.currentStreak++;
+    if (pomState.currentStreak > pomState.bestStreak) pomState.bestStreak = pomState.currentStreak;
+    if (pomState.round >= pomState.roundsPerLong) {
+      pomState.phase = 'long';
+      pomState.round = 1;
+    } else {
+      pomState.phase = 'short';
+      pomState.round++;
+    }
+  } else {
+    pomState.breaksTaken++;
+    pomState.phase = 'work';
+  }
+  pomState.total = pomSecondsForPhase(pomState.phase);
+  pomState.remaining = pomState.total;
+}
+
+function pomBeep(isWork) {
+  try {
+    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    var freqs = isWork ? [880, 1100] : [660, 880];
+    freqs.forEach(function(freq, i) {
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.18, ctx.currentTime + i * 0.22);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.22 + 0.4);
+      osc.start(ctx.currentTime + i * 0.22);
+      osc.stop(ctx.currentTime + i * 0.22 + 0.42);
+    });
+  } catch(e) {}
+}
+
+function pomUpdateUI() {
+  var mins = Math.floor(pomState.remaining / 60);
+  var secs = pomState.remaining % 60;
+  var timeStr = (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
+
+  var displayEl = document.getElementById('pom-time-display');
+  var fillEl = document.getElementById('pom-ring-fill');
+  var phaseEl = document.getElementById('pom-phase-label');
+  var roundEl = document.getElementById('pom-round-label');
+  if (!displayEl) return;
+
+  displayEl.textContent = timeStr;
+  phaseEl.textContent = pomPhaseLabel(pomState.phase);
+
+  if (pomState.phase === 'work') {
+    roundEl.textContent = 'Round ' + pomState.round + ' of ' + pomState.roundsPerLong;
+  } else if (pomState.phase === 'short') {
+    roundEl.textContent = 'Short Break — Round ' + (pomState.round - 1) + ' done';
+  } else {
+    roundEl.textContent = 'Long Break — ' + pomState.roundsPerLong + ' rounds complete!';
+  }
+
+  // Ring progress
+  var circumference = 534;
+  var progress = pomState.total > 0 ? pomState.remaining / pomState.total : 1;
+  fillEl.style.strokeDashoffset = (circumference * (1 - progress)).toString();
+
+  if (pomState.phase === 'work') {
+    fillEl.classList.remove('pom-break');
+  } else {
+    fillEl.classList.add('pom-break');
+  }
+
+  // Stats
+  document.getElementById('pom-stat-sessions').textContent = pomState.sessionsCompleted;
+  document.getElementById('pom-stat-focus').textContent = pomState.focusMin + ' min';
+  document.getElementById('pom-stat-breaks').textContent = pomState.breaksTaken;
+  document.getElementById('pom-stat-streak').textContent = pomState.bestStreak;
+
+  // Page title
+  document.title = timeStr + ' — ' + pomPhaseLabel(pomState.phase);
+}
+
+function pomTick() {
+  if (pomState.remaining <= 0) {
+    pomBeep(pomState.phase !== 'work');
+    pomNextPhase();
+    pomUpdateUI();
+    return;
+  }
+  pomState.remaining--;
+  pomUpdateUI();
+}
+
+function pomStart() {
+  if (pomState.running) return;
+  if (pomState.remaining === 0 && pomState.total === 0) {
+    pomState.phase = 'work';
+    pomState.total = pomSecondsForPhase('work');
+    pomState.remaining = pomState.total;
+  }
+  pomState.running = true;
+  pomState.intervalId = setInterval(pomTick, 1000);
+  document.getElementById('pom-start-btn').disabled = true;
+  document.getElementById('pom-pause-btn').disabled = false;
+}
+
+function pomPause() {
+  if (!pomState.running) return;
+  pomState.running = false;
+  clearInterval(pomState.intervalId);
+  pomState.intervalId = null;
+  document.getElementById('pom-start-btn').disabled = false;
+  document.getElementById('pom-pause-btn').disabled = true;
+}
+
+function pomReset() {
+  pomPause();
+  pomState.phase = 'work';
+  pomState.round = 1;
+  pomState.total = pomSecondsForPhase('work');
+  pomState.remaining = pomState.total;
+  document.getElementById('pom-start-btn').disabled = false;
+  document.getElementById('pom-pause-btn').disabled = true;
+  document.title = 'Studying Tools - Study Smarter';
+  pomUpdateUI();
+}
+
+function pomSkip() {
+  pomPause();
+  pomNextPhase();
+  pomUpdateUI();
+  document.getElementById('pom-start-btn').disabled = false;
+  document.getElementById('pom-pause-btn').disabled = true;
+}
+
+function pomApplySettings() {
+  var w = parseInt(document.getElementById('pom-set-work').value) || 25;
+  var s = parseInt(document.getElementById('pom-set-short').value) || 5;
+  var l = parseInt(document.getElementById('pom-set-long').value) || 15;
+  var r = parseInt(document.getElementById('pom-set-rounds').value) || 4;
+  pomState.workMin = Math.min(90, Math.max(1, w));
+  pomState.shortMin = Math.min(30, Math.max(1, s));
+  pomState.longMin = Math.min(60, Math.max(5, l));
+  pomState.roundsPerLong = Math.min(8, Math.max(2, r));
+  pomReset();
+}
+
+// Initialise when the panel first opens
+(function() {
+  var orig = window.showPanel;
+  window.showPanel = function(id) {
+    orig(id);
+    if (id === 'pomodoro') {
+      if (pomState.total === 0) {
+        pomState.phase = 'work';
+        pomState.round = 1;
+        pomState.total = pomSecondsForPhase('work');
+        pomState.remaining = pomState.total;
+        pomUpdateUI();
+      }
+    }
+  };
+})();
