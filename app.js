@@ -3834,5 +3834,271 @@ function pomApplySettings() {
         pomUpdateUI();
       }
     }
+    if (id === 'transitions') {
+      twRender();
+    }
   };
 })();
+
+// ============================================
+// TRANSITION WORD BANK
+// ============================================
+
+var twData = [
+  // Adding Information
+  { cat: 'add', phrase: 'Furthermore' },
+  { cat: 'add', phrase: 'In addition' },
+  { cat: 'add', phrase: 'Additionally' },
+  { cat: 'add', phrase: 'Moreover' },
+  { cat: 'add', phrase: 'Also' },
+  { cat: 'add', phrase: 'Besides' },
+  { cat: 'add', phrase: 'As well as' },
+  { cat: 'add', phrase: 'Along with' },
+  { cat: 'add', phrase: 'Not only … but also' },
+  { cat: 'add', phrase: 'What is more' },
+  { cat: 'add', phrase: 'Coupled with' },
+  { cat: 'add', phrase: 'Together with' },
+  { cat: 'add', phrase: 'In the same way' },
+  { cat: 'add', phrase: 'Equally important' },
+  { cat: 'add', phrase: 'Again' },
+  { cat: 'add', phrase: 'To add to this' },
+  { cat: 'add', phrase: 'On top of that' },
+  { cat: 'add', phrase: 'Yet another' },
+  { cat: 'add', phrase: 'And' },
+
+  // Contrasting
+  { cat: 'contrast', phrase: 'However' },
+  { cat: 'contrast', phrase: 'On the other hand' },
+  { cat: 'contrast', phrase: 'Nevertheless' },
+  { cat: 'contrast', phrase: 'Nonetheless' },
+  { cat: 'contrast', phrase: 'Although' },
+  { cat: 'contrast', phrase: 'Even though' },
+  { cat: 'contrast', phrase: 'Despite this' },
+  { cat: 'contrast', phrase: 'In spite of' },
+  { cat: 'contrast', phrase: 'Yet' },
+  { cat: 'contrast', phrase: 'But' },
+  { cat: 'contrast', phrase: 'Still' },
+  { cat: 'contrast', phrase: 'Conversely' },
+  { cat: 'contrast', phrase: 'On the contrary' },
+  { cat: 'contrast', phrase: 'By contrast' },
+  { cat: 'contrast', phrase: 'That said' },
+  { cat: 'contrast', phrase: 'Whereas' },
+  { cat: 'contrast', phrase: 'While' },
+  { cat: 'contrast', phrase: 'Alternatively' },
+  { cat: 'contrast', phrase: 'Rather' },
+  { cat: 'contrast', phrase: 'Instead' },
+  { cat: 'contrast', phrase: 'In contrast' },
+  { cat: 'contrast', phrase: 'At the same time' },
+  { cat: 'contrast', phrase: 'Be that as it may' },
+
+  // Cause & Effect
+  { cat: 'cause', phrase: 'Therefore' },
+  { cat: 'cause', phrase: 'As a result' },
+  { cat: 'cause', phrase: 'Consequently' },
+  { cat: 'cause', phrase: 'Thus' },
+  { cat: 'cause', phrase: 'Hence' },
+  { cat: 'cause', phrase: 'For this reason' },
+  { cat: 'cause', phrase: 'Because of this' },
+  { cat: 'cause', phrase: 'Due to' },
+  { cat: 'cause', phrase: 'Owing to' },
+  { cat: 'cause', phrase: 'Since' },
+  { cat: 'cause', phrase: 'Because' },
+  { cat: 'cause', phrase: 'Accordingly' },
+  { cat: 'cause', phrase: 'So' },
+  { cat: 'cause', phrase: 'In effect' },
+  { cat: 'cause', phrase: 'This leads to' },
+  { cat: 'cause', phrase: 'As a consequence' },
+  { cat: 'cause', phrase: 'It follows that' },
+  { cat: 'cause', phrase: 'With this in mind' },
+
+  // Sequence / Order
+  { cat: 'sequence', phrase: 'First' },
+  { cat: 'sequence', phrase: 'Second' },
+  { cat: 'sequence', phrase: 'Third' },
+  { cat: 'sequence', phrase: 'Next' },
+  { cat: 'sequence', phrase: 'Then' },
+  { cat: 'sequence', phrase: 'After that' },
+  { cat: 'sequence', phrase: 'Afterward' },
+  { cat: 'sequence', phrase: 'Subsequently' },
+  { cat: 'sequence', phrase: 'Before' },
+  { cat: 'sequence', phrase: 'Previously' },
+  { cat: 'sequence', phrase: 'Earlier' },
+  { cat: 'sequence', phrase: 'Finally' },
+  { cat: 'sequence', phrase: 'Lastly' },
+  { cat: 'sequence', phrase: 'To begin with' },
+  { cat: 'sequence', phrase: 'To start with' },
+  { cat: 'sequence', phrase: 'Initially' },
+  { cat: 'sequence', phrase: 'At first' },
+  { cat: 'sequence', phrase: 'In the first place' },
+  { cat: 'sequence', phrase: 'Simultaneously' },
+  { cat: 'sequence', phrase: 'Meanwhile' },
+  { cat: 'sequence', phrase: 'During' },
+  { cat: 'sequence', phrase: 'At the same time' },
+
+  // Emphasizing
+  { cat: 'emphasize', phrase: 'Indeed' },
+  { cat: 'emphasize', phrase: 'In fact' },
+  { cat: 'emphasize', phrase: 'Clearly' },
+  { cat: 'emphasize', phrase: 'Obviously' },
+  { cat: 'emphasize', phrase: 'Of course' },
+  { cat: 'emphasize', phrase: 'Certainly' },
+  { cat: 'emphasize', phrase: 'Undoubtedly' },
+  { cat: 'emphasize', phrase: 'Without a doubt' },
+  { cat: 'emphasize', phrase: 'Most importantly' },
+  { cat: 'emphasize', phrase: 'Above all' },
+  { cat: 'emphasize', phrase: 'Especially' },
+  { cat: 'emphasize', phrase: 'Particularly' },
+  { cat: 'emphasize', phrase: 'Notably' },
+  { cat: 'emphasize', phrase: 'Significantly' },
+  { cat: 'emphasize', phrase: 'It is worth noting' },
+  { cat: 'emphasize', phrase: 'It is clear that' },
+  { cat: 'emphasize', phrase: 'Even more so' },
+  { cat: 'emphasize', phrase: 'Emphatically' },
+
+  // Examples
+  { cat: 'example', phrase: 'For example' },
+  { cat: 'example', phrase: 'For instance' },
+  { cat: 'example', phrase: 'To illustrate' },
+  { cat: 'example', phrase: 'Such as' },
+  { cat: 'example', phrase: 'Including' },
+  { cat: 'example', phrase: 'Namely' },
+  { cat: 'example', phrase: 'Specifically' },
+  { cat: 'example', phrase: 'In particular' },
+  { cat: 'example', phrase: 'As an example' },
+  { cat: 'example', phrase: 'As demonstrated by' },
+  { cat: 'example', phrase: 'As evidenced by' },
+  { cat: 'example', phrase: 'This is seen in' },
+  { cat: 'example', phrase: 'A case in point' },
+  { cat: 'example', phrase: 'To demonstrate' },
+
+  // Comparing
+  { cat: 'compare', phrase: 'Similarly' },
+  { cat: 'compare', phrase: 'Likewise' },
+  { cat: 'compare', phrase: 'In the same way' },
+  { cat: 'compare', phrase: 'Just as' },
+  { cat: 'compare', phrase: 'Just like' },
+  { cat: 'compare', phrase: 'Equally' },
+  { cat: 'compare', phrase: 'Comparably' },
+  { cat: 'compare', phrase: 'In comparison' },
+  { cat: 'compare', phrase: 'By the same token' },
+  { cat: 'compare', phrase: 'In the same manner' },
+  { cat: 'compare', phrase: 'Correspondingly' },
+  { cat: 'compare', phrase: 'Analogously' },
+  { cat: 'compare', phrase: 'Much like' },
+
+  // Concluding
+  { cat: 'conclude', phrase: 'In conclusion' },
+  { cat: 'conclude', phrase: 'To conclude' },
+  { cat: 'conclude', phrase: 'In summary' },
+  { cat: 'conclude', phrase: 'To summarize' },
+  { cat: 'conclude', phrase: 'Overall' },
+  { cat: 'conclude', phrase: 'In short' },
+  { cat: 'conclude', phrase: 'In brief' },
+  { cat: 'conclude', phrase: 'To sum up' },
+  { cat: 'conclude', phrase: 'Ultimately' },
+  { cat: 'conclude', phrase: 'All in all' },
+  { cat: 'conclude', phrase: 'On the whole' },
+  { cat: 'conclude', phrase: 'As shown above' },
+  { cat: 'conclude', phrase: 'Given these points' },
+  { cat: 'conclude', phrase: 'Taking everything into account' },
+  { cat: 'conclude', phrase: 'In light of this' },
+  { cat: 'conclude', phrase: 'For these reasons' },
+  { cat: 'conclude', phrase: 'In the end' },
+  { cat: 'conclude', phrase: 'As a final point' }
+];
+
+var twCatLabels = {
+  add: 'Adding Information',
+  contrast: 'Contrasting',
+  cause: 'Cause & Effect',
+  sequence: 'Sequence / Order',
+  emphasize: 'Emphasizing',
+  example: 'Examples',
+  compare: 'Comparing',
+  conclude: 'Concluding'
+};
+
+var twActiveCat = 'all';
+
+function twSetCat(cat, btn) {
+  twActiveCat = cat;
+  document.querySelectorAll('#tw-category-btns .gc-filter-btn').forEach(function(b) {
+    b.classList.remove('active');
+  });
+  btn.classList.add('active');
+  twRender();
+}
+
+function twFilter() {
+  twRender();
+}
+
+function twRender() {
+  var area = document.getElementById('tw-results-area');
+  var empty = document.getElementById('tw-empty');
+  if (!area) return;
+
+  var search = (document.getElementById('tw-search') || {}).value || '';
+  search = search.trim().toLowerCase();
+
+  var filtered = twData.filter(function(item) {
+    var catMatch = twActiveCat === 'all' || item.cat === twActiveCat;
+    var searchMatch = !search || item.phrase.toLowerCase().indexOf(search) !== -1;
+    return catMatch && searchMatch;
+  });
+
+  if (filtered.length === 0) {
+    area.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  // Group by category
+  var groups = {};
+  filtered.forEach(function(item) {
+    if (!groups[item.cat]) groups[item.cat] = [];
+    groups[item.cat].push(item.phrase);
+  });
+
+  var html = '';
+  Object.keys(groups).forEach(function(cat) {
+    html += '<div class="card" style="margin-bottom:20px">';
+    html += '<div class="card-title">' + twCatLabels[cat] + '</div>';
+    html += '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">';
+    groups[cat].forEach(function(phrase) {
+      html += '<button class="btn btn-secondary" style="font-size:14px;padding:6px 14px;" onclick="twCopy(' + JSON.stringify(phrase) + ')">' + twEscape(phrase) + '</button>';
+    });
+    html += '</div></div>';
+  });
+
+  area.innerHTML = html;
+}
+
+function twEscape(str) {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function twCopy(phrase) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(phrase);
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = phrase;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  }
+  var toast = document.getElementById('tw-copy-toast');
+  if (!toast) return;
+  toast.style.opacity = '1';
+  toast.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(function() {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(-50%) translateY(20px)';
+  }, 1600);
+}

@@ -52,6 +52,9 @@
       <div class="nav-item" data-panel="outline" onclick="showPanel('outline')">
         <span class="nav-icon">&#x1F4CB;</span> Essay Outline Builder
       </div>
+      <div class="nav-item" data-panel="transitions" onclick="showPanel('transitions')">
+        <span class="nav-icon">&#x1F517;</span> Transition Word Bank
+      </div>
     </nav>
 
     <div class="sidebar-footer">
@@ -94,6 +97,12 @@
       <div class="card-name">Essay Outline Builder</div>
       <div class="card-courses">Writing Tools</div>
       <div class="card-preview">Choose an essay type, enter your topic, and instantly get a structured outline with intro, body paragraphs, and conclusion you can edit and copy.</div>
+    </div>
+    <div class="home-card animate-in" onclick="showPanel('transitions')">
+      <div class="card-emoji">&#x1F517;</div>
+      <div class="card-name">Transition Word Bank</div>
+      <div class="card-courses">Writing Tools</div>
+      <div class="card-preview">Browse hundreds of transition words and phrases organized by purpose. Filter by category, search, and copy any phrase straight into your essay.</div>
     </div>
   </div>
 </div>
@@ -362,6 +371,50 @@
       <div class="card-desc" style="margin-bottom:16px">Click any field to edit it directly.</div>
       <div id="ob-outline-content"></div>
     </div>
+  </div>
+</div>
+
+<!-- ======== TRANSITION WORD BANK ======== -->
+<div class="tool-panel" id="panel-transitions">
+  <div class="main-header">
+    <h1>Transition Word Bank</h1>
+    <p>Hundreds of transition words and phrases, organized by purpose. Click any phrase to copy it.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Filter by Purpose</div>
+    <div class="card-desc">Select a category to browse phrases for that writing goal, or search for a specific word.</div>
+    <div class="form-group" style="max-width:400px">
+      <input type="text" class="form-input" id="tw-search" placeholder="Search phrases..." oninput="twFilter()">
+    </div>
+    <div class="gc-filter-group" id="tw-category-btns" style="flex-wrap:wrap;gap:6px;margin-top:8px">
+      <button class="gc-filter-btn active" data-cat="all" onclick="twSetCat('all',this)">All</button>
+      <button class="gc-filter-btn" data-cat="add" onclick="twSetCat('add',this)">Adding Info</button>
+      <button class="gc-filter-btn" data-cat="contrast" onclick="twSetCat('contrast',this)">Contrasting</button>
+      <button class="gc-filter-btn" data-cat="cause" onclick="twSetCat('cause',this)">Cause &amp; Effect</button>
+      <button class="gc-filter-btn" data-cat="sequence" onclick="twSetCat('sequence',this)">Sequence</button>
+      <button class="gc-filter-btn" data-cat="emphasize" onclick="twSetCat('emphasize',this)">Emphasizing</button>
+      <button class="gc-filter-btn" data-cat="example" onclick="twSetCat('example',this)">Examples</button>
+      <button class="gc-filter-btn" data-cat="compare" onclick="twSetCat('compare',this)">Comparing</button>
+      <button class="gc-filter-btn" data-cat="conclude" onclick="twSetCat('conclude',this)">Concluding</button>
+    </div>
+  </div>
+
+  <div id="tw-results-area">
+    <!-- Phrase cards render here -->
+  </div>
+
+  <div id="tw-empty" class="empty-state" style="display:none">
+    <div class="empty-icon">&#x1F50D;</div>
+    <p>No phrases match your search.</p>
+  </div>
+
+  <div id="tw-copy-toast" style="
+    position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--accent-primary);color:#fff;padding:10px 22px;border-radius:24px;
+    font-size:14px;font-weight:600;opacity:0;pointer-events:none;
+    transition:opacity 0.25s,transform 0.25s;z-index:9999;">
+    Copied!
   </div>
 </div>
 
