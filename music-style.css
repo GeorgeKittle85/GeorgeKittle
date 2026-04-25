@@ -465,6 +465,115 @@
 
 
 /* ============================================
+   CHORD BUILDER STYLES
+   ============================================ */
+
+.cb-formula-badge {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent-purple);
+  background: var(--accent-purple-dim);
+  padding: 4px 14px;
+  border-radius: 20px;
+  letter-spacing: 0.04em;
+}
+
+.cb-interval-table {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.cb-interval-row {
+  display: grid;
+  grid-template-columns: 120px 80px 1fr 80px;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+}
+
+.cb-interval-row.cb-interval-header {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding-bottom: 2px;
+}
+
+.cb-note-cell {
+  font-weight: 700;
+  font-family: var(--font-display);
+  color: var(--accent-cyan);
+}
+
+.cb-degree-cell {
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+.cb-semitone-cell {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: right;
+}
+
+.cb-inversions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.cb-inversion-card {
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color var(--transition-fast);
+}
+
+.cb-inversion-card.cb-inv-root {
+  border-color: var(--accent-cyan);
+  background: var(--accent-cyan-dim);
+}
+
+.cb-inv-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.cb-inv-root .cb-inv-label {
+  color: var(--accent-cyan);
+}
+
+.cb-inv-bass {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.cb-inv-notes {
+  font-size: 13px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: 0.01em;
+}
+
+
+/* ============================================
    RESPONSIVE OVERRIDES
    ============================================ */
 
@@ -474,4 +583,6 @@
   .sm-dur-btn, .sm-acc-btn { min-width: 60px; font-size: 12px; padding: 6px 10px; }
   .ise-note-pill { min-width: 50px; padding: 8px 10px; }
   .ise-chords-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+  .cb-interval-row { grid-template-columns: 90px 60px 1fr 60px; font-size: 12px; }
+  .cb-inversions-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
 }
