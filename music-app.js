@@ -825,3 +825,105 @@ function iseClear() {
   document.getElementById('ise-result').style.display = 'none';
   document.getElementById('ise-chords-area').style.display = 'none';
 }
+
+
+// ============================================
+// ============================================
+//  TOOL 4 — CHORD BUILDER
+// ============================================
+// ============================================
+
+var CB_NOTES_DISPLAY = ['C','C#/D♭','D','D#/E♭','E','F','F#/G♭','G','G#/A♭','A','A#/B♭','B'];
+var CB_NOTES_SHORT   = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+
+var CB_INTERVAL_NAMES = [
+  'Root (1)', 'Minor 2nd (♭2)', 'Major 2nd (2)', 'Minor 3rd (♭3)',
+  'Major 3rd (3)', 'Perfect 4th (4)', 'Tritone (♭5/♯4)', 'Perfect 5th (5)',
+  'Augmented 5th (♯5)', 'Major 6th (6)', 'Minor 7th (♭7)', 'Major 7th (7)'
+];
+
+var CB_CHORDS = {
+  maj:     { name: 'Major',                  symbol: '',    formula: '1 – 3 – 5',         offsets: [0,4,7],    degrees: ['1','3','5'] },
+  min:     { name: 'Minor',                  symbol: 'm',   formula: '1 – ♭3 – 5',        offsets: [0,3,7],    degrees: ['1','♭3','5'] },
+  dim:     { name: 'Diminished',             symbol: '°',   formula: '1 – ♭3 – ♭5',       offsets: [0,3,6],    degrees: ['1','♭3','♭5'] },
+  aug:     { name: 'Augmented',              symbol: '+',   formula: '1 – 3 – ♯5',        offsets: [0,4,8],    degrees: ['1','3','♯5'] },
+  sus2:    { name: 'Suspended 2nd',          symbol: 'sus2',formula: '1 – 2 – 5',         offsets: [0,2,7],    degrees: ['1','2','5'] },
+  sus4:    { name: 'Suspended 4th',          symbol: 'sus4',formula: '1 – 4 – 5',         offsets: [0,5,7],    degrees: ['1','4','5'] },
+  maj7:    { name: 'Major 7th',              symbol: 'maj7',formula: '1 – 3 – 5 – 7',     offsets: [0,4,7,11], degrees: ['1','3','5','7'] },
+  min7:    { name: 'Minor 7th',              symbol: 'm7',  formula: '1 – ♭3 – 5 – ♭7',  offsets: [0,3,7,10], degrees: ['1','♭3','5','♭7'] },
+  dom7:    { name: 'Dominant 7th',           symbol: '7',   formula: '1 – 3 – 5 – ♭7',   offsets: [0,4,7,10], degrees: ['1','3','5','♭7'] },
+  dim7:    { name: 'Diminished 7th',         symbol: '°7',  formula: '1 – ♭3 – ♭5 – ♭♭7',offsets: [0,3,6,9],  degrees: ['1','♭3','♭5','♭♭7'] },
+  hdim7:   { name: 'Half-Diminished 7th',    symbol: 'ø7',  formula: '1 – ♭3 – ♭5 – ♭7', offsets: [0,3,6,10], degrees: ['1','♭3','♭5','♭7'] },
+  minmaj7: { name: 'Minor/Major 7th',        symbol: 'mM7', formula: '1 – ♭3 – 5 – 7',   offsets: [0,3,7,11], degrees: ['1','♭3','5','7'] },
+};
+
+var CB_INVERSION_NAMES = ['Root Position', '1st Inversion', '2nd Inversion', '3rd Inversion'];
+
+function cbBuild() {
+  var rootIdx  = parseInt(document.getElementById('cb-root').value, 10);
+  var chordKey = document.getElementById('cb-type').value;
+  var chord    = CB_CHORDS[chordKey];
+
+  var rootShort = CB_NOTES_SHORT[rootIdx];
+  var rootDisplay = CB_NOTES_DISPLAY[rootIdx];
+
+  // Build note list for root position
+  var notes = chord.offsets.map(function(off, i) {
+    var idx = (rootIdx + off) % 12;
+    return {
+      display: CB_NOTES_DISPLAY[idx],
+      short:   CB_NOTES_SHORT[idx],
+      semitones: off,
+      degree:  chord.degrees[i],
+      interval: CB_INTERVAL_NAMES[off]
+    };
+  });
+
+  // Show result area
+  document.getElementById('cb-result').style.display = 'block';
+
+  // Chord name & formula
+  document.getElementById('cb-chord-name').textContent = rootShort + ' ' + chord.name + ' (' + rootShort + chord.symbol + ')';
+  document.getElementById('cb-formula-badge').textContent = 'Formula: ' + chord.formula;
+
+  // Note pills
+  var pillsHTML = notes.map(function(n, i) {
+    return '<div class="ise-note-pill' + (i === 0 ? ' ise-root' : '') + '">' +
+           '<div class="ise-degree">' + n.degree + '</div>' +
+           '<div class="ise-notename">' + n.display + '</div>' +
+           '</div>';
+  }).join('');
+  document.getElementById('cb-notes-display').innerHTML = pillsHTML;
+
+  // Interval breakdown table
+  var tableHTML = '<div class="cb-interval-row cb-interval-header">' +
+    '<span>Note</span><span>Degree</span><span>Interval from Root</span><span>Semitones</span></div>';
+  notes.forEach(function(n) {
+    tableHTML += '<div class="cb-interval-row">' +
+      '<span class="cb-note-cell">' + n.display + '</span>' +
+      '<span class="cb-degree-cell">' + n.degree + '</span>' +
+      '<span>' + n.interval + '</span>' +
+      '<span class="cb-semitone-cell">+' + n.semitones + '</span>' +
+    '</div>';
+  });
+  document.getElementById('cb-interval-table').innerHTML = tableHTML;
+
+  // Inversions
+  var invCount = notes.length; // triads = 3 inversions, 7th = 4
+  var invHTML = '';
+  for (var inv = 0; inv < invCount; inv++) {
+    var invNotes = notes.slice(inv).concat(notes.slice(0, inv));
+    var bassNote = invNotes[0].display;
+    var noteNames = invNotes.map(function(n) { return n.display; }).join(' – ');
+    invHTML += '<div class="cb-inversion-card' + (inv === 0 ? ' cb-inv-root' : '') + '">' +
+      '<div class="cb-inv-label">' + CB_INVERSION_NAMES[inv] + '</div>' +
+      (inv > 0 ? '<div class="cb-inv-bass">Bass: ' + bassNote + '</div>' : '<div class="cb-inv-bass">Root on bottom</div>') +
+      '<div class="cb-inv-notes">' + noteNames + '</div>' +
+    '</div>';
+  }
+  document.getElementById('cb-inversions-grid').innerHTML = invHTML;
+}
+
+function cbClear() {
+  document.getElementById('cb-result').style.display = 'none';
+}
