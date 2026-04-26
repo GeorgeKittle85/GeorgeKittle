@@ -465,6 +465,97 @@
 
 
 /* ============================================
+   CHORD BUILDER STYLES
+   ============================================ */
+
+.cb-symbol-badge {
+  font-size: 22px;
+  font-weight: 800;
+  font-family: var(--font-display);
+  color: var(--accent-purple);
+  background: var(--accent-purple-dim);
+  padding: 4px 14px;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.02em;
+}
+
+/* Piano wrapper constrains the keyboard width */
+.cb-piano-wrap {
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+/* Inner container: holds white keys absolutely, then black keys on top */
+.cb-piano {
+  min-width: 320px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.cb-piano-inner {
+  position: relative;
+  height: 100px;
+  width: 100%;
+  user-select: none;
+}
+
+/* White keys */
+.cb-wkey {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: #f5f5f5;
+  border: 1px solid #bbb;
+  border-radius: 0 0 5px 5px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 5px;
+}
+
+.cb-wkey.cb-key-hl {
+  background: var(--accent-purple);
+  border-color: var(--accent-purple);
+}
+
+/* Black keys (rendered on top via z-index) */
+.cb-bkey {
+  position: absolute;
+  top: 0;
+  height: 62%;
+  background: #1a1a2e;
+  border: 1px solid #444;
+  border-radius: 0 0 4px 4px;
+  box-sizing: border-box;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 3px;
+}
+
+.cb-bkey.cb-key-hl {
+  background: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+}
+
+/* Note labels on highlighted keys */
+.cb-key-label {
+  font-size: 9px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: #fff;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.cb-bkey-label {
+  font-size: 8px;
+}
+
+
+/* ============================================
    RESPONSIVE OVERRIDES
    ============================================ */
 

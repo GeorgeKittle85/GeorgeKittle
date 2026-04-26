@@ -825,3 +825,113 @@ function iseClear() {
   document.getElementById('ise-result').style.display = 'none';
   document.getElementById('ise-chords-area').style.display = 'none';
 }
+
+
+// ============================================
+// ============================================
+//  TOOL 4 — CHORD BUILDER
+// ============================================
+// ============================================
+
+var CB_NOTES_SHARP = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+
+var CB_CHORDS = {
+  major:   { name: 'Major',             symbol: '',      offsets: [0,4,7],    formula: '1 – 3 – 5',          desc: 'Built from the root (1), major third (3), and perfect fifth (5). Bright and stable — the most common chord in music.' },
+  minor:   { name: 'Minor',             symbol: 'm',     offsets: [0,3,7],    formula: '1 – ♭3 – 5',         desc: 'The third is flattened by one half step. This gives minor chords their darker, more emotional quality.' },
+  dim:     { name: 'Diminished',        symbol: '°',     offsets: [0,3,6],    formula: '1 – ♭3 – ♭5',        desc: 'Both the third and fifth are flattened, stacking two minor thirds. Creates strong tension that wants to resolve.' },
+  aug:     { name: 'Augmented',         symbol: '+',     offsets: [0,4,8],    formula: '1 – 3 – #5',         desc: 'The fifth is raised a half step above a major chord. Augmented chords have an unstable, dreamy sound.' },
+  sus2:    { name: 'Suspended 2nd',     symbol: 'sus2',  offsets: [0,2,7],    formula: '1 – 2 – 5',          desc: 'The third is replaced by the major 2nd. Sus chords have an open quality — neither major nor minor.' },
+  sus4:    { name: 'Suspended 4th',     symbol: 'sus4',  offsets: [0,5,7],    formula: '1 – 4 – 5',          desc: 'The third is replaced by the perfect 4th. Very common in rock and pop, often resolving down to the major chord.' },
+  power:   { name: 'Power Chord',       symbol: '5',     offsets: [0,7],      formula: '1 – 5',              desc: 'Just the root and perfect fifth — no third at all. Neither major nor minor, power chords are a rock guitar staple.' },
+  dom7:    { name: 'Dominant 7th',      symbol: '7',     offsets: [0,4,7,10], formula: '1 – 3 – 5 – ♭7',    desc: 'A major triad with a flattened seventh added. Creates strong harmonic tension; the V chord in major keys.' },
+  maj7:    { name: 'Major 7th',         symbol: 'maj7',  offsets: [0,4,7,11], formula: '1 – 3 – 5 – 7',     desc: 'A major triad with the natural seventh. Has a rich, jazzy warmth found in pop, jazz, and neo-soul.' },
+  min7:    { name: 'Minor 7th',         symbol: 'm7',    offsets: [0,3,7,10], formula: '1 – ♭3 – 5 – ♭7',   desc: 'A minor triad with a flattened seventh. Very common in jazz, funk, and soul; smooth and mellow.' },
+  dim7:    { name: 'Diminished 7th',    symbol: '°7',    offsets: [0,3,6,9],  formula: '1 – ♭3 – ♭5 – ♭♭7', desc: 'Four notes equally spaced by minor thirds (3 semitones each). Deeply tense; resolves strongly in classical music.' },
+  halfdim: { name: 'Half-Diminished',   symbol: 'ø7',    offsets: [0,3,6,10], formula: '1 – ♭3 – ♭5 – ♭7',  desc: 'A diminished triad plus a minor 7th (also written m7♭5). The ii chord in minor keys and common in jazz.' },
+};
+
+function cbBuild() {
+  var rootIdx  = parseInt(document.getElementById('cb-root').value, 10);
+  var chordKey = document.getElementById('cb-type').value;
+  var chord    = CB_CHORDS[chordKey];
+  var rootName = CB_NOTES_SHARP[rootIdx];
+
+  var noteClasses = chord.offsets.map(function(off) { return (rootIdx + off) % 12; });
+  var noteNames   = noteClasses.map(function(pc) { return CB_NOTES_SHARP[pc]; });
+  var formulaParts = chord.formula.split(' – ');
+
+  document.getElementById('cb-chord-name').textContent = rootName + ' ' + chord.name;
+  document.getElementById('cb-chord-symbol').textContent = rootName + chord.symbol;
+
+  var pillsHTML = noteNames.map(function(n, i) {
+    var isRoot = i === 0;
+    return '<div class="ise-note-pill' + (isRoot ? ' ise-root' : '') + '">' +
+           '<div class="ise-degree">' + (formulaParts[i] || '') + '</div>' +
+           '<div class="ise-notename">' + n + '</div>' +
+           '</div>';
+  }).join('');
+  document.getElementById('cb-notes-display').innerHTML = pillsHTML;
+
+  document.getElementById('cb-formula').textContent = chord.formula;
+
+  cbRenderPiano(noteClasses);
+
+  document.getElementById('cb-theory-text').innerHTML =
+    '<p style="color:var(--text-secondary);line-height:1.7;margin:0">' + chord.desc + '</p>';
+
+  document.getElementById('cb-result').style.display = 'block';
+}
+
+function cbClear() {
+  document.getElementById('cb-result').style.display = 'none';
+}
+
+function cbRenderPiano(highlightClasses) {
+  var container = document.getElementById('cb-piano');
+  if (!container) return;
+
+  var numOctaves = 2;
+  var totalWhiteKeys = 7 * numOctaves;
+
+  // Semitone offsets for the 7 white keys per octave (C D E F G A B)
+  var whiteOffsets = [0, 2, 4, 5, 7, 9, 11];
+
+  // Black key definitions: [semitone offset within octave, fractional white-key position from octave start]
+  var blackDefs = [
+    { off: 1,  pos: 0.65 },
+    { off: 3,  pos: 1.65 },
+    { off: 6,  pos: 3.65 },
+    { off: 8,  pos: 4.65 },
+    { off: 10, pos: 5.65 },
+  ];
+
+  var wkW = 100 / totalWhiteKeys;
+  var bkW = wkW * 0.65;
+
+  var whiteHTML = '';
+  var blackHTML = '';
+
+  for (var oct = 0; oct < numOctaves; oct++) {
+    whiteOffsets.forEach(function(noteOff, i) {
+      var pc = noteOff;
+      var hl = highlightClasses.indexOf(pc) >= 0;
+      var left = (oct * 7 + i) * wkW;
+      whiteHTML += '<div class="cb-wkey' + (hl ? ' cb-key-hl' : '') + '" style="left:' +
+        left.toFixed(3) + '%;width:' + wkW.toFixed(3) + '%;">' +
+        (hl ? '<span class="cb-key-label">' + CB_NOTES_SHARP[pc] + '</span>' : '') +
+        '</div>';
+    });
+
+    blackDefs.forEach(function(bk) {
+      var pc = bk.off;
+      var hl = highlightClasses.indexOf(pc) >= 0;
+      var left = (bk.pos + oct * 7) * wkW - bkW * 0.5;
+      blackHTML += '<div class="cb-bkey' + (hl ? ' cb-key-hl' : '') + '" style="left:' +
+        left.toFixed(3) + '%;width:' + bkW.toFixed(3) + '%;">' +
+        (hl ? '<span class="cb-key-label cb-bkey-label">' + CB_NOTES_SHARP[pc] + '</span>' : '') +
+        '</div>';
+    });
+  }
+
+  container.innerHTML = '<div class="cb-piano-inner">' + whiteHTML + blackHTML + '</div>';
+}
