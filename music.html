@@ -55,6 +55,9 @@
       <div class="nav-item" data-panel="scales" onclick="showPanel('scales')">
         <span class="nav-icon">&#x1F3B9;</span> Scale Explorer
       </div>
+      <div class="nav-item" data-panel="chords" onclick="showPanel('chords')">
+        <span class="nav-icon">&#x1F3B8;</span> Chord Builder
+      </div>
     </nav>
 
     <div class="sidebar-footer">
@@ -91,6 +94,12 @@
       <div class="card-name">Scale Explorer</div>
       <div class="card-courses">Theory &middot; All Ensembles</div>
       <div class="card-preview">Pick any root note and scale type to see every note, the interval step pattern, and the diatonic chords built on each degree.</div>
+    </div>
+    <div class="home-card animate-in" onclick="showPanel('chords')">
+      <div class="card-emoji">&#x1F3B8;</div>
+      <div class="card-name">Chord Builder</div>
+      <div class="card-courses">Theory &middot; All Ensembles</div>
+      <div class="card-preview">Pick any root note and chord type — major, minor, 7ths, diminished, and more — to see every note and interval in the chord.</div>
     </div>
   </div>
 </div>
@@ -412,6 +421,86 @@
     </div>
 
     <div class="card" id="ise-chords-area" style="display:none"></div>
+  </div>
+</div>
+
+
+<!-- ======== CHORD BUILDER ======== -->
+<div class="tool-panel" id="panel-chords">
+  <div class="main-header">
+    <h1>Chord Builder</h1>
+    <p>Pick a root note and chord type &mdash; see every note, interval, and what makes the chord tick.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Build a Chord</div>
+    <div class="card-desc">Select a root note and chord type, then click Build to see the full breakdown — from simple triads to rich jazz 7ths.</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Root Note</label>
+        <select class="form-select" id="cb-root">
+          <option value="0">C</option>
+          <option value="1">C# / D&#x266D;</option>
+          <option value="2">D</option>
+          <option value="3">D# / E&#x266D;</option>
+          <option value="4">E</option>
+          <option value="5">F</option>
+          <option value="6">F# / G&#x266D;</option>
+          <option value="7">G</option>
+          <option value="8">G# / A&#x266D;</option>
+          <option value="9">A</option>
+          <option value="10">A# / B&#x266D;</option>
+          <option value="11">B</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Chord Type</label>
+        <select class="form-select" id="cb-chord-type">
+          <optgroup label="Triads">
+            <option value="major">Major</option>
+            <option value="minor">Minor</option>
+            <option value="dim">Diminished</option>
+            <option value="aug">Augmented</option>
+            <option value="sus2">Suspended 2nd (sus2)</option>
+            <option value="sus4">Suspended 4th (sus4)</option>
+          </optgroup>
+          <optgroup label="7th Chords">
+            <option value="maj7">Major 7th (maj7)</option>
+            <option value="dom7">Dominant 7th (7)</option>
+            <option value="min7">Minor 7th (m7)</option>
+            <option value="minmaj7">Minor Major 7th (mM7)</option>
+            <option value="halfdim">Half Diminished (&#x00F8;7)</option>
+            <option value="dim7">Diminished 7th (&#x00B0;7)</option>
+          </optgroup>
+          <optgroup label="6th Chords">
+            <option value="maj6">Major 6th (6)</option>
+            <option value="min6">Minor 6th (m6)</option>
+          </optgroup>
+        </select>
+      </div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="cbBuild()">Build Chord</button>
+      <button class="btn btn-secondary" onclick="cbClear()">Clear</button>
+    </div>
+  </div>
+
+  <div id="cb-result" style="display:none">
+    <div class="card">
+      <div class="cb-chord-header">
+        <div class="cb-chord-big-name" id="cb-chord-name">C</div>
+        <div class="cb-chord-type-label" id="cb-chord-label">Major Chord</div>
+      </div>
+      <div class="cb-notes-line">Notes: <span id="cb-notes-text"></span></div>
+
+      <div class="card-title" style="margin-bottom:12px">Notes</div>
+      <div class="ise-notes-row" id="cb-notes-row"></div>
+
+      <div class="card-title" style="margin-top:20px;margin-bottom:12px">Interval Breakdown</div>
+      <div id="cb-interval-breakdown"></div>
+
+      <div class="cb-desc-box" id="cb-description"></div>
+    </div>
   </div>
 </div>
 
