@@ -465,6 +465,95 @@
 
 
 /* ============================================
+   CHORD BUILDER STYLES
+   ============================================ */
+
+.cb-chord-header {
+  text-align: center;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.cb-chord-big-name {
+  font-size: 2.4rem;
+  font-weight: 800;
+  font-family: var(--font-display);
+  color: var(--accent-cyan);
+  line-height: 1;
+}
+
+.cb-chord-type-label {
+  font-size: 1rem;
+  color: var(--text-muted);
+  margin-top: 6px;
+  font-family: var(--font-mono);
+}
+
+.cb-notes-line {
+  text-align: center;
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+
+.cb-notes-line span {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+}
+
+.cb-interval-table {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cb-interval-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+}
+
+.cb-interval-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent-purple);
+  min-width: 130px;
+  font-family: var(--font-mono);
+}
+
+.cb-interval-note {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  min-width: 80px;
+  font-family: var(--font-display);
+}
+
+.cb-interval-semi {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.cb-desc-box {
+  margin-top: 20px;
+  padding: 14px 16px;
+  background: var(--accent-cyan-dim);
+  border: 1px solid rgba(232,135,92,.2);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+
+/* ============================================
    RESPONSIVE OVERRIDES
    ============================================ */
 
@@ -474,4 +563,7 @@
   .sm-dur-btn, .sm-acc-btn { min-width: 60px; font-size: 12px; padding: 6px 10px; }
   .ise-note-pill { min-width: 50px; padding: 8px 10px; }
   .ise-chords-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+  .cb-chord-big-name { font-size: 1.8rem; }
+  .cb-interval-name { min-width: 100px; }
+  .cb-interval-note { min-width: 60px; }
 }

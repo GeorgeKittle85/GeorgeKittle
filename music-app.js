@@ -825,3 +825,76 @@ function iseClear() {
   document.getElementById('ise-result').style.display = 'none';
   document.getElementById('ise-chords-area').style.display = 'none';
 }
+
+
+// ============================================
+// ============================================
+//  TOOL 4 — CHORD BUILDER
+// ============================================
+// ============================================
+
+var CB_NOTE_DISPLAY = ['C','C#/D♭','D','D#/E♭','E','F','F#/G♭','G','G#/A♭','A','A#/B♭','B'];
+var CB_NOTE_SHARP   = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+
+var CB_CHORDS = {
+  major:    { name: 'Major',           symbol: '',     offsets: [0,4,7],     intervals: ['Root','Major 3rd','Perfect 5th'],           desc: 'Bright and stable. The foundation of major keys — used everywhere from pop to classical.' },
+  minor:    { name: 'Minor',           symbol: 'm',    offsets: [0,3,7],     intervals: ['Root','Minor 3rd','Perfect 5th'],           desc: 'Dark and expressive. The backbone of minor keys and emotional music.' },
+  dim:      { name: 'Diminished',      symbol: '°',    offsets: [0,3,6],     intervals: ['Root','Minor 3rd','Diminished 5th'],        desc: 'Tense and unstable. Often used as a passing chord that pulls toward resolution.' },
+  aug:      { name: 'Augmented',       symbol: '+',    offsets: [0,4,8],     intervals: ['Root','Major 3rd','Augmented 5th'],         desc: 'Eerie and unresolved. Creates dramatic tension in film scores and chromatic harmony.' },
+  sus2:     { name: 'Suspended 2nd',   symbol: 'sus2', offsets: [0,2,7],     intervals: ['Root','Major 2nd','Perfect 5th'],           desc: 'Open and floating. The 3rd is replaced by a 2nd — common in rock and ambient music.' },
+  sus4:     { name: 'Suspended 4th',   symbol: 'sus4', offsets: [0,5,7],     intervals: ['Root','Perfect 4th','Perfect 5th'],         desc: 'Anticipatory and tense. The 3rd is replaced by a 4th — wants to resolve back to major or minor.' },
+  maj7:     { name: 'Major 7th',       symbol: 'maj7', offsets: [0,4,7,11],  intervals: ['Root','Major 3rd','Perfect 5th','Major 7th'],    desc: 'Lush and dreamy. Signature sound of jazz ballads, bossa nova, and neo-soul.' },
+  dom7:     { name: 'Dominant 7th',    symbol: '7',    offsets: [0,4,7,10],  intervals: ['Root','Major 3rd','Perfect 5th','Minor 7th'],    desc: 'Bluesy and driving. The V7 chord — the strongest pull toward the tonic in any key.' },
+  min7:     { name: 'Minor 7th',       symbol: 'm7',   offsets: [0,3,7,10],  intervals: ['Root','Minor 3rd','Perfect 5th','Minor 7th'],    desc: 'Smooth and mellow. A staple of jazz, R&B, and funk rhythm sections.' },
+  minmaj7:  { name: 'Minor Major 7th', symbol: 'mM7',  offsets: [0,3,7,11],  intervals: ['Root','Minor 3rd','Perfect 5th','Major 7th'],    desc: 'Dark and rich. Signature of minor-key jazz — the Hitchcock chord in film scoring.' },
+  halfdim:  { name: 'Half Diminished', symbol: 'ø7',   offsets: [0,3,6,10],  intervals: ['Root','Minor 3rd','Diminished 5th','Minor 7th'], desc: 'Moody and tense. Also written m7♭5 — the ii° chord in minor key jazz progressions.' },
+  dim7:     { name: 'Diminished 7th',  symbol: '°7',   offsets: [0,3,6,9],   intervals: ['Root','Minor 3rd','Diminished 5th','Diminished 7th'], desc: 'Maximum tension. Fully symmetric — every note is a minor 3rd apart, so it can resolve four ways.' },
+  maj6:     { name: 'Major 6th',       symbol: '6',    offsets: [0,4,7,9],   intervals: ['Root','Major 3rd','Perfect 5th','Major 6th'],   desc: 'Warm and bright. A jazzy alternative to the plain major chord, common in 1940s–60s harmony.' },
+  min6:     { name: 'Minor 6th',       symbol: 'm6',   offsets: [0,3,7,9],   intervals: ['Root','Minor 3rd','Perfect 5th','Major 6th'],   desc: 'Bittersweet and sophisticated. Found in jazz standards, tango, and cinematic soundtracks.' }
+};
+
+function cbBuild() {
+  var rootIdx  = parseInt(document.getElementById('cb-root').value, 10);
+  var chordKey = document.getElementById('cb-chord-type').value;
+  var chord    = CB_CHORDS[chordKey];
+
+  var rootShort = CB_NOTE_SHARP[rootIdx];
+  var chordName = rootShort + chord.symbol;
+
+  var notes = chord.offsets.map(function(off, i) {
+    var idx = (rootIdx + off) % 12;
+    return { display: CB_NOTE_DISPLAY[idx], short: CB_NOTE_SHARP[idx], interval: chord.intervals[i], semitones: off };
+  });
+
+  // Note pills (reuse Scale Explorer styles)
+  var pillsHTML = notes.map(function(n, i) {
+    var isRoot = i === 0;
+    return '<div class="ise-note-pill' + (isRoot ? ' ise-root' : '') + '">' +
+           '<div class="ise-degree">' + n.interval + '</div>' +
+           '<div class="ise-notename">' + n.display + '</div>' +
+           '</div>';
+  }).join('');
+
+  // Interval breakdown table
+  var tableHTML = '<div class="cb-interval-table">' +
+    notes.map(function(n) {
+      return '<div class="cb-interval-row">' +
+        '<span class="cb-interval-name">' + n.interval + '</span>' +
+        '<span class="cb-interval-note">' + n.display + '</span>' +
+        '<span class="cb-interval-semi">+' + n.semitones + ' semitone' + (n.semitones !== 1 ? 's' : '') + '</span>' +
+        '</div>';
+    }).join('') +
+    '</div>';
+
+  document.getElementById('cb-chord-name').textContent = chordName;
+  document.getElementById('cb-chord-label').textContent = chord.name + ' Chord';
+  document.getElementById('cb-notes-text').textContent  = notes.map(function(n) { return n.short; }).join(' – ');
+  document.getElementById('cb-notes-row').innerHTML     = pillsHTML;
+  document.getElementById('cb-interval-breakdown').innerHTML = tableHTML;
+  document.getElementById('cb-description').textContent = chord.desc;
+  document.getElementById('cb-result').style.display    = 'block';
+}
+
+function cbClear() {
+  document.getElementById('cb-result').style.display = 'none';
+}
